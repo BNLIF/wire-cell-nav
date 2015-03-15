@@ -7,11 +7,14 @@ def options(ctx):
 
 def configure(ctx):
     ctx.load('find_package')
-
+    ctx.env.LIBPATH_WireCell = ctx.options.prefix + '/lib'
+    ctx.env.INCLUDES_WireCell = ctx.options.prefix + '/include'
+    print ctx.env
+    ctx.check_cxx(lib='WireCellData', libpath=ctx.options.prefix + '/lib')
 
 def build(bld):
     # main code library
-    bld.shared_library()
+    bld.shared_library(use='WireCell')
 #    bld.api_headers()
 #    bld.rootcint_dictionary()
 

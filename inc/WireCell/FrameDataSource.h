@@ -1,6 +1,8 @@
 #ifndef WIRECELL_FRAMEDATASOURCE_H
 #define WIRECELL_FRAMEDATASOURCE_H
 
+#include "WireCell/Trace.h"
+
 namespace WireCell {
 
 /**

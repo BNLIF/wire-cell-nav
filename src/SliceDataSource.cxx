@@ -9,11 +9,6 @@ WireCell::SliceDataSource::~SliceDataSource()
 {
 }
 
-int WireCell::SliceDataSource::framenum() const
-{
-    return fds.framenum();
-}
-
 int WireCell::SliceDataSource::size() const
 {
     if (slicenum < 0) { return 0; }

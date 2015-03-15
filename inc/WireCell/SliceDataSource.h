@@ -2,6 +2,7 @@
 #define WIRECELL_SLICEDATASOURCE_H
 
 #include "WireCell/FrameDataSource.h"
+#include "WireCell/Slice.h"
 
 namespace WireCell {
 
@@ -14,9 +15,6 @@ namespace WireCell {
     public:
 	SliceDataSource(WireCell::FrameDataSource& fds);
 	virtual ~SliceDataSource();
-
-	/// Return the frame number of the current frame
-	int framenum() const;
 
 	/// Return the number of slices in the current frame
 	int size() const;
