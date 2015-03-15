@@ -9,6 +9,8 @@ namespace WireCell {
        SliceDataSource - deliver slices from a FrameDataSource
      */
     class SliceDataSource {
+	WireCell::FrameDataSource& fds;
+	int slicenum;
     public:
 	SliceDataSource(WireCell::FrameDataSource& fds);
 	virtual ~SliceDataSource();
