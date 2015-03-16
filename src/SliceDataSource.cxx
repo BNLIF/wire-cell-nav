@@ -1,29 +1,29 @@
-#include "WireCell/SliceDataSource.h"
+#include "WireCellNav/SliceDataSource.h"
 
-WireCell::SliceDataSource::SliceDataSource(WireCell::FrameDataSource& fds)
+WireCellNav::SliceDataSource::SliceDataSource(WireCellNav::FrameDataSource& fds)
     : fds(fds)
     , slicenum(-1)
 {
 }
-WireCell::SliceDataSource::~SliceDataSource()
+WireCellNav::SliceDataSource::~SliceDataSource()
 {
 }
 
-int WireCell::SliceDataSource::size() const
+int WireCellNav::SliceDataSource::size() const
 {
     if (slicenum < 0) { return 0; }
 }
 
-int WireCell::SliceDataSource::jump(int slice_number)
+int WireCellNav::SliceDataSource::jump(int slice_number)
 {
     
 }
 
-int WireCell::SliceDataSource::next()
+int WireCellNav::SliceDataSource::next()
 {
 }
 
-int WireCell::SliceDataSource::get(WireCell::Slice& slice)
+int WireCellNav::SliceDataSource::get(WireCellData::Slice& slice)
 {
 }
 

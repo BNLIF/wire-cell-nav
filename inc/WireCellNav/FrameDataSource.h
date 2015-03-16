@@ -1,12 +1,12 @@
-#ifndef WIRECELL_FRAMEDATASOURCE_H
-#define WIRECELL_FRAMEDATASOURCE_H
+#ifndef WIRECELLNAV_FRAMEDATASOURCE_H
+#define WIRECELLNAV_FRAMEDATASOURCE_H
 
-#include "WireCell/Trace.h"
+#include "WireCellData/Trace.h"
 
-namespace WireCell {
+namespace WireCellNav {
 
 /**
-   FrameDataSource - provide access to WireCell:Frame data
+   FrameDataSource - provide access to WireCellData:Frame data
 
    This is an ABC, subclasses implement a real data source.
  */
@@ -25,7 +25,7 @@ public:
     virtual int next() = 0;
 
     /// Fill full frame with current frame data, returning it's number
-    virtual int get(WireCell::Frame& frame) const = 0;
+    virtual int get(WireCellData::Frame& frame) const = 0;
 
 };
 

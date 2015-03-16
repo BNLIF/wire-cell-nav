@@ -1,18 +1,18 @@
-#ifndef WIRECELL_GEOMDATASOURCE_H
-#define WIRECELL_GEOMDATASOURCE_H
+#ifndef WIRECELLNAV_GEOMDATASOURCE_H
+#define WIRECELLNAV_GEOMDATASOURCE_H
 
-#include "WireCell/Wire.h"
+#include "WireCellData/Wire.h"
 
 #include <map>
 
-namespace WireCell {
+namespace WireCellNav {
 
     /**
        A source of wire geometry information.
 
      */
     class GeomDataSource {
-	WireCell::WireCollection wires;
+	WireCellData::WireCollection wires;
 	mutable std::map<int,int> ident2index, channel2index;
 	mutable std::map<std::pair<int,int>, int> pi2index;
 
@@ -24,19 +24,19 @@ namespace WireCell {
 	virtual ~GeomDataSource();
 
 	/// Add a wire object, return its ident.
-	int add_wire(const WireCell::Wire& wire);
+	int add_wire(const WireCellData::Wire& wire);
 
 	/// Get full collection of wires.
-	const WireCell::WireCollection get_wires() const;
+	const WireCellData::WireCollection get_wires() const;
 
 	/// Look up a wire by it's identifier
-	const WireCell::Wire& by_ident(int ident) const;
+	const WireCellData::Wire& by_ident(int ident) const;
 
 	/// Look up a wire by it's electronics channel number
-	const WireCell::Wire& by_channel(int channel) const;
+	const WireCellData::Wire& by_channel(int channel) const;
 
 	/// Look up a wire by its plane number and index
-	const WireCell::Wire& by_planeindex(int plane, int index) const;
+	const WireCellData::Wire& by_planeindex(int plane, int index) const;
 
     };
 

@@ -1,10 +1,10 @@
-#include "WireCell/FrameDataSource.h"
+#include "WireCellNav/FrameDataSource.h"
 
-WireCell::FrameDataSource::FrameDataSource()
+WireCellNav::FrameDataSource::FrameDataSource()
 {
 }
 
-WireCell::FrameDataSource::~FrameDataSource()
+WireCellNav::FrameDataSource::~FrameDataSource()
 {
 }
 
