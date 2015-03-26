@@ -12,9 +12,9 @@ namespace WireCellNav {
 
      */
     class GeomDataSource {
-	WireCellData::WireCollection wires;
-	mutable std::map<int,int> ident2index, channel2index;
-	mutable std::map<std::pair<int,int>, int> pi2index;
+	WireCellData::WireSet wires;
+	mutable std::map<int, const WireCellData::Wire*> ident2wire, channel2wire;
+	mutable std::map<WireCellData::WirePlaneIndex, const WireCellData::Wire*> pi2wire;
 
 	// Maybe fill the cache
 	bool fill_cache() const;
@@ -24,19 +24,24 @@ namespace WireCellNav {
 	virtual ~GeomDataSource();
 
 	/// Add a wire object, return its ident.
-	int add_wire(const WireCellData::Wire& wire);
+	void add_wire(const WireCellData::Wire& wire);
 
 	/// Get full collection of wires.
-	const WireCellData::WireCollection get_wires() const;
+	const WireCellData::WireSet& get_wires() const;
+
+	/// Return an selection of wires in the given plane/direction
+	/// or all of them if no direction is specified.
+	WireCellData::WireSelection wires_in_plane(WireCellData::WirePlaneType_t plane = WireCellData::kUnknown);
 
 	/// Look up a wire by it's identifier
-	const WireCellData::Wire& by_ident(int ident) const;
+	const WireCellData::Wire* by_ident(int ident) const;
 
 	/// Look up a wire by it's electronics channel number
-	const WireCellData::Wire& by_channel(int channel) const;
+	const WireCellData::Wire* by_channel(int channel) const;
 
 	/// Look up a wire by its plane number and index
-	const WireCellData::Wire& by_planeindex(int plane, int index) const;
+	const WireCellData::Wire* by_planeindex(WireCellData::WirePlaneType_t plane, int index) const;
+	const WireCellData::Wire* by_planeindex(const WireCellData::WirePlaneIndex planeindex) const;
 
     };
 

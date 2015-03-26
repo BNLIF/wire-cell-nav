@@ -1,5 +1,6 @@
 #include "WireCellNav/GeomDataSource.h"
 
+using namespace WireCellData;
 
 WireCellNav::GeomDataSource::GeomDataSource()
 {
@@ -13,50 +14,72 @@ bool WireCellNav::GeomDataSource::fill_cache() const
 {
     size_t num = wires.size();
 
-    if (num <= ident2index.size()) {
+    if (num <= ident2wire.size()) {
 	return false;
     }
 
-    for (size_t ind=0; ind<num; ++ind) {
-	const WireCellData::Wire& wire = wires[ind];
-	ident2index[wire.ident] = ind;
-	channel2index[wire.ident] = ind;
-	pi2index[std::pair<int,int>(wire.plane, wire.index)] = ind;
+    ident2wire.clear();
+    channel2wire.clear();
+    pi2wire.clear();
+
+    int ind = 0;
+    WireSet::const_iterator wit, done = wires.end();
+    for (wit=wires.begin(); wit != done; ++wit) {
+	const WireCellData::Wire& wire = *wit;
+	ident2wire[wire.ident] = &wire;
+	channel2wire[wire.channel] = &wire;
+	pi2wire[wire.plane_index()] = &wire;
     }
     return true;
 }
 
 
-int WireCellNav::GeomDataSource::add_wire(const WireCellData::Wire& wire)
+void WireCellNav::GeomDataSource::add_wire(const WireCellData::Wire& wire)
 {
     wires.push_back(wire);
 }
 
-const WireCellData::WireCollection WireCellNav::GeomDataSource::get_wires() const
+const WireCellData::WireSet& WireCellNav::GeomDataSource::get_wires() const
 {
     return wires;
 }
 
-
-const WireCellData::Wire& WireCellNav::GeomDataSource::by_ident(int ident) const
+WireCellData::WireSelection WireCellNav::GeomDataSource::wires_in_plane(WireCellData::WirePlaneType_t plane)
 {
-    fill_cache();
-    int ind = ident2index[ident];
-    return wires[ind];
+    WireSelection ws;
+    WireSet::const_iterator wit, done = wires.end();
+
+    for (wit=wires.begin(); wit != done; ++wit) {
+	const WireCellData::Wire& wire = *wit;
+	if (plane == kUnknown or wire.plane == plane) {
+	    ws.push_back(&wire);
+	}
+    }
+
+    return ws;
 }
 
 
-const WireCellData::Wire& WireCellNav::GeomDataSource::by_channel(int channel) const
+const WireCellData::Wire* WireCellNav::GeomDataSource::by_ident(int ident) const
 {
     fill_cache();
-    int ind = channel2index[channel];
-    return wires[ind];
+    return ident2wire[ident];
 }
 
-const WireCellData::Wire& WireCellNav::GeomDataSource::by_planeindex(int plane, int index) const
+
+const WireCellData::Wire* WireCellNav::GeomDataSource::by_channel(int channel) const
 {
     fill_cache();
-    int ind = pi2index[std::pair<int,int>(plane,index)];
-    return wires[ind];
+    return channel2wire[channel];
+}
+
+const WireCellData::Wire* WireCellNav::GeomDataSource::by_planeindex(const WireCellData::WirePlaneIndex planeindex) const
+{
+    fill_cache();
+    return pi2wire[planeindex];
+}
+const WireCellData::Wire* WireCellNav::GeomDataSource::by_planeindex(WireCellData::WirePlaneType_t plane, int index) const
+{
+    return by_planeindex(WirePlaneIndex(plane,index));
 }
 
