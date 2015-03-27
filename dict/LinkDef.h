@@ -4,8 +4,8 @@
 #pragma link off all functions;
 #pragma link C++ nestedclasses;
 
-#pragma link C++ class WireCellNav::GeomDataSource-!;
-#pragma link C++ class WireCellNav::FrameDataSource-!;
-#pragma link C++ class WireCellNav::SliceDataSource-!;
+#pragma link C++ class WireCell::GeomDataSource-!;
+#pragma link C++ class WireCell::FrameDataSource-!;
+#pragma link C++ class WireCell::SliceDataSource-!;
 
 #endif

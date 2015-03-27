@@ -2,8 +2,7 @@
 
 #include <iostream>
 
-using namespace WireCellNav;
-using namespace WireCellData;
+using namespace WireCell;
 using namespace std;
 
 int main()
@@ -34,7 +33,7 @@ int main()
 	WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane+1);
 
 	WireSelection ws = gds.wires_in_plane(plane);
-	WireCellData::sort_by_planeindex(ws);
+	sort_by_planeindex(ws);
 
 	if (nwiresperplane != ws.size()) {
 	    cerr << "Failed to get back the right number of wires" << endl;

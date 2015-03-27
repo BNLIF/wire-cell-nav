@@ -4,16 +4,16 @@
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellData/Slice.h"
 
-namespace WireCellNav {
+namespace WireCell {
 
     /**
        SliceDataSource - deliver slices from a FrameDataSource
      */
     class SliceDataSource {
-	WireCellNav::FrameDataSource& fds;
+	WireCell::FrameDataSource& fds;
 	int slicenum;
     public:
-	SliceDataSource(WireCellNav::FrameDataSource& fds);
+	SliceDataSource(WireCell::FrameDataSource& fds);
 	virtual ~SliceDataSource();
 
 	/// Return the number of slices in the current frame
@@ -26,7 +26,7 @@ namespace WireCellNav {
 	int next();
 
 	/// Get the current slice, returning its number
-	int get(WireCellData::Slice& slice);
+	int get(WireCell::Slice& slice);
 
     };
 
