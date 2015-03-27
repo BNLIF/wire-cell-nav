@@ -31,7 +31,7 @@ namespace WireCell {
 
 	/// Return an selection of wires in the given plane/direction
 	/// or all of them if no direction is specified.
-	WireCell::WireSelection wires_in_plane(WireCell::WirePlaneType_t plane = WireCell::kUnknown);
+	WireCell::WireSelection wires_in_plane(WireCell::WirePlaneType_t plane = WireCell::kUnknown) const;
 
 	/// Look up a wire by it's identifier
 	const WireCell::Wire* by_ident(int ident) const;
@@ -43,9 +43,23 @@ namespace WireCell {
 	const WireCell::Wire* by_planeindex(WireCell::WirePlaneType_t plane, int index) const;
 	const WireCell::Wire* by_planeindex(const WireCell::WirePlaneIndex planeindex) const;
 
-	/// Return wire pitch (perpendicular distance between wires) 
-	const float pitch(WireCell::WirePlaneType_t plane);
+	/// Return wire pitch (perpendicular distance between wires, in System of Units) 
+	float pitch(WireCell::WirePlaneType_t plane) const;
 
+	/// Return the wire angle of given plane w.r.t. the Y axis (in System of Units)
+	float angle(WireCell::WirePlaneType_t plane) const;
+
+	/// Return size extent in all Cartesian directions (x=0, y=1 and
+	/// z=2) of all wire endpoints.  Values are length in the
+	/// System of Units.  One can limit the extent to a particular
+	/// wire plane
+	std::vector<float> extent(WireCell::WirePlaneType_t plane = WireCell::kUnknown) const;
+
+	/// Return min/max in a particular direction (x=0, y=1 and
+	/// z=2) of all wire endpoints.  Values are length in the
+	/// System of Units.  One can limit the extent to a particular
+	/// wire plane
+	std::pair<float, float> minmax(int axis, WireCell::WirePlaneType_t plane = WireCell::kUnknown) const;
     };
 
 }

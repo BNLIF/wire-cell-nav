@@ -1,6 +1,8 @@
 #include "WireCellNav/GeomDataSource.h"
 
 #include <cmath>		// std::abs() - careful not to use bare abs()
+#include <algorithm>
+
 using namespace WireCell;
 
 GeomDataSource::GeomDataSource()
@@ -45,7 +47,7 @@ const WireSet& GeomDataSource::get_wires() const
     return wires;
 }
 
-WireSelection GeomDataSource::wires_in_plane(WirePlaneType_t plane)
+WireSelection GeomDataSource::wires_in_plane(WirePlaneType_t plane) const
 {
     WireSelection ws;
     WireSet::const_iterator wit, done = wires.end();
@@ -84,7 +86,7 @@ const Wire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) cons
     return by_planeindex(WirePlaneIndex(plane,index));
 }
 
-const float GeomDataSource::pitch(WireCell::WirePlaneType_t plane)
+float GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
 {
     const Wire& wire0 = *this->by_planeindex(plane, 0);
     const Wire& wire1 = *this->by_planeindex(plane, 1);
@@ -100,4 +102,100 @@ const float GeomDataSource::pitch(WireCell::WirePlaneType_t plane)
     double b1 = (wire1.point1.y - m * wire1.point1.z);
 
     return std::abs(b0-b1) / sqrt(m*m + 1);
+}
+
+float GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
+{
+    const Wire& w = *this->by_planeindex(plane, 0);
+    double dz = w.point2.z - w.point1.z;
+    double dy = w.point2.y - w.point1.y;
+    double angle = std::atan2(dz, dy);
+    return angle*units::radian;
+}
+
+std::vector<float> GeomDataSource::extent(WireCell::WirePlaneType_t plane) const
+{
+    float xmin, ymin, zmin, xmax, ymax, zmax;
+
+    WireSelection ws = this->wires_in_plane(plane);
+    size_t nwires = ws.size();
+    for (size_t wind=0; wind<nwires; ++wind) {
+	const Wire& w = *ws[wind];
+	float this_xmin = std::min(w.point1.x, w.point2.x);
+	float this_ymin = std::min(w.point1.y, w.point2.y);
+	float this_zmin = std::min(w.point1.z, w.point2.z);
+
+	float this_xmax = std::max(w.point1.x, w.point2.x);
+	float this_ymax = std::max(w.point1.y, w.point2.y);
+	float this_zmax = std::max(w.point1.z, w.point2.z);
+
+	if (!wind) {		// first time through
+	    xmin = this_xmin;
+	    ymin = this_ymin;
+	    zmin = this_zmin;
+
+	    xmax = this_xmax;
+	    ymax = this_ymax;
+	    zmax = this_zmax;
+	    continue;
+	}
+	xmin = std::min(xmin, this_xmin);
+	ymin = std::min(ymin, this_ymin);
+	zmin = std::min(zmin, this_zmin);
+
+	xmax = std::max(xmax, this_xmax);
+	ymax = std::max(ymax, this_ymax);
+	zmax = std::max(zmax, this_zmax);
+    }	
+    float ex[] = {xmax-xmin, ymax-ymin, zmax-zmin};
+    return std::vector<float>(ex, ex + sizeof(ex)/sizeof(float));
+}
+
+// fixme: it is colossally lame of me to cut-and-paste the above, refactor and use caching. 
+
+std::pair<float, float> GeomDataSource::minmax(int axis, WireCell::WirePlaneType_t plane) const
+{
+    float xmin, ymin, zmin, xmax, ymax, zmax;
+
+    WireSelection ws = this->wires_in_plane(plane);
+    size_t nwires = ws.size();
+    for (size_t wind=0; wind<nwires; ++wind) {
+	const Wire& w = *ws[wind];
+	float this_xmin = std::min(w.point1.x, w.point2.x);
+	float this_ymin = std::min(w.point1.y, w.point2.y);
+	float this_zmin = std::min(w.point1.z, w.point2.z);
+
+	float this_xmax = std::max(w.point1.x, w.point2.x);
+	float this_ymax = std::max(w.point1.y, w.point2.y);
+	float this_zmax = std::max(w.point1.z, w.point2.z);
+
+	if (!wind) {		// first time through
+	    xmin = this_xmin;
+	    ymin = this_ymin;
+	    zmin = this_zmin;
+
+	    xmax = this_xmax;
+	    ymax = this_ymax;
+	    zmax = this_zmax;
+	    continue;
+	}
+	xmin = std::min(xmin, this_xmin);
+	ymin = std::min(ymin, this_ymin);
+	zmin = std::min(zmin, this_zmin);
+
+	xmax = std::max(xmax, this_xmax);
+	ymax = std::max(ymax, this_ymax);
+	zmax = std::max(zmax, this_zmax);
+    }	
+    float ex[] = {xmax-xmin, ymax-ymin, zmax-zmin};
+
+    switch (axis) {
+    case 0:
+	return std::pair<float,float>(xmin, xmax);
+    case 1:
+	return std::pair<float,float>(ymin, ymax);
+    case 2: 
+	return std::pair<float,float>(zmin, zmax);
+    }
+    return std::pair<float,float>(0,0);
 }
