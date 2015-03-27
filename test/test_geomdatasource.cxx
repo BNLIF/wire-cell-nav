@@ -1,4 +1,5 @@
 #include "WireCellNav/GeomDataSource.h"
+#include "WireCellData/Units.h"
 
 #include <iostream>
 

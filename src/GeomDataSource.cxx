@@ -1,5 +1,6 @@
 #include "WireCellNav/GeomDataSource.h"
 
+#include <cmath>		// std::abs() - careful not to use bare abs()
 using namespace WireCell;
 
 GeomDataSource::GeomDataSource()
@@ -83,3 +84,20 @@ const Wire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) cons
     return by_planeindex(WirePlaneIndex(plane,index));
 }
 
+const float GeomDataSource::pitch(WireCell::WirePlaneType_t plane)
+{
+    const Wire& wire0 = *this->by_planeindex(plane, 0);
+    const Wire& wire1 = *this->by_planeindex(plane, 1);
+
+    double d = (wire0.point2.z - wire0.point1.z);
+    if (d == 0) {		// y wires
+	return std::abs(wire0.point1.z - wire1.point1.z);
+    }
+
+    double n = (wire0.point2.y - wire0.point1.y);
+    double m = n/d;
+    double b0 = (wire0.point1.y - m * wire0.point1.z);
+    double b1 = (wire1.point1.y - m * wire1.point1.z);
+
+    return std::abs(b0-b1) / sqrt(m*m + 1);
+}

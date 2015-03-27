@@ -43,6 +43,9 @@ namespace WireCell {
 	const WireCell::Wire* by_planeindex(WireCell::WirePlaneType_t plane, int index) const;
 	const WireCell::Wire* by_planeindex(const WireCell::WirePlaneIndex planeindex) const;
 
+	/// Return wire pitch (perpendicular distance between wires) 
+	const float pitch(WireCell::WirePlaneType_t plane);
+
     };
 
 }
