@@ -1,16 +1,20 @@
 #ifndef WIRECELLNAV_FRAMEDATASOURCE_H
 #define WIRECELLNAV_FRAMEDATASOURCE_H
 
-#include "WireCellData/Trace.h"
+#include "WireCellData/Frame.h"
 
 namespace WireCell {
 
 /**
-   FrameDataSource - provide access to WireCell:Frame data
+   FrameDataSource - provide base class access to WireCell:Frame data.
 
-   This is an ABC, subclasses implement a real data source.
+   This class is mostly abstract.  Subclass implementations should 
  */
 class FrameDataSource {
+protected:
+
+    WireCell::Frame frame;
+    
 public:
     FrameDataSource();
     virtual ~FrameDataSource();
@@ -22,10 +26,11 @@ public:
     virtual int jump(int frame_number) = 0;
 
     /// Advance to next frame, return frame number or -1 on error, -2 on end of frames
-    virtual int next() = 0;
+    virtual int next();
 
-    /// Fill full frame with current frame data, returning it's number
-    virtual int get(WireCell::Frame& frame) const = 0;
+    /// Access currently loaded frame.
+    virtual WireCell::Frame& get();
+    virtual const WireCell::Frame& get() const;
 
 };
 

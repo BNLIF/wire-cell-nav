@@ -36,8 +36,10 @@ namespace WireCell {
 	/// Look up a wire by it's identifier
 	const WireCell::Wire* by_ident(int ident) const;
 
-	/// Look up a wire by it's electronics channel number
-	const WireCell::Wire* by_channel(int channel) const;
+	/// Look up a wire by it's electronics channel number.  Fixme:
+	/// this needs to either return a vector or take an index.  N
+	/// wrapped wires map to 1 channel.
+	const WireCell::Wire* by_channel(int channel, int segment=0) const;
 
 	/// Look up a wire by its plane number and index
 	const WireCell::Wire* by_planeindex(WireCell::WirePlaneType_t plane, int index) const;

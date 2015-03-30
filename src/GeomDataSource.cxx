@@ -70,7 +70,7 @@ const Wire* GeomDataSource::by_ident(int ident) const
 }
 
 
-const Wire* GeomDataSource::by_channel(int channel) const
+const Wire* GeomDataSource::by_channel(int channel, int segment) const
 {
     fill_cache();
     return channel2wire[channel];

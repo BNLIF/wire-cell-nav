@@ -3,6 +3,7 @@
 
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellData/Slice.h"
+#include "WireCellData/Frame.h"
 
 namespace WireCell {
 
@@ -11,12 +12,20 @@ namespace WireCell {
      */
     class SliceDataSource {
 	WireCell::FrameDataSource& fds;
-	int slicenum;
+	WireCell::Slice slice;	// current slice
+	int frame_index;	// last frame we loaded
+	int slice_index;	// current slice, for caching
+	int slices_begin;	// tbin index of earliest bin of all traces
+	int slices_end;		// tbin index of one past the latest bin of all traces
+
+	void update_slices_bounds();
+	void clear();
+
     public:
 	SliceDataSource(WireCell::FrameDataSource& fds);
 	virtual ~SliceDataSource();
 
-	/// Return the number of slices in the current frame
+	/// Return the number of slices in the current frame.  
 	int size() const;
 
 	/// Go to the given slice, return slice number or -1 on error
@@ -25,8 +34,9 @@ namespace WireCell {
 	/// Go to the next slice, return its number or -1 on error
 	int next();
 
-	/// Get the current slice, returning its number
-	int get(WireCell::Slice& slice);
+	/// Get the current slice
+	WireCell::Slice&  get();
+	const WireCell::Slice&  get() const;
 
     };
 
