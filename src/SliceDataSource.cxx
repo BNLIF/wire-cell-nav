@@ -23,18 +23,19 @@ void SliceDataSource::clear()
 }
 
 // Update the bounds on the slice indices based on the current frame.
-void SliceDataSource::update_slices_bounds()
+void SliceDataSource::update_slices_bounds() const
 {
     const Frame& frame = fds.get();
 
     if (frame.index < 0) {	// no frames
-	this->clear();
 	return;
     }
 
     if (frame.index == frame_index) { // no change, no-op
 	return;
     }
+
+    // frame change
 
     size_t ntraces = frame.traces.size();
     for (size_t ind=0; ind<ntraces; ++ind) {
@@ -55,7 +56,8 @@ void SliceDataSource::update_slices_bounds()
 
 int SliceDataSource::size() const
 {
-    if (slice_index < 0) {
+    this->update_slices_bounds();
+    if (slices_begin < 0 || slices_end < 0) {
 	return 0;
     }
     return slices_end - slices_begin;

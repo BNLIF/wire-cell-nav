@@ -15,10 +15,10 @@ namespace WireCell {
 	WireCell::Slice slice;	// current slice
 	int frame_index;	// last frame we loaded
 	int slice_index;	// current slice, for caching
-	int slices_begin;	// tbin index of earliest bin of all traces
-	int slices_end;		// tbin index of one past the latest bin of all traces
+	mutable int slices_begin; // tbin index of earliest bin of all traces
+	mutable int slices_end;	  // tbin index of one past the latest bin of all traces
 
-	void update_slices_bounds();
+	void update_slices_bounds() const;
 	void clear();
 
     public:
