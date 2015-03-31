@@ -22,7 +22,7 @@ namespace WireCell {
 	/// Get full collection of wires.
 	const WireCell::WireSet& get_wires() const;
 
-	/// Return an selection of wires in the given plane/direction
+	/// Return a selection of wires in the given plane/direction
 	/// or all of them if no direction is specified.
 	WireCell::WireSelection wires_in_plane(WireCell::WirePlaneType_t plane = WireCell::kUnknown) const;
 
