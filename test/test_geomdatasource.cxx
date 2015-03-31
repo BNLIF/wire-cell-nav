@@ -61,10 +61,13 @@ int main()
 		++errors;
 	    }
 
-	    wire = gds.by_channel(channel);
-	    if (!wire || wire->channel != channel) { 
-		cerr << "Failed to get wire channel " << channel << endl;
-		++errors;
+	    const WireSelection& ws_chan = gds.by_channel(channel);
+	    for (size_t iw = 0; iw < ws_chan.size(); ++iw) {
+		const Wire* one = ws_chan[iw];
+		if (!one || one->channel != channel) { 
+		    cerr << "Failed to get wire #" <<iw<<" for channel " << channel << endl;
+		    ++errors;
+		}
 	    }
 	    
 	    const Wire* other = ws[ind];

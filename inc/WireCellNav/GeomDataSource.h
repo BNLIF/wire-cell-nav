@@ -12,13 +12,6 @@ namespace WireCell {
 
      */
     class GeomDataSource {
-	WireCell::WireSet wires;
-	mutable std::map<int, const WireCell::Wire*> ident2wire, channel2wire;
-	mutable std::map<WireCell::WirePlaneIndex, const WireCell::Wire*> pi2wire;
-
-	// Maybe fill the cache
-	bool fill_cache() const;
-
     public:
 	GeomDataSource();
 	virtual ~GeomDataSource();
@@ -36,10 +29,9 @@ namespace WireCell {
 	/// Look up a wire by it's identifier
 	const WireCell::Wire* by_ident(int ident) const;
 
-	/// Look up a wire by it's electronics channel number.  Fixme:
-	/// this needs to either return a vector or take an index.  N
-	/// wrapped wires map to 1 channel.
-	const WireCell::Wire* by_channel(int channel, int segment=0) const;
+	/// Look up a wire by it's electronics channel number.
+	const WireCell::Wire* by_channel_segment(int channel, int segment) const;
+	const WireCell::WireSelection& by_channel(int channel) const;
 
 	/// Look up a wire by its plane number and index
 	const WireCell::Wire* by_planeindex(WireCell::WirePlaneType_t plane, int index) const;
@@ -62,6 +54,21 @@ namespace WireCell {
 	/// System of Units.  One can limit the extent to a particular
 	/// wire plane
 	std::pair<float, float> minmax(int axis, WireCell::WirePlaneType_t plane = WireCell::kUnknown) const;
+
+
+    private:
+	WireCell::WireSet wires;
+	// reverse lookup cache of wire ID to wire object
+	mutable std::map<int, const WireCell::Wire*> ident2wire;
+	// reverse lookup cache of <plane,index> to wire object
+	mutable std::map<WireCell::WirePlaneIndex, const WireCell::Wire*> pi2wire;
+	// reverse lookup cache of all wire segments associated with one electronics channel
+	mutable std::map<int, WireCell::WireSelection> channel2wire;
+
+	// Maybe fill the cache
+	bool fill_cache() const;
+
+
     };
 
 }

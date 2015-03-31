@@ -2,17 +2,21 @@
 #define WIRECELLNAV_SLICEDATASOURCE_H
 
 #include "WireCellNav/FrameDataSource.h"
+#include "WireCellNav/GeomDataSource.h"
 #include "WireCellData/Slice.h"
 #include "WireCellData/Frame.h"
 
 namespace WireCell {
 
     /**
-       SliceDataSource - deliver slices from a FrameDataSource
+       SliceDataSource - deliver slices of frames from a FrameDataSource
      */
     class SliceDataSource {
 	WireCell::FrameDataSource& fds;
-	WireCell::Slice slice;	// current slice
+
+	// needed to resolve electronics channel->wire IDs
+	const WireCell::GeomDataSource& gds; 
+	WireCell::Slice slice;	// cache the current slice
 	int frame_index;	// last frame we loaded
 	int slice_index;	// current slice, for caching
 	mutable int slices_begin; // tbin index of earliest bin of all traces
@@ -22,7 +26,8 @@ namespace WireCell {
 	void clear();
 
     public:
-	SliceDataSource(WireCell::FrameDataSource& fds);
+
+	SliceDataSource(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds);
 	virtual ~SliceDataSource();
 
 	/// Return the number of slices in the current frame.  

@@ -30,7 +30,7 @@ bool GeomDataSource::fill_cache() const
     for (wit=wires.begin(); wit != done; ++wit) {
 	const Wire& wire = *wit;
 	ident2wire[wire.ident] = &wire;
-	channel2wire[wire.channel] = &wire;
+	channel2wire[wire.channel].push_back(&wire);
 	pi2wire[wire.plane_index()] = &wire;
     }
     return true;
@@ -70,11 +70,17 @@ const Wire* GeomDataSource::by_ident(int ident) const
 }
 
 
-const Wire* GeomDataSource::by_channel(int channel, int segment) const
+const std::vector<const WireCell::Wire*>& GeomDataSource::by_channel(int channel) const
 {
     fill_cache();
     return channel2wire[channel];
 }
+
+const Wire* GeomDataSource::by_channel_segment(int channel, int segment) const
+{
+    return by_channel(channel)[segment];
+}
+
 
 const Wire* GeomDataSource::by_planeindex(const WirePlaneIndex planeindex) const
 {

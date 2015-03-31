@@ -2,8 +2,9 @@
 
 using namespace WireCell;
 
-SliceDataSource::SliceDataSource(FrameDataSource& fds)
+SliceDataSource::SliceDataSource(FrameDataSource& fds, const GeomDataSource& gds)
     : fds(fds)
+    , gds(gds)
     , frame_index(-1)
     , slice_index(-1)
     , slices_begin(-1)
@@ -41,7 +42,7 @@ void SliceDataSource::update_slices_bounds() const
     for (size_t ind=0; ind<ntraces; ++ind) {
 	const Trace& trace = frame.traces[ind];
 
-	if (!ind) {
+	if (!ind) {		// first time
 	    slices_begin = trace.tbin;
 	    slices_end   = trace.charge.size() + slices_begin;
 	    continue;
@@ -90,9 +91,9 @@ int SliceDataSource::jump(int index)
     size_t ntraces = frame.traces.size();
     for (size_t ind=0; ind<ntraces; ++ind) {
 	const Trace& trace = frame.traces[ind];
-
 	int tbin = trace.tbin;
 	int nbins = trace.charge.size();
+
 	if (slice.tbin < tbin) {
 	    continue;
 	}
@@ -100,10 +101,16 @@ int SliceDataSource::jump(int index)
 	    continue;
 	}
 
-	// FIXME!!! this is wrong wrong wrong
-	int wid = trace.chid;
+	// Save association of a wire (segment) ID and charge.  Note,
+	// the inherent degeneracy in detectors with wrapped wires is
+	// preserved here when the WireSelection is larger than 1 wire.
 	int q = trace.charge[slice.tbin];
-	slice.charge.push_back(WireCharge(wid, q));
+	const WireSelection& ws = gds.by_channel(trace.chid);
+	size_t ws_size = ws.size();
+	for (size_t iwid=0; iwid < ws_size; ++iwid) {
+	    int wid = ws[iwid]->ident;
+	    slice.charge.push_back(WireCharge(wid, q));
+	}
     }
     return index;
 }
