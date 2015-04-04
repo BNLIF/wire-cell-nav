@@ -18,7 +18,7 @@ int main()
 	WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane);
 	for (int ind = 0; ind < nwiresperplane; ++ind) {
 	    int channel = iplane*nwiresperplane + ind;
-	    Wire wire(ident, plane, ind, channel);
+	    GeomWire wire(ident, plane, ind, channel);
 	    gds.add_wire(wire);
 	    ident += 1;
 	}
@@ -34,17 +34,17 @@ int main()
 	WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane);
 	int nwires = nwiresperplane;
 	if (iplane == 3) {
-	    plane = kUnknown;
+	    plane = kUnknownWirePlaneType;
 	    nwires = 3*nwiresperplane;
 	}
 
-	WireSelection ws = gds.wires_in_plane(plane);
+	GeomWireSelection ws = gds.wires_in_plane(plane);
 	sort_by_planeindex(ws);
 	if (nwires != ws.size()) {
 	    cerr << "Failed to get back the right number of wires" << endl;
 	    ++errors;
 	}
-	if (plane == kUnknown) {
+	if (plane == kUnknownWirePlaneType) {
 	    continue;
 	}
 
@@ -53,27 +53,29 @@ int main()
 	for (int ind = 0; ind < nwiresperplane; ++ind) {
 	    int channel = iplane*nwiresperplane + ind;
 
-	    const Wire* wire = gds.by_ident(ident);
-	    cout << "Wire: " << wire->ident << " plane=" << wire->plane << " index=" << wire->index << endl;
+	    const GeomWire* wire = gds.by_ident(ident);
+	    cout << "Wire: " << wire->ident() 
+		 << " plane=" << wire->plane() 
+		 << " index=" << wire->index() << endl;
 
-	    if (!wire || wire->ident != ident) { 
+	    if (!wire || wire->ident() != ident) { 
 		cerr << "Failed to get wire ident " << ident << endl;
 		++errors;
 	    }
 
-	    const WireSelection& ws_chan = gds.by_channel(channel);
+	    const GeomWireSelection& ws_chan = gds.by_channel(channel);
 	    for (size_t iw = 0; iw < ws_chan.size(); ++iw) {
-		const Wire* one = ws_chan[iw];
-		if (!one || one->channel != channel) { 
+		const GeomWire* one = ws_chan[iw];
+		if (!one || one->channel() != channel) { 
 		    cerr << "Failed to get wire #" <<iw<<" for channel " << channel << endl;
 		    ++errors;
 		}
 	    }
 	    
-	    const Wire* other = ws[ind];
+	    const GeomWire* other = ws[ind];
 	    if (wire != other) {
 		cerr << "Got unexpected wire, ident: " 
-		     << wire->ident << " != " << other->ident
+		     << wire->ident() << " != " << other->ident()
 		     << endl;
 		++errors;
 	    }

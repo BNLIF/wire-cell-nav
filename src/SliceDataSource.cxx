@@ -105,10 +105,10 @@ int SliceDataSource::jump(int index)
 	// the inherent degeneracy in detectors with wrapped wires is
 	// preserved here when the WireSelection is larger than 1 wire.
 	int q = trace.charge[slice.tbin];
-	const WireSelection& ws = gds.by_channel(trace.chid);
+	const GeomWireSelection& ws = gds.by_channel(trace.chid);
 	size_t ws_size = ws.size();
 	for (size_t iwid=0; iwid < ws_size; ++iwid) {
-	    int wid = ws[iwid]->ident;
+	    int wid = ws[iwid]->ident();
 	    slice.charge.push_back(WireCharge(wid, q));
 	}
     }

@@ -26,35 +26,35 @@ bool GeomDataSource::fill_cache() const
     pi2wire.clear();
 
     int ind = 0;
-    WireSet::const_iterator wit, done = wires.end();
+    GeomWireSet::const_iterator wit, done = wires.end();
     for (wit=wires.begin(); wit != done; ++wit) {
-	const Wire& wire = *wit;
-	ident2wire[wire.ident] = &wire;
-	channel2wire[wire.channel].push_back(&wire);
+	const GeomWire& wire = *wit;
+	ident2wire[wire.ident()] = &wire;
+	channel2wire[wire.channel()].push_back(&wire);
 	pi2wire[wire.plane_index()] = &wire;
     }
     return true;
 }
 
 
-void GeomDataSource::add_wire(const Wire& wire)
+void GeomDataSource::add_wire(const GeomWire& wire)
 {
-    wires.push_back(wire);
+    wires.insert(wire);
 }
 
-const WireSet& GeomDataSource::get_wires() const
+const GeomWireSet& GeomDataSource::get_wires() const
 {
     return wires;
 }
 
-WireSelection GeomDataSource::wires_in_plane(WirePlaneType_t plane) const
+GeomWireSelection GeomDataSource::wires_in_plane(WirePlaneType_t plane) const
 {
-    WireSelection ws;
-    WireSet::const_iterator wit, done = wires.end();
+    GeomWireSelection ws;
+    GeomWireSet::const_iterator wit, done = wires.end();
 
     for (wit=wires.begin(); wit != done; ++wit) {
-	const Wire& wire = *wit;
-	if (plane == kUnknown or wire.plane == plane) {
+	const GeomWire& wire = *wit;
+	if (plane == kUnknownWirePlaneType or wire.plane() == plane) {
 	    ws.push_back(&wire);
 	}
     }
@@ -63,58 +63,58 @@ WireSelection GeomDataSource::wires_in_plane(WirePlaneType_t plane) const
 }
 
 
-const Wire* GeomDataSource::by_ident(int ident) const
+const GeomWire* GeomDataSource::by_ident(int ident) const
 {
     fill_cache();
     return ident2wire[ident];
 }
 
 
-const std::vector<const WireCell::Wire*>& GeomDataSource::by_channel(int channel) const
+const std::vector<const WireCell::GeomWire*>& GeomDataSource::by_channel(int channel) const
 {
     fill_cache();
     return channel2wire[channel];
 }
 
-const Wire* GeomDataSource::by_channel_segment(int channel, int segment) const
+const GeomWire* GeomDataSource::by_channel_segment(int channel, int segment) const
 {
     return by_channel(channel)[segment];
 }
 
 
-const Wire* GeomDataSource::by_planeindex(const WirePlaneIndex planeindex) const
+const GeomWire* GeomDataSource::by_planeindex(const WirePlaneIndex planeindex) const
 {
     fill_cache();
     return pi2wire[planeindex];
 }
-const Wire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) const
+const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) const
 {
     return by_planeindex(WirePlaneIndex(plane,index));
 }
 
 float GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
 {
-    const Wire& wire0 = *this->by_planeindex(plane, 0);
-    const Wire& wire1 = *this->by_planeindex(plane, 1);
+    const GeomWire& wire0 = *this->by_planeindex(plane, 0);
+    const GeomWire& wire1 = *this->by_planeindex(plane, 1);
 
-    double d = (wire0.point2.z - wire0.point1.z);
+    double d = (wire0.point2().z - wire0.point1().z);
     if (d == 0) {		// y wires
-	return std::abs(wire0.point1.z - wire1.point1.z);
+	return std::abs(wire0.point1().z - wire1.point1().z);
     }
 
-    double n = (wire0.point2.y - wire0.point1.y);
+    double n = (wire0.point2().y - wire0.point1().y);
     double m = n/d;
-    double b0 = (wire0.point1.y - m * wire0.point1.z);
-    double b1 = (wire1.point1.y - m * wire1.point1.z);
+    double b0 = (wire0.point1().y - m * wire0.point1().z);
+    double b1 = (wire1.point1().y - m * wire1.point1().z);
 
     return std::abs(b0-b1) / sqrt(m*m + 1);
 }
 
 float GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
 {
-    const Wire& w = *this->by_planeindex(plane, 0);
-    double dz = w.point2.z - w.point1.z;
-    double dy = w.point2.y - w.point1.y;
+    const GeomWire& w = *this->by_planeindex(plane, 0);
+    double dz = w.point2().z - w.point1().z;
+    double dy = w.point2().y - w.point1().y;
     double angle = std::atan2(dz, dy);
     return angle*units::radian;
 }
@@ -123,17 +123,17 @@ std::vector<float> GeomDataSource::extent(WireCell::WirePlaneType_t plane) const
 {
     float xmin, ymin, zmin, xmax, ymax, zmax;
 
-    WireSelection ws = this->wires_in_plane(plane);
+    GeomWireSelection ws = this->wires_in_plane(plane);
     size_t nwires = ws.size();
     for (size_t wind=0; wind<nwires; ++wind) {
-	const Wire& w = *ws[wind];
-	float this_xmin = std::min(w.point1.x, w.point2.x);
-	float this_ymin = std::min(w.point1.y, w.point2.y);
-	float this_zmin = std::min(w.point1.z, w.point2.z);
+	const GeomWire& w = *ws[wind];
+	float this_xmin = std::min(w.point1().x, w.point2().x);
+	float this_ymin = std::min(w.point1().y, w.point2().y);
+	float this_zmin = std::min(w.point1().z, w.point2().z);
 
-	float this_xmax = std::max(w.point1.x, w.point2.x);
-	float this_ymax = std::max(w.point1.y, w.point2.y);
-	float this_zmax = std::max(w.point1.z, w.point2.z);
+	float this_xmax = std::max(w.point1().x, w.point2().x);
+	float this_ymax = std::max(w.point1().y, w.point2().y);
+	float this_zmax = std::max(w.point1().z, w.point2().z);
 
 	if (!wind) {		// first time through
 	    xmin = this_xmin;
@@ -163,17 +163,17 @@ std::pair<float, float> GeomDataSource::minmax(int axis, WireCell::WirePlaneType
 {
     float xmin, ymin, zmin, xmax, ymax, zmax;
 
-    WireSelection ws = this->wires_in_plane(plane);
+    GeomWireSelection ws = this->wires_in_plane(plane);
     size_t nwires = ws.size();
     for (size_t wind=0; wind<nwires; ++wind) {
-	const Wire& w = *ws[wind];
-	float this_xmin = std::min(w.point1.x, w.point2.x);
-	float this_ymin = std::min(w.point1.y, w.point2.y);
-	float this_zmin = std::min(w.point1.z, w.point2.z);
+	const GeomWire& w = *ws[wind];
+	float this_xmin = std::min(w.point1().x, w.point2().x);
+	float this_ymin = std::min(w.point1().y, w.point2().y);
+	float this_zmin = std::min(w.point1().z, w.point2().z);
 
-	float this_xmax = std::max(w.point1.x, w.point2.x);
-	float this_ymax = std::max(w.point1.y, w.point2.y);
-	float this_zmax = std::max(w.point1.z, w.point2.z);
+	float this_xmax = std::max(w.point1().x, w.point2().x);
+	float this_ymax = std::max(w.point1().y, w.point2().y);
+	float this_zmax = std::max(w.point1().z, w.point2().z);
 
 	if (!wind) {		// first time through
 	    xmin = this_xmin;
