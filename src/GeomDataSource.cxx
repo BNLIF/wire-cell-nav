@@ -205,3 +205,14 @@ std::pair<float, float> GeomDataSource::minmax(int axis, WireCell::WirePlaneType
     }
     return std::pair<float,float>(0,0);
 }
+GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) const
+{
+    // fixme: write me!
+    return GeomWirePair();
+}
+
+const GeomWire* GeomDataSource::closest(const Point& point, WirePlaneType_t plane) const
+{
+    // fixme: write me!
+    return 0;
+}

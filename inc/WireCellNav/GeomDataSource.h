@@ -56,6 +56,12 @@ namespace WireCell {
 	std::pair<float, float> minmax(int axis, WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
 
+	/// Return the two wires that bound a given point in the wire plane.
+	GeomWirePair bounds(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
+
+	/// Return closest wire in the plane to the given point
+	const GeomWire* closest(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
+
     private:
 	GeomWireSet wires;
 	// reverse lookup cache of wire ID to wire object
