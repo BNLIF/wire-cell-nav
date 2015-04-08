@@ -14,7 +14,7 @@ namespace WireCell {
     class SliceDataSource {
     public:
 
-	SliceDataSource(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds);
+	SliceDataSource(WireCell::FrameDataSource& fds);
 	virtual ~SliceDataSource();
 
 	/// Return the number of slices in the current frame.  
@@ -34,8 +34,6 @@ namespace WireCell {
 
 	WireCell::FrameDataSource& _fds;
 
-	// needed to resolve electronics channel->wire IDs
-	const WireCell::GeomDataSource& _gds; 
 	WireCell::Slice _slice;	// cache the current slice
 	int _frame_index;	// last frame we loaded
 	int _slice_index;	// current slice, for caching

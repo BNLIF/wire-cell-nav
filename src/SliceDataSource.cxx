@@ -2,9 +2,8 @@
 
 using namespace WireCell;
 
-SliceDataSource::SliceDataSource(FrameDataSource& fds, const GeomDataSource& gds)
+SliceDataSource::SliceDataSource(FrameDataSource& fds)
     : _fds(fds)
-    , _gds(gds)
     , _frame_index(-1)
     , _slice_index(-1)
     , _slices_begin(-1)
@@ -86,7 +85,7 @@ int SliceDataSource::jump(int index)
     _slice.clear();
     _slice_index = index;	
     int slice_tbin = _slice_index + _slices_begin; 
-    Wire::Group slice_group;
+    Channel::Group slice_group;
 	
     const Frame& frame = _fds.get();
     size_t ntraces = frame.traces.size();
@@ -102,15 +101,9 @@ int SliceDataSource::jump(int index)
 	    continue;
 	}
 
-	// Save association of a wire (segment) ID and charge.  Note,
-	// the inherent degeneracy in detectors with wrapped wires is
-	// preserved here when the WireSelection is larger than 1 wire.
+	// Save association of a channel ID and its charge.
 	int q = trace.charge[slice_tbin];
-	const GeomWireSelection& ws = _gds.by_channel(trace.chid);
-	size_t ws_size = ws.size();
-	for (size_t iwid=0; iwid < ws_size; ++iwid) {
-	    slice_group.push_back(Wire::Charge(ws[iwid], q));
-	}
+	slice_group.push_back(Channel::Charge(trace.chid, q));
     }
     _slice.reset(slice_tbin, slice_group);
     return index;
