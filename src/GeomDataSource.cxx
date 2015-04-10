@@ -223,12 +223,13 @@ const GeomWire* GeomDataSource::closest(const Point& point, WirePlaneType_t plan
 }
 
 float GeomDataSource::wire_dist(const Point& point, WirePlaneType_t plane){
-  //fixme: wirte me!
-  return 0;
+  float theta = angle(plane);
+  float dis = std::cos(theta/units::radian) *point.z  - std::sin(theta/units::radian) * point.y;
+
+  return dis;
 }
 
 float GeomDataSource::wire_dist(const GeomWire& wire){
-  //fixme: write me!
   float theta = angle(wire.plane());
   
   float dis = std::cos(theta/units::radian) *wire.point1().z  - std::sin(theta/units::radian) * wire.point1().y;
