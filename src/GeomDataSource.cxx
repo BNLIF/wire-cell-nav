@@ -205,6 +205,8 @@ std::pair<float, float> GeomDataSource::minmax(int axis, WireCell::WirePlaneType
     }
     return std::pair<float,float>(0,0);
 }
+
+
 GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) const
 {
     // fixme: write me!
@@ -217,17 +219,21 @@ const GeomWire* GeomDataSource::closest(const Point& point, WirePlaneType_t plan
     return 0;
 }
 
-
-
 float GeomDataSource::wire_dist(const Point& point, WirePlaneType_t plane){
   //fixme: wirte me!
   return 0;
 }
 
-float GeomDataSource::wire_dist(const GeomWire& wire, WirePlaneType_t plane){
-  return 0;
+float GeomDataSource::wire_dist(const GeomWire& wire){
+  //fixme: write me!
+  float theta = angle(wire.plane());
+  
+  float dis = std::cos(theta/units::radian) *wire.point1().z  - std::sin(theta/units::radian) * wire.point1().y;
+  dis += std::cos(theta/units::radian) * wire.point2().z  - std::sin(theta/units::radian) * wire.point2().y;
+  dis = dis/2.;
+  
+  return dis;
 }
-
 
 Point GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2){
   //fixme: write me!
