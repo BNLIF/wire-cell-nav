@@ -116,6 +116,9 @@ float GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
     double dz = w.point2().z - w.point1().z;
     double dy = w.point2().y - w.point1().y;
     double angle = std::atan2(dz, dy);
+    
+    if (angle>3.1415926/2.) angle -= 3.1415926;
+    
     return angle*units::radian;
 }
 
