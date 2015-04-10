@@ -65,6 +65,8 @@ namespace WireCell {
 	/// Given a point to calculate its u-v-w position
 	float wire_dist(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType);
 
+	float wire_dist(const GeomWire& wire);
+
 	// Given two wires to calculate its x-y position
 	Point crossing_point(const GeomWire& wire1, const GeomWire& wire2);
 

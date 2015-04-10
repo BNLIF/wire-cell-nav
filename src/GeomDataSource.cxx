@@ -224,6 +224,11 @@ float GeomDataSource::wire_dist(const Point& point, WirePlaneType_t plane){
   return 0;
 }
 
+float GeomDataSource::wire_dist(const GeomWire& wire, WirePlaneType_t plane){
+  return 0;
+}
+
+
 Point GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2){
   //fixme: write me!
   return Point();
