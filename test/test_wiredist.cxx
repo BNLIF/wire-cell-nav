@@ -62,5 +62,11 @@ int main()
   WireCell::Point p1(-1,0,100);
   cout << gds.wire_dist(p1,plane)<< endl;
 
+  cout << gds.crossing_point(wire1, wire3).y << " " << gds.crossing_point(wire1, wire3).z << endl;
+  WireCell::Point p2(-1,7.3853,-2005.56);
+  cout << gds.wire_dist(p2,plane)<< " " << gds.wire_dist(wire1) << endl;
+  plane = static_cast<WireCell::WirePlaneType_t>(1);
+  cout << gds.wire_dist(p2,plane)<< " " << gds.wire_dist(wire3) << endl;
+
   return 0;
 }

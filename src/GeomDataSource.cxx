@@ -240,6 +240,36 @@ float GeomDataSource::wire_dist(const GeomWire& wire){
 }
 
 Point GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2){
-  //fixme: write me!
-  return Point();
+  float theta1 = angle(wire1.plane());
+  float theta2 = angle(wire2.plane());
+
+  float dis1 = wire_dist(wire1);
+  float dis2 = wire_dist(wire2);
+  
+  float a1 = std::cos(theta1/units::radian);
+  float b1 = -std::sin(theta1/units::radian);
+  
+  float a2 = std::cos(theta2/units::radian);
+  float b2 = -std::sin(theta2/units::radian);
+
+  //equation array is
+  // dis1 = z * a1 + y * b1;
+  // dis2 = z * a2 + y * b2;
+  float x = -1;
+  float y,z;
+  if (b1*a2-b2*a1!=0){
+    y = (dis1 * a2 - dis2 *a1)/(b1*a2-b2*a1);
+  }else{
+    y = -1;
+  }
+
+  if (a1*b2 - a2 * b1!=0){
+    z = (dis1 * b2 - dis2 * b1)/(a1*b2 - a2 * b1);
+  }else{
+    z= -1;
+  }
+
+  Point p(x,y,z);
+
+  return p;
 }
