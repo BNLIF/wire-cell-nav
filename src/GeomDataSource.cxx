@@ -219,12 +219,12 @@ const GeomWire* GeomDataSource::closest(const Point& point, WirePlaneType_t plan
 
 
 
-float GeomDataSource::find_uvw(const Point& point, WirePlaneType_t plane){
+float GeomDataSource::wire_dist(const Point& point, WirePlaneType_t plane){
   //fixme: wirte me!
   return 0;
 }
 
-std::pair<float,float> GeomDataSource::find_xy(GeomWire* wire1, GeomWire* wire2){
+Point GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2){
   //fixme: write me!
-  return std::pair<float,float>(0,0);
+  return Point();
 }

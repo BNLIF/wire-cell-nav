@@ -63,10 +63,10 @@ namespace WireCell {
 	const GeomWire* closest(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
 	/// Given a point to calculate its u-v-w position
-	float find_uvw(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType);
+	float wire_dist(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType);
 
 	// Given two wires to calculate its x-y position
-	std::pair<float,float> find_xy(GeomWire* wire1, GeomWire* wire2);
+	Point crossing_point(const GeomWire& wire1, const GeomWire& wire2);
 
     private:
 	GeomWireSet wires;
