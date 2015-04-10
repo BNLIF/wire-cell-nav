@@ -62,6 +62,12 @@ namespace WireCell {
 	/// Return closest wire in the plane to the given point
 	const GeomWire* closest(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
+	/// Given a point to calculate its u-v-w position
+	float find_uvw(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType);
+
+	// Given two wires to calculate its x-y position
+	std::pair<float,float> find_xy(GeomWire* wire1, GeomWire* wire2);
+
     private:
 	GeomWireSet wires;
 	// reverse lookup cache of wire ID to wire object
