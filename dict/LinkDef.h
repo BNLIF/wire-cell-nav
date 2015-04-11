@@ -6,6 +6,7 @@
 
 #pragma link C++ class WireCell::GeomDataSource-!;
 #pragma link C++ class WireCell::FrameDataSource-!;
+#pragma link C++ class WireCell::ThresholdFDS-!;
 #pragma link C++ class WireCell::SliceDataSource-!;
 
 #endif
