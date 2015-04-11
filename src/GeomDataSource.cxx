@@ -86,6 +86,7 @@ const GeomWire* GeomDataSource::by_planeindex(const WirePlaneIndex planeindex) c
 {
     fill_cache();
     return pi2wire[planeindex];
+    
 }
 const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) const
 {
@@ -210,26 +211,14 @@ std::pair<float, float> GeomDataSource::minmax(int axis, WireCell::WirePlaneType
 }
 
 
-GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) const
-{
-    // fixme: write me!
-    return GeomWirePair();
-}
-
-const GeomWire* GeomDataSource::closest(const Point& point, WirePlaneType_t plane) const
-{
-    // fixme: write me!
-    return 0;
-}
-
-float GeomDataSource::wire_dist(const Point& point, WirePlaneType_t plane){
+float GeomDataSource::wire_dist(const Point& point, WirePlaneType_t plane) const{
   float theta = angle(plane);
   float dis = std::cos(theta/units::radian) *point.z  - std::sin(theta/units::radian) * point.y;
 
   return dis;
 }
 
-float GeomDataSource::wire_dist(const GeomWire& wire){
+float GeomDataSource::wire_dist(const GeomWire& wire) const{
   float theta = angle(wire.plane());
   
   float dis = std::cos(theta/units::radian) *wire.point1().z  - std::sin(theta/units::radian) * wire.point1().y;
@@ -263,13 +252,87 @@ Point GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire
     y = -1;
   }
 
+  if (y >= wire1.point1().y && y <= wire1.point1().y  || y >= wire1.point2().y && y <= wire1.point1().y){
+  }else{
+    y=-1;
+  }
+  if (y >= wire2.point1().y && y <= wire2.point1().y  || y >= wire2.point2().y && y <= wire2.point1().y){
+  }else{
+    y = -1;
+  }
+
+
   if (a1*b2 - a2 * b1!=0){
     z = (dis1 * b2 - dis2 * b1)/(a1*b2 - a2 * b1);
   }else{
     z= -1;
   }
 
+  if (z >= wire1.point1().z && z <= wire1.point1().z  || z >= wire1.point2().z && z <= wire1.point1().z){
+  }else{
+    z=-1;
+  }
+  if (z >= wire2.point1().z && z <= wire2.point1().z  || z >= wire2.point2().z && z <= wire2.point1().z){
+  }else{
+    z = -1;
+  }
+  
+
   Point p(x,y,z);
 
   return p;
 }
+
+
+
+GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) const
+{
+  float theta = angle(plane);
+  float dis = wire_dist(point,plane);
+  
+  //find out the ident number of the first wire
+  const GeomWire *first_wire = by_planeindex(plane,0);
+  float dis0 = wire_dist( *first_wire );
+  
+  int num = (dis - dis0)/pitch(plane);
+  
+  const GeomWire *central_wire = by_planeindex(plane,num);
+  float central_dis = wire_dist(*central_wire);
+
+  GeomWirePair p1;
+  if (dis > central_dis){
+    p1.first = by_planeindex(plane,num);
+    p1.second = by_planeindex(plane,num+1);
+  }else if (dis < central_dis){
+    p1.first = by_planeindex(plane,num-1);
+    p1.second = by_planeindex(plane,num);
+  }else{
+    if (num==0){
+      p1.first = by_planeindex(plane,num);
+      p1.second = by_planeindex(plane,num+1);
+    }else{
+      p1.first = by_planeindex(plane,num-1);
+      p1.second = by_planeindex(plane,num);
+    }
+  }
+
+  return p1;
+  //  return GeomWirePair();
+}
+
+const GeomWire* GeomDataSource::closest(const Point& point, WirePlaneType_t plane) const
+{
+  // fixme: write me!
+  float dis = wire_dist(point,plane);
+  GeomWirePair p1 = bounds(point,plane);
+  float dis1 = wire_dist(*p1.first);
+  float dis2 = wire_dist(*p1.second);
+  
+  if (fabs(dis1-dis)<fabs(dis2-dis)){
+    return p1.first;
+  }else{
+    return p1.second;
+  }
+
+}
+
