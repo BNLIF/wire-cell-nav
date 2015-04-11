@@ -116,6 +116,9 @@ float GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
     double dz = w.point2().z - w.point1().z;
     double dy = w.point2().y - w.point1().y;
     double angle = std::atan2(dz, dy);
+    
+    if (angle>3.1415926/2.) angle -= 3.1415926;
+    
     return angle*units::radian;
 }
 
@@ -205,6 +208,8 @@ std::pair<float, float> GeomDataSource::minmax(int axis, WireCell::WirePlaneType
     }
     return std::pair<float,float>(0,0);
 }
+
+
 GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) const
 {
     // fixme: write me!
@@ -215,4 +220,56 @@ const GeomWire* GeomDataSource::closest(const Point& point, WirePlaneType_t plan
 {
     // fixme: write me!
     return 0;
+}
+
+float GeomDataSource::wire_dist(const Point& point, WirePlaneType_t plane){
+  float theta = angle(plane);
+  float dis = std::cos(theta/units::radian) *point.z  - std::sin(theta/units::radian) * point.y;
+
+  return dis;
+}
+
+float GeomDataSource::wire_dist(const GeomWire& wire){
+  float theta = angle(wire.plane());
+  
+  float dis = std::cos(theta/units::radian) *wire.point1().z  - std::sin(theta/units::radian) * wire.point1().y;
+  dis += std::cos(theta/units::radian) * wire.point2().z  - std::sin(theta/units::radian) * wire.point2().y;
+  dis = dis/2.;
+  
+  return dis;
+}
+
+Point GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2){
+  float theta1 = angle(wire1.plane());
+  float theta2 = angle(wire2.plane());
+
+  float dis1 = wire_dist(wire1);
+  float dis2 = wire_dist(wire2);
+  
+  float a1 = std::cos(theta1/units::radian);
+  float b1 = -std::sin(theta1/units::radian);
+  
+  float a2 = std::cos(theta2/units::radian);
+  float b2 = -std::sin(theta2/units::radian);
+
+  //equation array is
+  // dis1 = z * a1 + y * b1;
+  // dis2 = z * a2 + y * b2;
+  float x = -1;
+  float y,z;
+  if (b1*a2-b2*a1!=0){
+    y = (dis1 * a2 - dis2 *a1)/(b1*a2-b2*a1);
+  }else{
+    y = -1;
+  }
+
+  if (a1*b2 - a2 * b1!=0){
+    z = (dis1 * b2 - dis2 * b1)/(a1*b2 - a2 * b1);
+  }else{
+    z= -1;
+  }
+
+  Point p(x,y,z);
+
+  return p;
 }
