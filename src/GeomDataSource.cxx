@@ -229,11 +229,40 @@ float GeomDataSource::wire_dist(const GeomWire& wire) const{
 }
 
 Point GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2){
-  float theta1 = angle(wire1.plane());
-  float theta2 = angle(wire2.plane());
-
+  
   float dis1 = wire_dist(wire1);
   float dis2 = wire_dist(wire2);
+  
+  Point p = crossing_point(dis1,dis2,wire1.plane(),wire2.plane());
+  
+  if (p.y >= wire1.point1().y && p.y <= wire1.point1().y  || p.y >= wire1.point2().y && p.y <= wire1.point1().y){
+  }else{
+    p.y=-1;
+  }
+  if (p.y >= wire2.point1().y && p.y <= wire2.point1().y  || p.y >= wire2.point2().y && p.y <= wire2.point1().y){
+  }else{
+    p.y = -1;
+  }
+
+  if (p.z >= wire1.point1().z && p.z <= wire1.point1().z  || p.z >= wire1.point2().z && p.z <= wire1.point1().z){
+  }else{
+    p.z=-1;
+  }
+  if (p.z >= wire2.point1().z && p.z <= wire2.point1().z  || p.z >= wire2.point2().z && p.z <= wire2.point1().z){
+  }else{
+    p.z = -1;
+  }
+  
+
+
+  return p;
+}
+
+
+Point GeomDataSource::crossing_point(float dis1, float dis2, WirePlaneType_t plane1, WirePlaneType_t plane2){
+  float theta1 = angle(plane1);
+  float theta2 = angle(plane2);
+
   
   float a1 = std::cos(theta1/units::radian);
   float b1 = -std::sin(theta1/units::radian);
@@ -252,14 +281,7 @@ Point GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire
     y = -1;
   }
 
-  if (y >= wire1.point1().y && y <= wire1.point1().y  || y >= wire1.point2().y && y <= wire1.point1().y){
-  }else{
-    y=-1;
-  }
-  if (y >= wire2.point1().y && y <= wire2.point1().y  || y >= wire2.point2().y && y <= wire2.point1().y){
-  }else{
-    y = -1;
-  }
+ 
 
 
   if (a1*b2 - a2 * b1!=0){
@@ -268,20 +290,13 @@ Point GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire
     z= -1;
   }
 
-  if (z >= wire1.point1().z && z <= wire1.point1().z  || z >= wire1.point2().z && z <= wire1.point1().z){
-  }else{
-    z=-1;
-  }
-  if (z >= wire2.point1().z && z <= wire2.point1().z  || z >= wire2.point2().z && z <= wire2.point1().z){
-  }else{
-    z = -1;
-  }
-  
+
 
   Point p(x,y,z);
 
   return p;
 }
+
 
 
 

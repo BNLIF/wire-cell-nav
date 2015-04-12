@@ -62,6 +62,7 @@ namespace WireCell {
 	
 	// Given two wires to calculate its x-y position
 	Point crossing_point(const GeomWire& wire1, const GeomWire& wire2);
+	Point crossing_point(float dis1, float dis2, WirePlaneType_t plane1, WirePlaneType_t plane2);
 
 	/// Return the two wires that bound a given point in the wire plane.
 	GeomWirePair bounds(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
