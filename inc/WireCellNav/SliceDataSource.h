@@ -18,17 +18,17 @@ namespace WireCell {
 	virtual ~SliceDataSource();
 
 	/// Return the number of slices in the current frame.  
-	int size() const;
+	virtual int size() const;
 
 	/// Go to the given slice, return slice number or -1 on error
-	int jump(int slice_number); 
+	virtual int jump(int slice_number); 
 
 	/// Go to the next slice, return its number or -1 on error
-	int next();
+	virtual int next();
 
 	/// Get the current slice
-	WireCell::Slice&  get();
-	const WireCell::Slice&  get() const;
+	virtual WireCell::Slice&  get();
+	virtual const WireCell::Slice&  get() const;
 
     private:
 
@@ -41,8 +41,8 @@ namespace WireCell {
 	mutable int _slices_end; // tbin index of one past the latest bin of all traces
 
 
-	void update_slices_bounds() const;
-	void clear();
+	virtual void update_slices_bounds() const;
+	virtual void clear();
 
     };
 
