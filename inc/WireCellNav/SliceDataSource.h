@@ -14,21 +14,23 @@ namespace WireCell {
     class SliceDataSource {
     public:
 
+	/// Create a slice data source from the given FrameDataSource.
 	SliceDataSource(WireCell::FrameDataSource& fds);
-	virtual ~SliceDataSource();
+
+	// not virtual.  If you think you want to inherit from this class, let's discuss.
+	~SliceDataSource();
 
 	/// Return the number of slices in the current frame.  
-	virtual int size() const;
+	int size() const;
 
 	/// Go to the given slice, return slice number or -1 on error
-	virtual int jump(int slice_number); 
+	int jump(int slice_number); 
 
 	/// Go to the next slice, return its number or -1 on error
-	virtual int next();
+	int next();
 
 	/// Get the current slice
-	virtual WireCell::Slice&  get();
-	virtual const WireCell::Slice&  get() const;
+	const WireCell::Slice&  get() const;
 
     private:
 
@@ -41,8 +43,8 @@ namespace WireCell {
 	mutable int _slices_end; // tbin index of one past the latest bin of all traces
 
 
-	virtual void update_slices_bounds() const;
-	virtual void clear();
+	void update_slices_bounds() const;
+	void clear();
 
     };
 
