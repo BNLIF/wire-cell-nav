@@ -55,6 +55,14 @@ namespace WireCell {
 	/// wire plane
 	std::pair<float, float> minmax(int axis, WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
+	/// Given a point to calculate its u-v-w position
+	float wire_dist(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
+	
+	float wire_dist(const GeomWire& wire) const;
+	
+	// Given two wires to calculate its x-y position
+	Point crossing_point(const GeomWire& wire1, const GeomWire& wire2);
+	Point crossing_point(float dis1, float dis2, WirePlaneType_t plane1, WirePlaneType_t plane2);
 
 	/// Return the two wires that bound a given point in the wire plane.
 	GeomWirePair bounds(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
@@ -62,13 +70,7 @@ namespace WireCell {
 	/// Return closest wire in the plane to the given point
 	const GeomWire* closest(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
 	
-	/// Given a point to calculate its u-v-w position
-	float wire_dist(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType);
 	
-	float wire_dist(const GeomWire& wire);
-	
-	// Given two wires to calculate its x-y position
-	Point crossing_point(const GeomWire& wire1, const GeomWire& wire2);
 	
     private:
 	GeomWireSet wires;
