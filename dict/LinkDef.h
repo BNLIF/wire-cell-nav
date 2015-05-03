@@ -10,4 +10,6 @@
 #pragma link C++ class WireCell::ThresholdFDS-!;
 #pragma link C++ class WireCell::SliceDataSource-!;
 
+#pragma link C++ function make_example_gds;
+
 #endif

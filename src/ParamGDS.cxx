@@ -14,7 +14,7 @@ bool ParamGDS::inside(const Vector& point)
     return true;
 }
 
-int ParamGDS::make_wires(const Vector& start, const Vector& pitch, 
+int ParamGDS::make_wires(const Vector& start, const Vector& step, 
 			 const Vector& proto, WirePlaneType_t plane)
 {
     int global_count = this->get_wires().size();
@@ -23,7 +23,7 @@ int ParamGDS::make_wires(const Vector& start, const Vector& pitch,
     while (true) {
 	++index;
 
-	Vector point = start + double(index) * pitch;
+	Vector point = start + double(index) * step;
 	
 	if (!inside(point)) {
 	    break;
@@ -52,7 +52,18 @@ int ParamGDS::make_wires(const Vector& start, const Vector& pitch,
 int ParamGDS::make_wire_plane(const Vector& offset, const Vector& pitch,
 			      WirePlaneType_t plane)
 {
-    Vector start = minbound + offset;
+    // start in center of bounds respecting the offset
+    Vector center = 0.5*(minbound+maxbound);
+
+    Vector hit1, hit2;
+    int hitmask = box_intersection(minbound, maxbound, center, pitch, hit1, hit2);    
+
+    Vector start = hit1;
+    Vector stride = center-start;
+    if (stride.dot(pitch) < 0) {
+	start = hit2;
+    }
+    start = start + offset;
 
     // unit vector in direction of wires of this plane
     Vector proto = drift.cross(pitch).norm(); 
@@ -61,6 +72,7 @@ int ParamGDS::make_wire_plane(const Vector& offset, const Vector& pitch,
 	      << " proto=" << proto
 	      << " start=" << start
 	      << " pitch=" << pitch
+	      << " offset=" << offset
 	      << std::endl;
 
     return make_wires(start, pitch, proto, plane);
@@ -77,7 +89,7 @@ ParamGDS::ParamGDS(const Vector& minbound, const Vector& maxbound, const Vector&
     , drift(drift)
 {
     make_wire_plane(offsetU, pitchU, kUwire);
-    make_wire_plane(offsetU, pitchV, kVwire);
+    make_wire_plane(offsetV, pitchV, kVwire);
     make_wire_plane(offsetY, pitchY, kYwire);
 }
 
