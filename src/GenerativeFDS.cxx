@@ -17,9 +17,14 @@ GenerativeFDS::~GenerativeFDS()
 {
 }
 
+int GenerativeFDS::size() const { return max_frames; }
+
 int GenerativeFDS::jump(int frame_number)
 {
-    if (frame_number < 0 || frame_number >= max_frames) {
+    if (frame_number < 0) {
+	return -1;
+    }
+    if (max_frames >=0 && frame_number >= max_frames) {
 	return -1;
     }
 
@@ -29,9 +34,8 @@ int GenerativeFDS::jump(int frame_number)
 
     frame.clear();
 
-    int tbinmin = frame_number*bins_per_frame;
-    int tbinmax = (frame_number+1)*bins_per_frame;
-    const PointValueVector& hits = dep.depositions(tbinmin, tbinmax);
+    const PointValueVector& hits = dep.depositions(frame_number);
+
     size_t nhits = hits.size();
 
     typedef map<int, int> TraceIndexMap; // channel->index into traces;
@@ -40,7 +44,10 @@ int GenerativeFDS::jump(int frame_number)
     for (size_t ind=0; ind<nhits; ++ind) {
 	const Point& p = hits[ind].first;
 	float charge = hits[ind].second;
-	int tbin = tbinmin - p.x;
+	int tbin = p.x;
+	if (tbin >= bins_per_frame) {
+	    continue;
+	}
 
 	for (int iplane=0; iplane < 3; ++iplane) {
 	    WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
@@ -67,7 +74,7 @@ int GenerativeFDS::jump(int frame_number)
 	}	
     }
     
-    frame.index = frame_number;
+    frame.index = frame_number; 
     return frame.index;
 }
 

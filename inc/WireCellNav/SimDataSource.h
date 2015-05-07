@@ -21,6 +21,10 @@ namespace WireCell {
 	/// Access to the sim truth objects.  The SimTruthSelection will be empty on error
 	virtual SimTruthSelection truth() const = 0; 
 
+	
+	/// Explicitly set the "frame" (event) to process.  Frame number returned or -1 on error.
+	virtual int jump(int frame_number) = 0;
+
     };
 
 }
