@@ -62,6 +62,7 @@ int GenerativeFDS::jump(int frame_number)
 		t.chid = chid;
 		t.tbin = 0;
 		t.charge.resize(bins_per_frame, 0.0);
+		tim[chid] = frame.traces.size();
 		frame.traces.push_back(t);
 	    }
 	    else {		// already seen
