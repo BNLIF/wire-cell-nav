@@ -68,12 +68,12 @@ int ParamGDS::make_wire_plane(const Vector& offset, const Vector& pitch,
     // unit vector in direction of wires of this plane
     Vector proto = drift.cross(pitch).norm(); 
 
-    std::cerr << "Making plane #" << plane 
-	      << " proto=" << proto
-	      << " start=" << start
-	      << " pitch=" << pitch
-	      << " offset=" << offset
-	      << std::endl;
+    // std::cerr << "Making plane #" << plane 
+    // 	      << " proto=" << proto
+    // 	      << " start=" << start
+    // 	      << " pitch=" << pitch
+    // 	      << " offset=" << offset
+    // 	      << std::endl;
 
     return make_wires(start, pitch, proto, plane);
 }
