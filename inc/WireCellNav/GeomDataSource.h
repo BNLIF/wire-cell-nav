@@ -60,6 +60,7 @@ namespace WireCell {
 
 	/// Return true if point is contained in the extent.
 	bool contained(const Point& point) const;
+	bool contained_yz(const Point& point) const;
 
 	/// Given a point to calculate its u-v-w position.
 	float wire_dist(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;

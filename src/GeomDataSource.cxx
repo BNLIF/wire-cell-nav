@@ -222,8 +222,28 @@ bool GeomDataSource::contained(const Point& point) const
 
     mm = minmax(0);
     if (point.x < mm.first || mm.second <= point.x) { 
+    	return false;
+    }
+
+    mm = minmax(1);
+    if (point.y < mm.first || mm.second <= point.y) { 
 	return false;
     }
+
+    mm = minmax(2);
+    if (point.z < mm.first || mm.second <= point.z) { 
+	return false;
+    }
+
+    return true;
+}
+
+/// Return true if point is contained in the extent.
+bool GeomDataSource::contained_yz(const Point& point) const
+{
+    std::pair<float, float> mm;
+
+   
 
     mm = minmax(1);
     if (point.y < mm.first || mm.second <= point.y) { 

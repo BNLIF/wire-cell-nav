@@ -49,29 +49,37 @@ int GenerativeFDS::jump(int frame_number)
 	    continue;
 	}
 
+	
+
+	if (gds.contained_yz(p)){
+	  
+	//	  std::cout << p.x << " " << p.y << " " << p.z << std::endl;
+
 	for (int iplane=0; iplane < 3; ++iplane) {
-	    WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
-	    const GeomWire* wire = gds.closest(p, plane);
-
-	    int chid = wire->channel();
-	    TraceIndexMap::iterator it = tim.find(chid);
-
-	    int trace_index = frame.traces.size(); // if new
-	    if (it == tim.end()) {
-		Trace t;
-		t.chid = chid;
-		t.tbin = 0;
-		t.charge.resize(bins_per_frame, 0.0);
-		tim[chid] = frame.traces.size();
-		frame.traces.push_back(t);
-	    }
-	    else {		// already seen
-		trace_index = it->second;
-	    }
-	    Trace& trace = frame.traces[trace_index];
-
-	    // finally
-	    trace.charge[tbin] += charge;
+	  WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
+	  const GeomWire* wire = gds.closest(p, plane);
+	  
+	  int chid = wire->channel();
+	  
+	  TraceIndexMap::iterator it = tim.find(chid);
+	  
+	  int trace_index = frame.traces.size(); // if new
+	  if (it == tim.end()) {
+	    Trace t;
+	    t.chid = chid;
+	    t.tbin = 0;
+	    t.charge.resize(bins_per_frame, 0.0);
+	    tim[chid] = frame.traces.size();
+	    frame.traces.push_back(t);
+	  }
+	  else {		// already seen
+	    trace_index = it->second;
+	  }
+	  Trace& trace = frame.traces[trace_index];
+	  
+	  // finally
+	  trace.charge[tbin] += charge;
+	}
 	}	
     }
     
