@@ -3,8 +3,8 @@
 
 using namespace WireCell;
 
-WireCell::GeomDataSource* make_example_gds(float pitch, float angle,
-					   float yextent, float zextent)
+WireCell::GeomDataSource* WireCell::make_example_gds(float pitch, float angle,
+						     float yextent, float zextent)
 {
     float nudge = 1.0*units::mm;
     float dx=10*units::mm;

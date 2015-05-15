@@ -23,7 +23,10 @@ bool GeomDataSource::fill_cache() const
 
     ident2wire.clear();
     channel2wire.clear();
-    pi2wire.clear();
+
+    for (int iplane=0; iplane<3; ++iplane) {
+	pi2wire[iplane].clear();
+    }
 
     int ind = 0;
     GeomWireSet::const_iterator wit, done = wires.end();
@@ -31,8 +34,22 @@ bool GeomDataSource::fill_cache() const
 	const GeomWire& wire = *wit;
 	ident2wire[wire.ident()] = &wire;
 	channel2wire[wire.channel()].push_back(&wire);
-	pi2wire[wire.plane_index()] = &wire;
+	WirePlaneIndex wpi = wire.plane_index();
+	pi2wire[wpi.first].resize(wpi.second+1,0);
+	pi2wire[wpi.first][wpi.second] = &wire;
     }
+
+
+    // angle
+    for (int iplane=0; iplane<3; ++iplane) {
+	const GeomWire& w = *pi2wire[iplane][0];
+	double dz = w.point2().z - w.point1().z;
+	double dy = w.point2().y - w.point1().y;
+	double angle = std::atan2(dz, dy);
+	if (angle>3.1415926/2.) angle -= 3.1415926;
+	angle_cache[iplane] = angle*units::radian;
+    }
+
     return true;
 }
 
@@ -85,12 +102,13 @@ const GeomWire* GeomDataSource::by_channel_segment(int channel, int segment) con
 const GeomWire* GeomDataSource::by_planeindex(const WirePlaneIndex planeindex) const
 {
     fill_cache();
-    return pi2wire[planeindex];
+    return pi2wire[planeindex.first].at(planeindex.second);
     
 }
 const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) const
 {
-    return by_planeindex(WirePlaneIndex(plane,index));
+    fill_cache();
+    return pi2wire[plane].at(index);
 }
 
 float GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
@@ -113,15 +131,10 @@ float GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
 
 float GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
 {
-    const GeomWire& w = *this->by_planeindex(plane, 0);
-    double dz = w.point2().z - w.point1().z;
-    double dy = w.point2().y - w.point1().y;
-    double angle = std::atan2(dz, dy);
-    
-    if (angle>3.1415926/2.) angle -= 3.1415926;
-    
-    return angle*units::radian;
+    fill_cache();
+    return angle_cache[plane];
 }
+
 
 bool GeomDataSource::fill_mm_cache() const 
 {
@@ -380,7 +393,6 @@ GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) c
   }
 
   return p1;
-  //  return GeomWirePair();
 }
 
 const GeomWire* GeomDataSource::closest(const Point& point, WirePlaneType_t plane) const

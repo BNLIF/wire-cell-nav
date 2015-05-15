@@ -97,17 +97,19 @@ namespace WireCell {
 	// reverse lookup cache of wire ID to wire object
 	mutable std::map<int, const GeomWire*> ident2wire;
 	// reverse lookup cache of <plane,index> to wire object
-	mutable std::map<WirePlaneIndex, const GeomWire*> pi2wire;
+	mutable std::vector<const GeomWire*> pi2wire[3];
 	// reverse lookup cache of all wire segments associated with one electronics channel
 	mutable std::map<int, GeomWireSelection> channel2wire;
 
 	// one for each x,y,z
 	mutable std::map<WirePlaneType_t, std::pair<float,float> > mm_cache[3];
 
+	mutable float angle_cache[3];
+
 	// Maybe fill the cache
 	bool fill_cache() const;
 	bool fill_mm_cache() const;
-
+	bool fill_angle_cache() const;
 	
 
     };
