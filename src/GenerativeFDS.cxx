@@ -52,12 +52,13 @@ int GenerativeFDS::jump(int frame_number)
 	
 
 	if (gds.contained_yz(p)){
-	  
+	  Point p1=p;// // hack for now
+	  // gds.avoid_gap(p1);
 	//	  std::cout << p.x << " " << p.y << " " << p.z << std::endl;
 
 	for (int iplane=0; iplane < 3; ++iplane) {
 	  WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
-	  const GeomWire* wire = gds.closest(p, plane);
+	  const GeomWire* wire = gds.closest(p1, plane);
 	  
 	  int chid = wire->channel();
 	  

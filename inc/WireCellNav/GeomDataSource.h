@@ -90,7 +90,7 @@ namespace WireCell {
 	const GeomWire* closest(const Point& point, 
 				WirePlaneType_t plane = kUnknownWirePlaneType) const;
 	
-	
+	void avoid_gap(Point& point) const;
 	
     private:
 	GeomWireSet wires;
