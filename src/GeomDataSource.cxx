@@ -375,18 +375,20 @@ GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) c
   const GeomWire *first_wire = by_planeindex(plane,0);
   float dis0 = wire_dist( *first_wire );
   
-  int num = (dis - dis0)/pitch(plane);
+  int num = (dis - dis0)/pitch(plane); // first guess
   
   const GeomWire *central_wire = by_planeindex(plane,num);
   float central_dis = wire_dist(*central_wire);
 
   GeomWirePair p1;
   if (dis > central_dis){
-    p1.first = by_planeindex(plane,num);
-    p1.second = by_planeindex(plane,num+1);
+    int num1 = (dis -central_dis)/pitch(plane);
+    p1.first = by_planeindex(plane,num+num1);
+    p1.second = by_planeindex(plane,num+num1+1);
   }else if (dis < central_dis){
-    p1.first = by_planeindex(plane,num-1);
-    p1.second = by_planeindex(plane,num);
+    int num1 = (central_dis-dis)/pitch(plane);
+    p1.first = by_planeindex(plane,num-num1-1);
+    p1.second = by_planeindex(plane,num-num1);
   }else{
     if (num==0){
       p1.first = by_planeindex(plane,num);
@@ -416,3 +418,31 @@ const GeomWire* GeomDataSource::closest(const Point& point, WirePlaneType_t plan
 
 }
 
+
+void GeomDataSource::avoid_gap(Point& p) const{
+    
+  int flag = 0;
+  float pitch1;
+  // do{
+  //   flag = 0;
+    for (int iplane=0; iplane < 3; ++iplane) {
+      WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
+      GeomWirePair p1 = bounds(p, plane);
+      float dis = wire_dist(p,plane);
+      float dis1 = wire_dist(*p1.first);
+      float dis2 = wire_dist(*p1.second);
+      pitch1 = pitch(plane);
+      std::cout << flag << " " << dis << " " << dis1 << " " << dis2 << " " << fabs(dis1+dis2-dis-dis) << " " << pitch1/20. << " " << p1.first->channel() << " " << p1.second->channel() << std::endl;
+      if (fabs(dis1-dis-dis+dis2)/2.<pitch1/10.){
+	flag = 1; 
+      }
+    }
+    // if (flag==1){
+    //   p.z = p.z - pitch1/10.;
+    //   if (!contained_yz(p)){
+    // 	p.z = p.z + pitch1/5.;
+    //   }
+    // }
+  // }while(flag==1);
+  
+}
