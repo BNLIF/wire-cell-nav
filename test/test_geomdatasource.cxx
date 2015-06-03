@@ -25,15 +25,15 @@ int main()
     }
 
     if (gds.get_wires().size() != ident) {
-	cerr << "got bogus number of wires" << endl;
+	cerr << "FAIL: got bogus number of wires" << endl;
 	++errors;
     }
 
     ident = 0;
-    for (int iplane = 0; iplane < 4; ++iplane) {
+    for (int iplane = -1; iplane < 3; ++iplane) {
 	WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane);
 	int nwires = nwiresperplane;
-	if (iplane == 3) {
+	if (iplane < 0) {
 	    plane = kUnknownWirePlaneType;
 	    nwires = 3*nwiresperplane;
 	}
@@ -41,7 +41,7 @@ int main()
 	GeomWireSelection ws = gds.wires_in_plane(plane);
 	sort_by_planeindex(ws);
 	if (nwires != ws.size()) {
-	    cerr << "Failed to get back the right number of wires" << endl;
+	    cerr << "FAIL: wrong number of wires in plane "<<plane<<", want:" << nwires << " got:" << ws.size() << endl;
 	    ++errors;
 	}
 	if (plane == kUnknownWirePlaneType) {
@@ -49,6 +49,10 @@ int main()
 	}
 
 	cout << "Plane: " << plane << " has " << ws.size() << " wires" << endl;
+
+        if (iplane<0) {
+            continue;
+        }
 
 	for (int ind = 0; ind < nwiresperplane; ++ind) {
 	    int channel = iplane*nwiresperplane + ind;
@@ -59,7 +63,7 @@ int main()
 		 << " index=" << wire->index() << endl;
 
 	    if (!wire || wire->ident() != ident) { 
-		cerr << "Failed to get wire ident " << ident << endl;
+		cerr << "FAIL: wrong wire ident, want: " << ident << " got:" << wire->ident() << endl;
 		++errors;
 	    }
 
@@ -67,14 +71,14 @@ int main()
 	    for (size_t iw = 0; iw < ws_chan.size(); ++iw) {
 		const GeomWire* one = ws_chan[iw];
 		if (!one || one->channel() != channel) { 
-		    cerr << "Failed to get wire #" <<iw<<" for channel " << channel << endl;
+		    cerr << "FAIL: no wire #" <<iw<<" for channel " << channel << endl;
 		    ++errors;
 		}
 	    }
 	    
 	    const GeomWire* other = ws[ind];
 	    if (wire != other) {
-		cerr << "Got unexpected wire, ident: " 
+		cerr << "FAIL: unexpected wire, ident: " 
 		     << wire->ident() << " != " << other->ident()
 		     << endl;
 		++errors;
@@ -85,7 +89,7 @@ int main()
     }
 
     if (errors) {
-	cerr << "Got " << errors << " errors" << endl;
+	cerr << "FAILED: got " << errors << " errors" << endl;
 	exit(errors);
     }
 

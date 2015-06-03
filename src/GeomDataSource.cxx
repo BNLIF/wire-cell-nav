@@ -42,12 +42,12 @@ bool GeomDataSource::fill_cache() const
 
     // angle
     for (int iplane=0; iplane<3; ++iplane) {
-	std::vector<const GeomWire*>& wires_in_plane = pi2wire[iplane];
-	if (! wires_in_plane.size()) {
+	std::vector<const GeomWire*>& wip = pi2wire[iplane];
+	if (! wip.size()) {
 	    angle_cache[iplane] = -999;
 	    continue;
 	}
-	const GeomWire& w = *wires_in_plane[0];
+	const GeomWire& w = *wip[0];
 	double dz = w.point2().z - w.point1().z;
 	double dy = w.point2().y - w.point1().y;
 	double angle = std::atan2(dz, dy);
@@ -76,7 +76,7 @@ GeomWireSelection GeomDataSource::wires_in_plane(WirePlaneType_t plane) const
 
     for (wit=wires.begin(); wit != done; ++wit) {
 	const GeomWire& wire = *wit;
-	if (plane == kUnknownWirePlaneType or wire.plane() == plane) {
+	if (plane == kUnknownWirePlaneType || wire.plane() == plane) {
 	    ws.push_back(&wire);
 	}
     }
@@ -112,6 +112,10 @@ const GeomWire* GeomDataSource::by_planeindex(const WirePlaneIndex planeindex) c
 }
 const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) const
 {
+    if (0 > plane || plane >= 3) {
+        return 0;
+    }
+
     fill_cache();
     return pi2wire[plane].at(index);
 }
@@ -136,68 +140,68 @@ float GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
 
 float GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
 {
+    if (0 > plane || plane >= 3) {
+        return -999;
+    }
     fill_cache();
     return angle_cache[plane];
 }
 
 
+static std::pair<float,float> vmm(const std::vector<float>& v)
+{
+    auto res = std::minmax_element(v.begin(),v.end());
+    return std::pair<float,float>( *res.first, *res.second);
+}
+
 bool GeomDataSource::fill_mm_cache() const 
 {
+    // std::cerr << "fill_mm_cache "
+    //           << mm_cache[0].size() << ", "
+    //           << mm_cache[1].size() << ", "
+    //           << mm_cache[2].size()
+    //           << std::endl;
+
     if (mm_cache[0].size()) {
 	return false;
     }
 
-    float totxmin=0, totymin=0, totzmin=0, totxmax=0, totymax=0, totzmax=0;
+    std::vector<float> totx, toty, totz;
+
     for (int iplane=0; iplane<3; ++iplane) {
-	float xmin=0, ymin=0, zmin=0, xmax=0, ymax=0, zmax=0;
 	WirePlaneType_t tplane = (WirePlaneType_t)iplane;
+        std::vector<float> x, y, z;
 	GeomWireSelection ws = this->wires_in_plane(tplane);
 	size_t nwires = ws.size();
-	for (size_t wind=0; wind<nwires; ++wind) {
+        for (size_t wind=0; wind<nwires; ++wind) {
 	    const GeomWire& w = *ws[wind];
-	    float this_xmin = std::min(w.point1().x, w.point2().x);
-	    float this_ymin = std::min(w.point1().y, w.point2().y);
-	    float this_zmin = std::min(w.point1().z, w.point2().z);
 
-	    float this_xmax = std::max(w.point1().x, w.point2().x);
-	    float this_ymax = std::max(w.point1().y, w.point2().y);
-	    float this_zmax = std::max(w.point1().z, w.point2().z);
-
-	    if (!wind) {		// first time through
-		totxmin = xmin = this_xmin;
-		totymin = ymin = this_ymin;
-		totzmin = zmin = this_zmin;
-
-		totxmax = xmax = this_xmax;
-		totymax = ymax = this_ymax;
-		totzmax = zmax = this_zmax;
-		continue;
-	    }
-	    xmin = std::min(xmin, this_xmin);
-	    ymin = std::min(ymin, this_ymin);
-	    zmin = std::min(zmin, this_zmin);
-	    
-	    xmax = std::max(xmax, this_xmax);
-	    ymax = std::max(ymax, this_ymax);
-	    zmax = std::max(zmax, this_zmax);
-
-	    totxmin = std::min(xmin, totxmin);
-	    totymin = std::min(ymin, totymin);
-	    totzmin = std::min(zmin, totzmin);
-	    
-	    totxmax = std::max(xmax, totxmax);
-	    totymax = std::max(ymax, totymax);
-	    totzmax = std::max(zmax, totzmax);
-
-	}	
-	mm_cache[0][tplane] = std::pair<float,float>(xmin,xmax);
-	mm_cache[1][tplane] = std::pair<float,float>(ymin,ymax);
-	mm_cache[2][tplane] = std::pair<float,float>(zmin,zmax);
+            const Point& one = w.point1();
+            x.push_back(one.x);             totx.push_back(one.x); 
+            y.push_back(one.y);             toty.push_back(one.y); 
+            z.push_back(one.z);             totz.push_back(one.z); 
+            const Point& two = w.point2();
+            x.push_back(two.x);             totx.push_back(two.x); 
+            y.push_back(two.y);             toty.push_back(two.y); 
+            z.push_back(two.z);             totz.push_back(two.z); 
+        }
+	mm_cache[0][tplane] = vmm(x);
+	mm_cache[1][tplane] = vmm(y);
+	mm_cache[2][tplane] = vmm(z);
     }
-    mm_cache[0][kUnknownWirePlaneType] = std::pair<float,float>(totxmin,totxmax);
-    mm_cache[1][kUnknownWirePlaneType] = std::pair<float,float>(totymin,totymax);
-    mm_cache[2][kUnknownWirePlaneType] = std::pair<float,float>(totzmin,totzmax);
+    mm_cache[0][kUnknownWirePlaneType] = vmm(totx);
+    mm_cache[1][kUnknownWirePlaneType] = vmm(toty);
+    mm_cache[2][kUnknownWirePlaneType] = vmm(totz);
     
+    // for (int iplane=kUnknownWirePlaneType; iplane<=kYwire; ++iplane) {
+    //     WireCell::WirePlaneType_t eplane = (WireCell::WirePlaneType_t)iplane;
+    //     std::cerr << "CACHE HIT: extent for plane "<< iplane << ": "
+    //               << " x:" << mm_cache[0][eplane].first <<" "<<mm_cache[0][eplane].first
+    //               << " y:" << mm_cache[1][eplane].first <<" "<<mm_cache[1][eplane].first
+    //               << " z:" << mm_cache[2][eplane].first <<" "<<mm_cache[2][eplane].first
+    //               << std::endl;
+    // }
+    return true;
 }
 
 Point GeomDataSource::center() const
@@ -216,6 +220,10 @@ Point GeomDataSource::center() const
 
 std::vector<float> GeomDataSource::extent(WireCell::WirePlaneType_t plane) const
 {
+    if (plane < kUnknownWirePlaneType || plane > kYwire) {
+        return std::vector<float>();
+    }
+
     fill_mm_cache();
 
     std::vector<float> ret;
@@ -229,7 +237,12 @@ std::vector<float> GeomDataSource::extent(WireCell::WirePlaneType_t plane) const
 
 std::pair<float, float> GeomDataSource::minmax(int axis, WireCell::WirePlaneType_t plane) const
 {
+    if (plane < kUnknownWirePlaneType || plane > kYwire) {
+        return std::pair<float,float>(-999,-999);
+    }
+
     fill_mm_cache();
+
     return mm_cache[axis][plane];
 }
 
