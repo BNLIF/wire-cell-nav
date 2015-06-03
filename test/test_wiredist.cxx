@@ -19,6 +19,7 @@ int main()
   WireCell:: GeomWire wire2(10001, plane, 1, 0,
 			    WireCell::Point(-6.34706e-14*cm, 116.675*cm, 0.206489*cm),
    			    WireCell::Point(-6.33987e-14*cm, 117.36*cm, 1.39351	*cm));
+
   gds.add_wire(wire1);
   gds.add_wire(wire2);
   cout << "Plane 1: " << gds.angle(plane) << " " << 3.1415926*radian << endl;

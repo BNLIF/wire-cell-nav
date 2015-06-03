@@ -42,7 +42,12 @@ bool GeomDataSource::fill_cache() const
 
     // angle
     for (int iplane=0; iplane<3; ++iplane) {
-	const GeomWire& w = *pi2wire[iplane][0];
+	std::vector<const GeomWire*>& wires_in_plane = pi2wire[iplane];
+	if (! wires_in_plane.size()) {
+	    angle_cache[iplane] = -999;
+	    continue;
+	}
+	const GeomWire& w = *wires_in_plane[0];
 	double dz = w.point2().z - w.point1().z;
 	double dy = w.point2().y - w.point1().y;
 	double angle = std::atan2(dz, dy);
