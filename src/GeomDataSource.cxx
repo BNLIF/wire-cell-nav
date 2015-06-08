@@ -393,6 +393,8 @@ GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) c
   const GeomWire *central_wire = by_planeindex(plane,num);
   float central_dis = wire_dist(*central_wire);
 
+  
+
   GeomWirePair p1;
   if (dis > central_dis){
     int num1 = (dis -central_dis)/pitch(plane);
@@ -400,7 +402,12 @@ GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) c
     p1.second = by_planeindex(plane,num+num1+1);
   }else if (dis < central_dis){
     int num1 = (central_dis-dis)/pitch(plane);
-    p1.first = by_planeindex(plane,num-num1-1);
+    //    std::cout << num << " " << dis << " " << central_dis << " " << num1 << std::endl;
+    if (num-num1-1>0){
+      p1.first = by_planeindex(plane,num-num1-1);
+    }else{
+      p1.first = by_planeindex(plane,num-num1);
+    }
     p1.second = by_planeindex(plane,num-num1);
   }else{
     if (num==0){
