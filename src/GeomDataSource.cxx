@@ -106,8 +106,9 @@ const GeomWire* GeomDataSource::by_channel_segment(int channel, int segment) con
 
 const GeomWire* GeomDataSource::by_planeindex(const WirePlaneIndex planeindex) const
 {
-    fill_cache();
-    return pi2wire[planeindex.first].at(planeindex.second);
+    //fill_cache();
+    //return pi2wire[planeindex.first].at(planeindex.second);
+    return by_planeindex(planeindex.first, planeindex.second);
     
 }
 const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) const
@@ -115,9 +116,15 @@ const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) 
     if (0 > plane || plane >= 3) {
         return 0;
     }
-
+    if (index < 0) {
+	return 0;
+    }
     fill_cache();
-    return pi2wire[plane].at(index);
+    std::vector<const GeomWire*>& wires = pi2wire[plane];
+    if (index >= wires.size()) {
+	return 0;
+    }
+    return wires[index];
 }
 
 float GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
