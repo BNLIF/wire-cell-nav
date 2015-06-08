@@ -47,7 +47,6 @@ int GenerativeFDS::jump(int frame_number)
 	int tbin = p.x;
 	
 	
-
 	if (tbin >= bins_per_frame) {
 	    continue;
 	}
@@ -58,14 +57,14 @@ int GenerativeFDS::jump(int frame_number)
 	  Point p1=p;// // hack for now
 	  // if (tbin==135)
 	  //   gds.avoid_gap(p1);
-	//	  std::cout << p.x << " " << p.y << " " << p.z << std::endl;
+	  
 	  
 	 
 	  
 	for (int iplane=0; iplane < 3; ++iplane) {
 	  WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
 	 
-	  
+	  //std::cout << p.x << " " << p.y << " " << p.z << " " << iplane << std::endl;
 	  
 	  const GeomWire* wire = gds.closest(p1, plane);
 	  
@@ -75,6 +74,7 @@ int GenerativeFDS::jump(int frame_number)
 	  //    std::cout << "Xin " << chid << " " << ind << " " << p.x << " " << p.y << " " << p.z << " " << charge << std::endl;
 	  // }
 	  
+
 	  
 	  TraceIndexMap::iterator it = tim.find(chid);
 	  
