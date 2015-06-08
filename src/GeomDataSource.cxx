@@ -400,14 +400,28 @@ GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) c
     int num1 = (dis -central_dis)/pitch(plane);
     p1.first = by_planeindex(plane,num+num1);
     p1.second = by_planeindex(plane,num+num1+1);
+    
+    // if (!by_planeindex(plane,num+num1+1)){
+    //   p1.second = by_planeindex(plane,num+num1+1);
+    // }else{
+    //   p1.second = by_planeindex(plane,num+num1);
+    // }
   }else if (dis < central_dis){
     int num1 = (central_dis-dis)/pitch(plane);
+
     //    std::cout << num << " " << dis << " " << central_dis << " " << num1 << std::endl;
     if (num-num1-1>0){
       p1.first = by_planeindex(plane,num-num1-1);
     }else{
       p1.first = by_planeindex(plane,num-num1);
     }
+
+    // if (!by_planeindex(plane,num-num1-1)){
+    //   p1.first = by_planeindex(plane,num-num1-1);
+    // }else{
+    //   p1.first = by_planeindex(plane,num-num1);
+    // }
+
     p1.second = by_planeindex(plane,num-num1);
   }else{
     if (num==0){
