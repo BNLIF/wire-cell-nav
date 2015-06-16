@@ -42,59 +42,41 @@ int GenerativeFDS::jump(int frame_number)
     TraceIndexMap tim;		// keep tabs on what channels we've seen already
 
     for (size_t ind=0; ind<nhits; ++ind) {
-	const Point& p = hits[ind].first;
+	const Point& pt = hits[ind].first;
 	float charge = hits[ind].second;
-	int tbin = p.x;
-	
+	int tbin = pt.x;
 	
 	if (tbin >= bins_per_frame) {
 	    continue;
 	}
 
-	
-
-	if (gds.contained_yz(p)){
-	  Point p1=p;// // hack for now
-	  // if (tbin==135)
-	  //   gds.avoid_gap(p1);
-	  
-	  
-	 
+	if (!gds.contained_yz(pt)) {
+	    continue;
+	}
 	  
 	for (int iplane=0; iplane < 3; ++iplane) {
-	  WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
-	 
-	  //std::cout << p.x << " " << p.y << " " << p.z << " " << iplane << std::endl;
+	    WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
+	    const GeomWire* wire = gds.closest(pt, plane);
+	    int chid = wire->channel();
 	  
-	  const GeomWire* wire = gds.closest(p1, plane);
+	    TraceIndexMap::iterator it = tim.find(chid);
 	  
-	  int chid = wire->channel();
-
-	   // if (tbin==135){
-	  //    std::cout << "Xin " << chid << " " << ind << " " << p.x << " " << p.y << " " << p.z << " " << charge << std::endl;
-	  // }
-	  
-
-	  
-	  TraceIndexMap::iterator it = tim.find(chid);
-	  
-	  int trace_index = frame.traces.size(); // if new
-	  if (it == tim.end()) {
-	    Trace t;
-	    t.chid = chid;
-	    t.tbin = 0;
-	    t.charge.resize(bins_per_frame, 0.0);
-	    tim[chid] = frame.traces.size();
-	    frame.traces.push_back(t);
-	  }
-	  else {		// already seen
-	    trace_index = it->second;
-	  }
-	  Trace& trace = frame.traces[trace_index];
-	  
-	  // finally
-	  trace.charge[tbin] += charge;
-	}
+	    int trace_index = frame.traces.size(); // if new
+	    if (it == tim.end()) {
+		Trace t;
+		t.chid = chid;
+		t.tbin = 0;
+		t.charge.resize(bins_per_frame, 0.0);
+		tim[chid] = frame.traces.size();
+		frame.traces.push_back(t);
+	    }
+	    else {		// already seen
+		trace_index = it->second;
+	    }
+	    Trace& trace = frame.traces[trace_index];
+	    
+	    // finally
+	    trace.charge[tbin] += charge;
 	}	
     }
     

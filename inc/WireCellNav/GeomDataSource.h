@@ -2,6 +2,7 @@
 #define WIRECELLNAV_GEOMDATASOURCE_H
 
 #include "WireCellData/GeomWire.h"
+#include "WireCellData/Vector.h"
 
 #include <map>
 
@@ -38,59 +39,71 @@ namespace WireCell {
 	const GeomWire* by_planeindex(const WirePlaneIndex planeindex) const;
 
 	/// Return wire pitch (perpendicular distance between wires, in System of Units) 
-	float pitch(WirePlaneType_t plane) const;
+	double pitch(WirePlaneType_t plane) const;
+
+	/// Return a Vector which points along the pitch and has unit length.
+	WireCell::Vector pitch_unit_vector(WirePlaneType_t plane) const;
 
 	/// Return the wire angle of given plane w.r.t. the Y axis (in System of Units)
-	float angle(WirePlaneType_t plane) const;
+	double angle(WirePlaneType_t plane) const;
 
 	/// Return size extent in all Cartesian directions (x=0, y=1 and
 	/// z=2) of all wire endpoints.  Values are length in the
 	/// System of Units.  One can limit the extent to a particular
 	/// wire plane
-	std::vector<float> extent(WirePlaneType_t plane = kUnknownWirePlaneType) const;
+	std::vector<double> extent(WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
 	/// Return the geometric center of all wire planes.
-	Point center() const;
+	Vector center() const;
 
 	/// Return min/max in a particular direction (x=0, y=1 and
 	/// z=2) of all wire endpoints.  Values are length in the
 	/// System of Units.  One can limit the extent to a particular
 	/// wire plane
-	std::pair<float, float> minmax(int axis, WirePlaneType_t plane = kUnknownWirePlaneType) const;
+	std::pair<double, double> minmax(int axis, WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
 	/// Return true if point is contained in the extent.
-	bool contained(const Point& point) const;
-	bool contained_yz(const Point& point) const;
+	bool contained(const Vector& point) const;
+	bool contained_yz(const Vector& point) const;
 
 	/// Given a point to calculate its u-v-w position.
-	float wire_dist(const Point& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
+	double wire_dist(const Vector& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
 	
-	float wire_dist(const GeomWire& wire) const;
+	double wire_dist(const GeomWire& wire) const;
 	
 	/// Given two wires, calculate their crossing point projected
 	/// to the y-z plane.  Only y and z values of result are modified.
 	/// Return true if point is in the wire plane.
 	bool crossing_point(const GeomWire& wire1, const GeomWire& wire2, 
-			    Point& result) const;
+			    Vector& result) const;
 
 	/// Given two lines defined as distances measured
 	/// perpendicular to the given wire plane type, calculate
 	/// their crossing point projected to the y-z plane.  Only y
 	/// and z values of result are modified.  Return true if point
 	/// is in the wire plane.
-	bool crossing_point(float dis1, float dis2, 
+	bool crossing_point(double dis1, double dis2, 
 			    WirePlaneType_t plane1, WirePlaneType_t plane2, 
-			    Point& result) const;
+			    Vector& result) const;
 
-	/// Return the two wires that bound a given point in the wire plane.
-	GeomWirePair bounds(const Point& point, 
+	/// Return the two wires that bound a given point in the wire
+	/// plane.  If point is out not bounded on the lower distance
+	/// side the first wire pointer will be NULL, etc if the point
+	/// is not bounded in the higher distance side.  This
+	/// implementation assumes wires are of uniform pitch and
+	/// angle.
+	GeomWirePair bounds(const Vector& point, 
 			    WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
-	/// Return closest wire in the plane to the given point
-	const GeomWire* closest(const Point& point, 
+	/// Return closest wire in the plane to the given point along
+	/// the direction perpendicular to the wires of the given
+	/// plane.  This implementation assumes wires are of uniform
+	/// pitch and angle.
+	const GeomWire* closest(const Vector& point, 
 				WirePlaneType_t plane = kUnknownWirePlaneType) const;
 	
-	void avoid_gap(Point& point) const;
+	/// Xin, document me.
+	void avoid_gap(Vector& point) const;
 	
     private:
 	GeomWireSet wires;
@@ -102,9 +115,9 @@ namespace WireCell {
 	mutable std::map<int, GeomWireSelection> channel2wire;
 
 	// one for each x,y,z
-	mutable std::map<WirePlaneType_t, std::pair<float,float> > mm_cache[3];
+	mutable std::map<WirePlaneType_t, std::pair<double,double> > mm_cache[3];
 
-	mutable float angle_cache[3];
+	mutable double angle_cache[3];
 
 	// Maybe fill the cache
 	bool fill_cache() const;

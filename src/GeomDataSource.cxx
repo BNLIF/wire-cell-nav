@@ -127,7 +127,7 @@ const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) 
     return wires[index];
 }
 
-float GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
+double GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
 {
     const GeomWire& wire0 = *this->by_planeindex(plane, 0);
     const GeomWire& wire1 = *this->by_planeindex(plane, 1);
@@ -145,7 +145,17 @@ float GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
     return std::abs(b0-b1) / sqrt(m*m + 1);
 }
 
-float GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
+
+WireCell::Vector GeomDataSource::pitch_unit_vector(WirePlaneType_t plane) const
+{
+    const GeomWire& wire = *this->by_planeindex(plane, 0);
+    WireCell::Vector vwire(wire.point2() - wire.point1()), ecks(1,0,0);
+    WireCell::Vector vpitch = ecks.cross(vwire);
+    return vpitch.norm();
+}
+
+
+double GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
 {
     if (0 > plane || plane >= 3) {
         return -999;
@@ -155,10 +165,10 @@ float GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
 }
 
 
-static std::pair<float,float> vmm(const std::vector<float>& v)
+static std::pair<double,double> vmm(const std::vector<double>& v)
 {
     auto res = std::minmax_element(v.begin(),v.end());
-    return std::pair<float,float>( *res.first, *res.second);
+    return std::pair<double,double>( *res.first, *res.second);
 }
 
 bool GeomDataSource::fill_mm_cache() const 
@@ -173,21 +183,21 @@ bool GeomDataSource::fill_mm_cache() const
 	return false;
     }
 
-    std::vector<float> totx, toty, totz;
+    std::vector<double> totx, toty, totz;
 
     for (int iplane=0; iplane<3; ++iplane) {
 	WirePlaneType_t tplane = (WirePlaneType_t)iplane;
-        std::vector<float> x, y, z;
+        std::vector<double> x, y, z;
 	GeomWireSelection ws = this->wires_in_plane(tplane);
 	size_t nwires = ws.size();
         for (size_t wind=0; wind<nwires; ++wind) {
 	    const GeomWire& w = *ws[wind];
 
-            const Point& one = w.point1();
+            const Vector& one = w.point1();
             x.push_back(one.x);             totx.push_back(one.x); 
             y.push_back(one.y);             toty.push_back(one.y); 
             z.push_back(one.z);             totz.push_back(one.z); 
-            const Point& two = w.point2();
+            const Vector& two = w.point2();
             x.push_back(two.x);             totx.push_back(two.x); 
             y.push_back(two.y);             toty.push_back(two.y); 
             z.push_back(two.z);             totz.push_back(two.z); 
@@ -203,18 +213,20 @@ bool GeomDataSource::fill_mm_cache() const
     // for (int iplane=kUnknownWirePlaneType; iplane<=kYwire; ++iplane) {
     //     WireCell::WirePlaneType_t eplane = (WireCell::WirePlaneType_t)iplane;
     //     std::cerr << "CACHE HIT: extent for plane "<< iplane << ": "
-    //               << " x:" << mm_cache[0][eplane].first <<" "<<mm_cache[0][eplane].first
-    //               << " y:" << mm_cache[1][eplane].first <<" "<<mm_cache[1][eplane].first
-    //               << " z:" << mm_cache[2][eplane].first <<" "<<mm_cache[2][eplane].first
+    //               << " x:" << mm_cache[0][eplane].first <<" "<<mm_cache[0][eplane].second
+    //               << " y:" << mm_cache[1][eplane].first <<" "<<mm_cache[1][eplane].second
+    //               << " z:" << mm_cache[2][eplane].first <<" "<<mm_cache[2][eplane].second
+    // 		  << " size: " << mm_cache[0].size()
     //               << std::endl;
     // }
+
     return true;
 }
 
-Point GeomDataSource::center() const
+Vector GeomDataSource::center() const
 {
-    Point p;
-    std::pair<float,float> mm;
+    Vector p;
+    std::pair<double,double> mm;
     mm = minmax(0);
     p.x = 0.5*(mm.first+mm.second);
     mm = minmax(1);
@@ -225,27 +237,27 @@ Point GeomDataSource::center() const
     return p;
 }
 
-std::vector<float> GeomDataSource::extent(WireCell::WirePlaneType_t plane) const
+std::vector<double> GeomDataSource::extent(WireCell::WirePlaneType_t plane) const
 {
     if (plane < kUnknownWirePlaneType || plane > kYwire) {
-        return std::vector<float>();
+        return std::vector<double>();
     }
 
     fill_mm_cache();
 
-    std::vector<float> ret;
+    std::vector<double> ret;
     for (int ind=0; ind<3; ++ind) {
-	std::pair<float,float> mm = mm_cache[ind][plane];
+	std::pair<double,double> mm = mm_cache[ind][plane];
 	ret.push_back(mm.second-mm.first);
     }
 
     return ret;
 }
 
-std::pair<float, float> GeomDataSource::minmax(int axis, WireCell::WirePlaneType_t plane) const
+std::pair<double, double> GeomDataSource::minmax(int axis, WireCell::WirePlaneType_t plane) const
 {
     if (plane < kUnknownWirePlaneType || plane > kYwire) {
-        return std::pair<float,float>(-999,-999);
+        return std::pair<double,double>(-999,-999);
     }
 
     fill_mm_cache();
@@ -254,9 +266,9 @@ std::pair<float, float> GeomDataSource::minmax(int axis, WireCell::WirePlaneType
 }
 
 /// Return true if point is contained in the extent.
-bool GeomDataSource::contained(const Point& point) const
+bool GeomDataSource::contained(const Vector& point) const
 {
-    std::pair<float, float> mm;
+    std::pair<double, double> mm;
 
     mm = minmax(0);
     if (point.x < mm.first || mm.second <= point.x) { 
@@ -277,11 +289,9 @@ bool GeomDataSource::contained(const Point& point) const
 }
 
 /// Return true if point is contained in the extent.
-bool GeomDataSource::contained_yz(const Point& point) const
+bool GeomDataSource::contained_yz(const Vector& point) const
 {
-    std::pair<float, float> mm;
-
-   
+    std::pair<double, double> mm;
 
     mm = minmax(1);
     if (point.y < mm.first || mm.second <= point.y) { 
@@ -297,19 +307,19 @@ bool GeomDataSource::contained_yz(const Point& point) const
 }
 
 
-float GeomDataSource::wire_dist(const Point& point, WirePlaneType_t plane) const
+double GeomDataSource::wire_dist(const Vector& point, WirePlaneType_t plane) const
 {
-    float theta = angle(plane);
-    float dis = std::cos(theta/units::radian) *point.z  - std::sin(theta/units::radian) * point.y;
+    double theta = angle(plane);
+    double dis = std::cos(theta/units::radian) *point.z  - std::sin(theta/units::radian) * point.y;
     
     return dis;
 }
 
-float GeomDataSource::wire_dist(const GeomWire& wire) const
+double GeomDataSource::wire_dist(const GeomWire& wire) const
 {
-  
-    Point p = float(0.5)*(wire.point1()+wire.point2());
-    return wire_dist(p, wire.plane());
+    Vector center = 0.5*Vector(wire.point1() + wire.point2());
+    //Vector p = float(0.5)*(wire.point1()+wire.point2());
+    return wire_dist(center, wire.plane());
 
     // float theta = angle(wire.plane());
     // float dis = std::cos(theta/units::radian) *wire.point1().z  - std::sin(theta/units::radian) * wire.point1().y;
@@ -320,10 +330,10 @@ float GeomDataSource::wire_dist(const GeomWire& wire) const
 }
 
 bool GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2, 
-				    Point& result) const
+				    Vector& result) const
 {
-    float dis1 = wire_dist(wire1);
-    float dis2 = wire_dist(wire2);
+    double dis1 = wire_dist(wire1);
+    double dis2 = wire_dist(wire2);
   
     bool okay = crossing_point(dis1,dis2,wire1.plane(),wire2.plane(), result);
     if (!okay) {
@@ -332,7 +342,7 @@ bool GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2
 
     // check if crossing point is bounded by Y and Z wire extent
     
-    std::pair<float, float> mm;
+    std::pair<double, double> mm;
 
     mm = minmax(1);		// y
     if (result.y < mm.first || mm.second <= result.y) { 
@@ -348,18 +358,18 @@ bool GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2
 }
 
 
-bool GeomDataSource::crossing_point(float dis1, float dis2,
+bool GeomDataSource::crossing_point(double dis1, double dis2,
 				    WirePlaneType_t plane1, WirePlaneType_t plane2, 
-				    Point& result) const
+				    Vector& result) const
 {
-    float theta1 = angle(plane1);
-    float theta2 = angle(plane2);
+    double theta1 = angle(plane1);
+    double theta2 = angle(plane2);
   
-    float a1 = std::cos(theta1/units::radian);
-    float b1 = -std::sin(theta1/units::radian);
+    double a1 = std::cos(theta1/units::radian);
+    double b1 = -std::sin(theta1/units::radian);
   
-    float a2 = std::cos(theta2/units::radian);
-    float b2 = -std::sin(theta2/units::radian);
+    double a2 = std::cos(theta2/units::radian);
+    double b2 = -std::sin(theta2/units::radian);
 
     //equation array is
     // dis1 = z * a1 + y * b1;
@@ -386,92 +396,53 @@ bool GeomDataSource::crossing_point(float dis1, float dis2,
 
 
 
-GeomWirePair GeomDataSource::bounds(const Point& point, WirePlaneType_t plane) const
+GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) const
 {
-  float theta = angle(plane);
-  float dis = wire_dist(point,plane);
-  
-  //find out the ident number of the first wire
-  const GeomWire *first_wire = by_planeindex(plane,0);
-  float dis0 = wire_dist( *first_wire );
-  
-  int num = (dis - dis0)/pitch(plane); // first guess
-  
-  const GeomWire *central_wire = by_planeindex(plane,num);
-  float central_dis = wire_dist(*central_wire);
+    GeomWireSelection wip = wires_in_plane(plane);
+    int nwires = wip.size();
 
-  
+    double dist = wire_dist(point, plane);
 
-  GeomWirePair p1;
-  if (dis > central_dis){
-    int num1 = (dis -central_dis)/pitch(plane);
-    p1.first = by_planeindex(plane,num+num1);
-    // p1.second = by_planeindex(plane,num+num1+1);
-    
-    if (by_planeindex(plane,num+num1+1)){
-      p1.second = by_planeindex(plane,num+num1+1);
-    }else{
-      p1.second = by_planeindex(plane,num+num1);
+    const GeomWire *wire0 = by_planeindex(plane,0);
+    double dist0 = wire_dist(*wire0);
+
+    double find = (dist-dist0)/pitch(plane);
+    if (find < 0) {
+	return GeomWirePair(0, wip[0]);
     }
-  }else if (dis < central_dis){
-    int num1 = (central_dis-dis)/pitch(plane);
-
-    //    std::cout << num << " " << dis << " " << central_dis << " " << num1 << std::endl;
-    // if (num-num1-1>0){
-    //   p1.first = by_planeindex(plane,num-num1-1);
-    // }else{
-    //   p1.first = by_planeindex(plane,num-num1);
-    // }
-
-    if (by_planeindex(plane,num-num1-1)){
-      p1.first = by_planeindex(plane,num-num1-1);
-    }else{
-      p1.first = by_planeindex(plane,num-num1);
+    if (find >= nwires-1) {
+	return GeomWirePair(wip[nwires-1], 0);
     }
-
-    p1.second = by_planeindex(plane,num-num1);
-  }else{
-    if (num==0){
-      p1.first = by_planeindex(plane,num);
-      p1.second = by_planeindex(plane,num+1);
-    }else{
-      p1.first = by_planeindex(plane,num-1);
-      p1.second = by_planeindex(plane,num);
-    }
-  }
-
-  return p1;
+    return GeomWirePair(wip[int(find)], wip[int(find+1)]);
 }
 
-const GeomWire* GeomDataSource::closest(const Point& point, WirePlaneType_t plane) const
+const GeomWire* GeomDataSource::closest(const Vector& point, WirePlaneType_t plane) const
 {
-  // fixme: write me!
-  float dis = wire_dist(point,plane);
-  GeomWirePair p1 = bounds(point,plane);
-  float dis1 = wire_dist(*p1.first);
-  float dis2 = wire_dist(*p1.second);
-  
-  if (fabs(dis1-dis)<fabs(dis2-dis)){
-    return p1.first;
-  }else{
-    return p1.second;
-  }
+    GeomWireSelection wip = wires_in_plane(plane);
+    double dist = wire_dist(point, plane);
 
+    const GeomWire *wire0 = by_planeindex(plane,0);
+    double dist0 = wire_dist(*wire0);
+
+    int ind = (dist-dist0)/pitch(plane);
+    if (ind < 0) ind = 0;
+    if (ind >= wip.size()) ind = wip.size()-1;
+    return wip[ind];
 }
 
 
-void GeomDataSource::avoid_gap(Point& p) const{
+void GeomDataSource::avoid_gap(Vector& p) const{
     
   int flag = 0;
-  float pitch1;
+  double pitch1;
   // do{
   //   flag = 0;
     for (int iplane=0; iplane < 3; ++iplane) {
       WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
       GeomWirePair p1 = bounds(p, plane);
-      float dis = wire_dist(p,plane);
-      float dis1 = wire_dist(*p1.first);
-      float dis2 = wire_dist(*p1.second);
+      double dis = wire_dist(p,plane);
+      double dis1 = wire_dist(*p1.first);
+      double dis2 = wire_dist(*p1.second);
       pitch1 = pitch(plane);
       std::cout << flag << " " << dis << " " << dis1 << " " << dis2 << " " << fabs(dis1+dis2-dis-dis) << " " << pitch1/20. << " " << p1.first->channel() << " " << p1.second->channel() << std::endl;
       if (fabs(dis1-dis-dis+dis2)/2.<pitch1/10.){

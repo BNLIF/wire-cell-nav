@@ -45,8 +45,6 @@ namespace WireCell {
 	virtual ~ParamGDS();
 
     private:
-	int make_wires(const Vector& start, const Vector& pitch, 
-		       const Vector& proto, WirePlaneType_t plane);
 	int make_wire_plane(const Vector& offset, const Vector& pitch,
 			    WirePlaneType_t plane);
 	bool inside(const Vector& point);
