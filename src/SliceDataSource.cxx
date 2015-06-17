@@ -1,5 +1,7 @@
 #include "WireCellNav/SliceDataSource.h"
 
+#include <iostream>
+using namespace std;
 using namespace WireCell;
 
 SliceDataSource::SliceDataSource(FrameDataSource& fds)
@@ -94,6 +96,8 @@ int SliceDataSource::jump(int index)
 	int tbin = trace.tbin;
 	int nbins = trace.charge.size();
 
+	//cerr << "SDS: trace#" << ind << " chid=" << trace.chid << " tbin=" << tbin << " nbins=" << nbins << endl;
+
 	if (slice_tbin < tbin) {
 	    continue;
 	}
@@ -102,7 +106,7 @@ int SliceDataSource::jump(int index)
 	}
 
 	// Save association of a channel ID and its charge.
-	int q = trace.charge[slice_tbin];
+	int q = trace.charge[slice_tbin - trace.tbin];
 	slice_group.push_back(Channel::Charge(trace.chid, q));
     }
     _slice.reset(slice_tbin, slice_group);
