@@ -418,27 +418,63 @@ GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) 
     double dist0 = wire_dist(*wire0);
 
     double find = (dist-dist0)/pitch(plane);
+    int central_wiren;
+    if (find <0 ){
+      central_wiren = 0;
+    }else if (find >= nwires-1){
+      central_wiren = nwires -1;
+    }else{
+      central_wiren = round(find);
+    }
+    const GeomWire *central_wire = by_planeindex(plane,central_wiren);
+    float central_dist = wire_dist(*central_wire);
+    
+    find = central_wiren + (dist - central_dist)/pitch(plane);
+    
+    
+
     if (find < 0) {
-	return GeomWirePair(0, wip[0]);
+    	return GeomWirePair(0, wip[0]);
     }
     if (find >= nwires-1) {
-	return GeomWirePair(wip[nwires-1], 0);
+    	return GeomWirePair(wip[nwires-1], 0);
     }
+    
+    
     return GeomWirePair(wip[int(find)], wip[int(find+1)]);
 }
 
 const GeomWire* GeomDataSource::closest(const Vector& point, WirePlaneType_t plane) const
 {
-    const GeomWireSelection& wip = wires_in_plane(plane);
-    double dist = wire_dist(point, plane);
+  float dis = wire_dist(point,plane);
+  GeomWirePair p1 = bounds(point,plane);
+  float dis1,dis2;
+  if (p1.first !=0){
+    dis1 = wire_dist(*p1.first);
+  }else{
+    dis1 = -1000;
+  }
+  if (p1.second!=0){
+    dis2 = wire_dist(*p1.second);
+  }else{
+    dis2 = -1000;
+  }
+  
+  if (fabs(dis1-dis)<fabs(dis2-dis)){
+    return p1.first;
+  }else{
+    return p1.second;
+  }
+    // const GeomWireSelection& wip = wires_in_plane(plane);
+    // double dist = wire_dist(point, plane);
 
-    const GeomWire *wire0 = by_planeindex(plane,0);
-    double dist0 = wire_dist(*wire0);
+    // const GeomWire *wire0 = by_planeindex(plane,0);
+    // double dist0 = wire_dist(*wire0);
 
-    int ind = round((dist-dist0)/pitch(plane));
-    if (ind < 0) ind = 0;
-    if (ind >= wip.size()) ind = wip.size()-1;
-    return wip[ind];
+    // int ind = round((dist-dist0)/pitch(plane));
+    // if (ind < 0) ind = 0;
+    // if (ind >= wip.size()) ind = wip.size()-1;
+    // return wip[ind];
 }
 
 
