@@ -271,17 +271,17 @@ bool GeomDataSource::contained(const Vector& point) const
     std::pair<double, double> mm;
 
     mm = minmax(0);
-    if (point.x < mm.first || mm.second <= point.x) { 
+    if (point.x < mm.first || mm.second < point.x) { 
     	return false;
     }
 
     mm = minmax(1);
-    if (point.y < mm.first || mm.second <= point.y) { 
+    if (point.y < mm.first || mm.second < point.y) { 
 	return false;
     }
 
     mm = minmax(2);
-    if (point.z < mm.first || mm.second <= point.z) { 
+    if (point.z < mm.first || mm.second < point.z) { 
 	return false;
     }
 
@@ -294,12 +294,12 @@ bool GeomDataSource::contained_yz(const Vector& point) const
     std::pair<double, double> mm;
 
     mm = minmax(1);
-    if (point.y < mm.first || mm.second <= point.y) { 
+    if (point.y < mm.first || mm.second < point.y) { 
 	return false;
     }
 
     mm = minmax(2);
-    if (point.z < mm.first || mm.second <= point.z) { 
+    if (point.z < mm.first || mm.second < point.z) { 
 	return false;
     }
 
@@ -345,12 +345,12 @@ bool GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2
     std::pair<double, double> mm;
 
     mm = minmax(1);		// y
-    if (result.y < mm.first || mm.second <= result.y) { 
+    if (result.y < mm.first || mm.second < result.y) { 
 	return false;
     }
 
     mm = minmax(2);		// z
-    if (result.z < mm.first || mm.second <= result.z) { 
+    if (result.z < mm.first || mm.second < result.z) { 
 	return false;
     }
 
@@ -424,7 +424,7 @@ const GeomWire* GeomDataSource::closest(const Vector& point, WirePlaneType_t pla
     const GeomWire *wire0 = by_planeindex(plane,0);
     double dist0 = wire_dist(*wire0);
 
-    int ind = (dist-dist0)/pitch(plane);
+    int ind = round((dist-dist0)/pitch(plane));
     if (ind < 0) ind = 0;
     if (ind >= wip.size()) ind = wip.size()-1;
     return wip[ind];

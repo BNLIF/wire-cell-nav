@@ -15,6 +15,20 @@ void assert(const OK& ok, const std::string& msg = "")
     exit(1);
 }
 
+void dump(GeomDataSource& gds, string name, const GeomWire& wire)
+{
+    Vector center = 0.5*Vector(wire.point1() + wire.point2());
+    double wire_dist = gds.wire_dist(wire);
+    double center_dist = gds.wire_dist(center, wire.plane());
+    cerr
+	<< "(" << (void*) &wire << ") "
+	<< name << ":\t"
+	<< wire.plane() << "/" << wire.index() << "/" << wire.ident() 
+	<< " [" << wire_dist << "]"
+	<< " " << wire.point1() << " -> " << center << " -> " << wire.point2()
+	<< endl;
+}
+
 int main()
 {
     GeomDataSource* pgds = make_example_gds();
@@ -47,25 +61,20 @@ int main()
 
 	    double wire_dist = gds.wire_dist(*wire);
 
-	    cerr << "WIRE:" << *wire
-		 << " " << wire->point1() << " --> " << wire->point2()
-		 << " [" << wire_dist << "]"
-		 << endl;
-
+	    dump(gds, "CURRENT", *wire);
 
 	    assert(wire_dist > last_distance);
 	    last_distance = wire_dist;
 
 	    Vector center = 0.5*Vector(wire->point1() + wire->point2());
-	    double center_dist = gds.wire_dist(center);
-	    cerr << "center=" << center << " dist=" << center_dist << endl;
+	    double center_dist = gds.wire_dist(center, plane);
 	    assert(gds.contained_yz(center), "center not yz-contained");
 	    assert(gds.contained(center), "center not contained");
 
+	    cerr << "center: [" << center_dist << "] " <<  center << endl;
+
 	    const GeomWire* wclosest = gds.closest(center, plane);
-	    cerr << "CLOSEST:" << *wclosest
-		 << " " << wclosest->point1() << " --> " << wclosest->point2()
-		 << endl;
+	    dump(gds, "CLOSEST", *wclosest);
 	    assert (wclosest && wclosest == wire, "wire isn't own closest wire");
 
 	    Vector Pbelow = center - vpitch*(0.1*pitch);

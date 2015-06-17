@@ -9,8 +9,7 @@
 namespace WireCell {
 
     /**
-       A source of wire geometry information.
-
+     * A source of wire geometry information.
      */
     class GeomDataSource {
     public:
@@ -50,7 +49,7 @@ namespace WireCell {
 	/// Return size extent in all Cartesian directions (x=0, y=1 and
 	/// z=2) of all wire endpoints.  Values are length in the
 	/// System of Units.  One can limit the extent to a particular
-	/// wire plane
+	/// wire plane, o.w. the union of all planes is assumed.
 	std::vector<double> extent(WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
 	/// Return the geometric center of all wire planes.
@@ -59,21 +58,32 @@ namespace WireCell {
 	/// Return min/max in a particular direction (x=0, y=1 and
 	/// z=2) of all wire endpoints.  Values are length in the
 	/// System of Units.  One can limit the extent to a particular
-	/// wire plane
+	/// wire plane, o.w. the union of all planes is assumed.
 	std::pair<double, double> minmax(int axis, WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
-	/// Return true if point is contained in the extent.
+	/// Return true if point is contained in the extent of all
+	/// wire planes.  The extent is considered inclusive of the
+	/// center-line of the wire so exact boundary matches are
+	/// consisidered contained.
 	bool contained(const Vector& point) const;
+
+	/// Return true if point is contained in the extent of the
+	/// wireplaces transverse to (and ignoring) the drift
+	/// direction.  See also contained().
 	bool contained_yz(const Vector& point) const;
 
-	/// Given a point to calculate its u-v-w position.
-	double wire_dist(const Vector& point, WirePlaneType_t plane = kUnknownWirePlaneType) const;
+	/// Return the location of the point measured in the direction
+	/// of wire pitch.
+	double wire_dist(const Vector& point, WirePlaneType_t plane) const;
 	
+	/// Return the location of the center point of the wire
+	/// measured in the direction of the pitch of the wire's
+	/// plane.
 	double wire_dist(const GeomWire& wire) const;
 	
 	/// Given two wires, calculate their crossing point projected
 	/// to the y-z plane.  Only y and z values of result are modified.
-	/// Return true if point is in the wire plane.
+	/// Return true if point is in the extent.
 	bool crossing_point(const GeomWire& wire1, const GeomWire& wire2, 
 			    Vector& result) const;
 
@@ -81,7 +91,7 @@ namespace WireCell {
 	/// perpendicular to the given wire plane type, calculate
 	/// their crossing point projected to the y-z plane.  Only y
 	/// and z values of result are modified.  Return true if point
-	/// is in the wire plane.
+	/// is in the extent.
 	bool crossing_point(double dis1, double dis2, 
 			    WirePlaneType_t plane1, WirePlaneType_t plane2, 
 			    Vector& result) const;
