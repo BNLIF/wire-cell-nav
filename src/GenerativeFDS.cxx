@@ -38,6 +38,8 @@ int GenerativeFDS::jump(int frame_number)
 
     size_t nhits = hits.size();
 
+   
+    
     typedef map<int, int> TraceIndexMap; // channel->index into traces;
     TraceIndexMap tim;		// keep tabs on what channels we've seen already
 
@@ -55,6 +57,8 @@ int GenerativeFDS::jump(int frame_number)
 	}
 	  
 	for (int iplane=0; iplane < 3; ++iplane) {
+	  std::cout << nhits << " " << ind << std::endl;
+
 	    WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
 	    const GeomWire* wire = gds.closest(pt, plane);
 	    int chid = wire->channel();
