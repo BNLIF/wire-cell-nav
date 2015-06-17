@@ -24,7 +24,7 @@ namespace WireCell {
 
 	/// Return a selection of wires in the given plane/direction
 	/// or all of them if no direction is specified.
-	GeomWireSelection wires_in_plane(WirePlaneType_t plane = kUnknownWirePlaneType) const;
+	const GeomWireSelection& wires_in_plane(WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
 	/// Look up a wire by it's identifier
 	const GeomWire* by_ident(int ident) const;
@@ -126,6 +126,7 @@ namespace WireCell {
 
 	// one for each x,y,z
 	mutable std::map<WirePlaneType_t, std::pair<double,double> > mm_cache[3];
+	mutable std::map<WirePlaneType_t, GeomWireSelection> mm_gwsel;
 
 	mutable double angle_cache[3];
 

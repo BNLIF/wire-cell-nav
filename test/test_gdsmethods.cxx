@@ -41,7 +41,11 @@ int main()
 
     for (int iplane=0; iplane<3; ++iplane) {
 	WirePlaneType_t plane = (WirePlaneType_t)iplane;
-	GeomWireSelection wip = gds.wires_in_plane(plane);
+	const GeomWireSelection& wip = gds.wires_in_plane(plane);
+	const GeomWireSelection& wip_other = gds.wires_in_plane(plane);
+
+	assert(&wip == &wip_other); // they better be cached
+
 	double pitch = gds.pitch(plane);
 	double last_distance = -99999;
 

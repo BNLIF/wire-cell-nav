@@ -45,17 +45,17 @@ int GenerativeFDS::jump(int frame_number)
     }
 
     frame.clear();
-
-    const PointValueVector& hits = dep.depositions(frame_number);
-
-    size_t nhits = hits.size();
-
-
-   
-    
-
     simtruth.clear();
 
+    const PointValueVector& hits = dep.depositions(frame_number);
+    size_t nhits = hits.size();
+    if (!nhits) {
+	frame.index = frame_number; 
+	return frame.index;
+    }
+
+    typedef map<int, int> TraceIndexMap; // channel->index into traces;
+    TraceIndexMap tim;		// keep tabs on what channels we've seen already
 
     for (size_t ind=0; ind<nhits; ++ind) {
 	const Point& pt = hits[ind].first;
@@ -82,12 +82,24 @@ int GenerativeFDS::jump(int frame_number)
 	    const GeomWire* wire = gds.closest(pt, plane);
 	    int chid = wire->channel();
 
-	    // make little one hit traces
-	    Trace trace;
-	    trace.chid = chid;
-	    trace.tbin = tbin;
-	    trace.charge.push_back(charge);
-	    frame.traces.push_back(trace);
+	    TraceIndexMap::iterator it = tim.find(chid);
+	  
+	    int trace_index = frame.traces.size(); // if new
+	    if (it == tim.end()) {
+		Trace t;
+		t.chid = chid;
+		t.tbin = 0;
+		t.charge.resize(bins_per_frame, 0.0);
+		tim[chid] = frame.traces.size();
+		frame.traces.push_back(t);
+	    }
+	    else {		// already seen
+		trace_index = it->second;
+	    }
+	    Trace& trace = frame.traces[trace_index];
+	    
+	    // finally
+	    trace.charge[tbin] += charge;
 	}	
     }
     

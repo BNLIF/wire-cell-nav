@@ -3,6 +3,7 @@
 #include <cmath>		// std::abs() - careful not to use bare abs()
 #include <algorithm>
 
+using namespace std;
 using namespace WireCell;
 
 GeomDataSource::GeomDataSource()
@@ -69,9 +70,17 @@ const GeomWireSet& GeomDataSource::get_wires() const
     return wires;
 }
 
-GeomWireSelection GeomDataSource::wires_in_plane(WirePlaneType_t plane) const
+const GeomWireSelection& GeomDataSource::wires_in_plane(WirePlaneType_t plane) const
 {
-    GeomWireSelection ws;
+    if (mm_gwsel.find(plane) == mm_gwsel.end()) {
+	GeomWireSelection ws;
+	mm_gwsel[plane] = ws;
+    }
+    GeomWireSelection& ws = mm_gwsel[plane];
+    if (ws.size()) {
+	return ws;
+    }
+
     GeomWireSet::const_iterator wit, done = wires.end();
 
     for (wit=wires.begin(); wit != done; ++wit) {
@@ -80,6 +89,8 @@ GeomWireSelection GeomDataSource::wires_in_plane(WirePlaneType_t plane) const
 	    ws.push_back(&wire);
 	}
     }
+
+    cerr << "Generated " << ws.size() << " wires for plane " << plane << endl;
 
     return ws;
 }
@@ -188,7 +199,7 @@ bool GeomDataSource::fill_mm_cache() const
     for (int iplane=0; iplane<3; ++iplane) {
 	WirePlaneType_t tplane = (WirePlaneType_t)iplane;
         std::vector<double> x, y, z;
-	GeomWireSelection ws = this->wires_in_plane(tplane);
+	const GeomWireSelection& ws = this->wires_in_plane(tplane);
 	size_t nwires = ws.size();
         for (size_t wind=0; wind<nwires; ++wind) {
 	    const GeomWire& w = *ws[wind];
@@ -398,7 +409,7 @@ bool GeomDataSource::crossing_point(double dis1, double dis2,
 
 GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) const
 {
-    GeomWireSelection wip = wires_in_plane(plane);
+    const GeomWireSelection& wip = wires_in_plane(plane);
     int nwires = wip.size();
 
     double dist = wire_dist(point, plane);
@@ -418,7 +429,7 @@ GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) 
 
 const GeomWire* GeomDataSource::closest(const Vector& point, WirePlaneType_t plane) const
 {
-    GeomWireSelection wip = wires_in_plane(plane);
+    const GeomWireSelection& wip = wires_in_plane(plane);
     double dist = wire_dist(point, plane);
 
     const GeomWire *wire0 = by_planeindex(plane,0);
