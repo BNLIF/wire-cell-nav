@@ -430,8 +430,6 @@ GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) 
     float central_dist = wire_dist(*central_wire);
     
     find = central_wiren + (dist - central_dist)/pitch(plane);
-    
-    
 
     if (find < 0) {
     	return GeomWirePair(0, wip[0]);
@@ -440,6 +438,10 @@ GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) 
     	return GeomWirePair(wip[nwires-1], 0);
     }
     
+    // It is possible due to non-regular pitch and/or round-off that
+    // the indexed calculation becomes off-by-one.  So, do a last
+    // ditch check to confirm we return what is actually the closest
+    // wire.
     const GeomWire *central_wire1 = by_planeindex(plane,int(find));
     central_dist = wire_dist(*central_wire1);
     if (central_dist < dist){
@@ -472,19 +474,8 @@ const GeomWire* GeomDataSource::closest(const Vector& point, WirePlaneType_t pla
   
   if (fabs(dis1-dis)<fabs(dis2-dis)){
     return p1.first;
-  }else{
-    return p1.second;
   }
-    // const GeomWireSelection& wip = wires_in_plane(plane);
-    // double dist = wire_dist(point, plane);
-
-    // const GeomWire *wire0 = by_planeindex(plane,0);
-    // double dist0 = wire_dist(*wire0);
-
-    // int ind = round((dist-dist0)/pitch(plane));
-    // if (ind < 0) ind = 0;
-    // if (ind >= wip.size()) ind = wip.size()-1;
-    // return wip[ind];
+  return p1.second;
 }
 
 
