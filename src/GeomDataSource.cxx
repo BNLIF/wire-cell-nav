@@ -440,8 +440,18 @@ GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) 
     	return GeomWirePair(wip[nwires-1], 0);
     }
     
-    
-    return GeomWirePair(wip[int(find)], wip[int(find+1)]);
+    const GeomWire *central_wire1 = by_planeindex(plane,int(find));
+    central_dist = wire_dist(*central_wire1);
+    if (central_dist < dist){
+      return GeomWirePair(wip[int(find)], wip[int(find+1)]);
+    }else{
+      if (int(find-1)<0){
+	return GeomWirePair(0, wip[0]);
+      }else{
+	return GeomWirePair(wip[int(find-1)], wip[int(find)]);
+      }
+      
+    }
 }
 
 const GeomWire* GeomDataSource::closest(const Vector& point, WirePlaneType_t plane) const
