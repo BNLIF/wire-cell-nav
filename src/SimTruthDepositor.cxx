@@ -33,7 +33,7 @@ const PointValueVector& SimTruthDepositor::depositions(int frame_number) const
     WireCell::SimTruthSelection sts = sds.truth();
     for (size_t itruth = 0; itruth < sts.size(); ++itruth) {
 	const WireCell::SimTruth* st = sts[itruth];
-	hits.push_back(PointValue(Point(st->tdc(), st->y(), st->z()), st->charge()));
+	hits.push_back(PointValue(Point(st->x(), st->y(), st->z()), st->charge()));
     }
     cerr << "SimTruthDepositor depositing " << hits.size() << " hits" << endl;
     return hits;

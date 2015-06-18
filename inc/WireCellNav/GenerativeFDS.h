@@ -9,7 +9,16 @@
 
 namespace WireCell {
 
-    /** A FrameDataSource which generates frames based on a depositor.
+    /** A FrameDataSource which generates frames of traces based on
+     * hits from a Depositor object.
+     *
+     * This FDS models an infinite volume with wire planes embedded at
+     * the locations given by the GeomDataSource.  Hits from provided
+     * by the Depositor object are assumed to drift in the negative X
+     * direction towards the wire planes at a constant
+     * bin_drift_distance per digitized time bin.  A Frame of the
+     * given bins_per_frame is digitized and hits are collected onto
+     * wires.  Any hits outside the frame are ignored.
      */
     class GenerativeFDS : public FrameDataSource , public SimDataSource
     {
@@ -21,12 +30,19 @@ namespace WireCell {
 	 * The gds is a GeomDataSource that determines which wires may
 	 * be "hit" by what is produced by the Depositor.
 	 *
+	 * The bins_per_frame determines how deep in the drift
+	 * distance a single frame is.
+	 *
 	 * The nframes set how many frames to assume is in the data
 	 * stream or negative to run forever.
+	 *
+	 * The bin_drift_distance is how far an electron will drift in
+	 * the time collected in one time bin.  Ie, digitization
+	 * period * drift speed.
 	 */	
 	GenerativeFDS(const Depositor& dep, const GeomDataSource& gds,
 		      int bins_per_frame = 1000, int nframes_total = -1,
-		      float drift_speed = 1.6*units::millimeter/units::microsecond);
+		      float bin_drift_distance = 0.5*1.6*units::millimeter);
 
 	virtual ~GenerativeFDS();
 
@@ -42,7 +58,7 @@ namespace WireCell {
 	const GeomDataSource& gds;
 
 	int bins_per_frame, max_frames;
-	float drift_speed;
+	float bin_drift_distance;
 
 	mutable WireCell::SimTruthSet simtruth;
     };

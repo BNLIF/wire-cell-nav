@@ -4,12 +4,13 @@ using namespace WireCell;
 using namespace std;
 
 GenerativeFDS::GenerativeFDS(const Depositor& dep, const GeomDataSource& gds, 
-			     int bins_per_frame, int nframes_total, float drift_speed)
+			     int bins_per_frame, int nframes_total,
+			     float bin_drift_distance)
     : dep(dep)
     , gds(gds)
     , bins_per_frame(bins_per_frame)
     , max_frames(nframes_total)
-    , drift_speed(drift_speed)
+    , bin_drift_distance(bin_drift_distance)
 {
 }
 
@@ -57,27 +58,29 @@ int GenerativeFDS::jump(int frame_number)
     typedef map<int, int> TraceIndexMap; // channel->index into traces;
     TraceIndexMap tim;		// keep tabs on what channels we've seen already
 
+    std::pair<double, double> xmm = gds.minmax(0);
+    
     for (size_t ind=0; ind<nhits; ++ind) {
 	const Point& pt = hits[ind].first;
 	float charge = hits[ind].second;
-	int tbin = pt.x;
+	int tbin = int((pt.x-xmm.second)/bin_drift_distance);
 	
 	if (tbin >= bins_per_frame) {
+	    //cerr << "GenerativeFDS: drop: tbin=" << tbin << " >= " << bins_per_frame << endl;
 	    continue;
 	}
 
 	if (!gds.contained_yz(pt)) {
+	    //cerr << "GenerativeFDS: drop: point not contained: " << pt << endl;
 	    continue;
 	}
 	  
-	//SimTruth(float x, float y, float z, float q, int tdc, int trackid=-1);
-	WireCell::SimTruth st(drift_speed*tbin, pt.y, pt.z, charge, tbin, simtruth.size());
+	WireCell::SimTruth st(pt.x, pt.y, pt.z, charge, tbin, simtruth.size());
 	simtruth.insert(st);
-	//cerr << "SimTruth: " << st.trackid() << " q=" << st.charge() << endl;
+	//cerr << "SimTruth: " << st.trackid() << " q=" << st.charge()
+	//     << " tbin=" << tbin << " pos=" << st.pos() << endl;
 
 	for (int iplane=0; iplane < 3; ++iplane) {
-	  //	  std::cout << nhits << " " << ind << std::endl;
-
 	    WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
 	    const GeomWire* wire = gds.closest(pt, plane);
 	    int chid = wire->channel();

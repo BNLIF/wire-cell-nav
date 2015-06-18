@@ -18,14 +18,12 @@ namespace WireCell {
 	virtual ~Depositor();
 
 	/**
-	 * Return depositions not before the given time bin.
+	 * Return depositions in the given frame number.
 	 *
 	 * Implementation should return a vector of point-value pairs.
 	 * 
-	 * Point.x : the time, relative to 0 and in units of time bins
-	 *
-	 * Point.y/z : the vertical/horizontal positions transverse to
-	 * the drift direction.
+	 * Point : location of the "hit" at the start of the frame.
+	 * (ie, a hit at x=0.0 will end up having a TDC value of 0).
 	 *
 	 * Value : the "charge" that the "hit" deposited.
 	 *

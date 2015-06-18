@@ -15,16 +15,15 @@ namespace WireCell {
     public:
 	typedef std::pair<float,float> MinMax;
 
-	PepperDepositor(MinMax ymm, MinMax zmm, MinMax qmm,
-			int hits_per_frame = 20, int tbins_per_frame=1000);
+	PepperDepositor(MinMax xmm, MinMax ymm, MinMax zmm, MinMax qmm,
+			int hits_per_frame = 20);
 	virtual ~PepperDepositor();
 
 	const PointValueVector& depositions(int frame_number) const;
 
     private:
-	MinMax ymm, zmm, qmm;
+	MinMax xmm, ymm, zmm, qmm;
 	int hits_per_frame;
-	int tbins_per_frame;
 
 	// cache this long enough so the depositions() return can be used w/out copy
 	// make it mutable so we can otherwise be const.
