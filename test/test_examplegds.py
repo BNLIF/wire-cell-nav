@@ -7,7 +7,7 @@ import ROOT
 ROOT.gSystem.Load("libWireCellNavDict")
 
 def test_make():
-    gds = ROOT.make_example_gds()
+    gds = ROOT.WireCell.make_example_gds()
     assert gds
 
 if '__main__' == __name__:
