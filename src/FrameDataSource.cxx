@@ -4,6 +4,7 @@ using namespace WireCell;
 
 FrameDataSource::FrameDataSource()
     : frame()
+    , bins_per_frame(0)
 {
 }
 

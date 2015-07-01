@@ -14,7 +14,8 @@ namespace WireCell {
     protected:
 
 	WireCell::Frame frame;
-    
+	int bins_per_frame;
+	
     public:
 	FrameDataSource();
 	virtual ~FrameDataSource();
@@ -31,7 +32,8 @@ namespace WireCell {
 	/// Access currently loaded frame.
 	virtual WireCell::Frame& get();
 	virtual const WireCell::Frame& get() const;
-	
+
+	int Get_Bins_Per_Frame(){return bins_per_frame;};
     };
 
 }
