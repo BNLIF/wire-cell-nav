@@ -4,14 +4,14 @@ using namespace WireCell;
 using namespace std;
 
 GenerativeFDS::GenerativeFDS(const Depositor& dep, const GeomDataSource& gds, 
-			     int bins_per_frame, int nframes_total,
+			     int bins_per_frame1, int nframes_total,
 			     float bin_drift_distance)
     : dep(dep)
     , gds(gds)
-    , bins_per_frame(bins_per_frame)
     , max_frames(nframes_total)
     , bin_drift_distance(bin_drift_distance)
 {
+  bins_per_frame = bins_per_frame1;
 }
 
 

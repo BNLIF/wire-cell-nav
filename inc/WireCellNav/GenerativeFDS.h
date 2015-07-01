@@ -41,7 +41,7 @@ namespace WireCell {
 	 * period * drift speed.
 	 */	
 	GenerativeFDS(const Depositor& dep, const GeomDataSource& gds,
-		      int bins_per_frame = 1000, int nframes_total = -1,
+		      int bins_per_frame1 = 1000, int nframes_total = -1,
 		      float bin_drift_distance = 0.5*1.6*units::millimeter);
 
 	virtual ~GenerativeFDS();
@@ -57,7 +57,7 @@ namespace WireCell {
 	const Depositor& dep;
 	const GeomDataSource& gds;
 
-	int bins_per_frame, max_frames;
+	int  max_frames;
 	float bin_drift_distance;
 
 	mutable WireCell::SimTruthSet simtruth;
