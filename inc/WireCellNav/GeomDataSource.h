@@ -4,6 +4,9 @@
 #include "WireCellData/GeomWire.h"
 #include "WireCellData/Vector.h"
 
+#include "WireCellIface/IWireGeometry.h"
+#include "WireCellIface/IWireDatabase.h"
+
 #include <map>
 
 namespace WireCell {
@@ -11,16 +14,23 @@ namespace WireCell {
     /**
      * A source of wire geometry information.
      */
-    class GeomDataSource {
+    class GeomDataSource : public WireCell::IWireGeometry, public WireCell::IWireDatabase {
     public:
 	GeomDataSource();
 	virtual ~GeomDataSource();
 
-	/// Add a wire object, return its ident.
-	void add_wire(const GeomWire& wire);
+	// IWireGeometry interface methods:
 
 	/// Get full collection of wires.
 	const GeomWireSet& get_wires() const;
+
+	// IWireDatabase interface methods:
+
+	/// Use the given IWireGeometry
+	void use_wires(const IWireGeometry& wiregeo);
+
+	/// Add a wire object to the database
+	void add_wire(const GeomWire& wire);
 
 	/// Return a selection of wires in the given plane/direction
 	/// or all of them if no direction is specified.
@@ -116,6 +126,7 @@ namespace WireCell {
 	void avoid_gap(Vector& point) const;
 	
     private:
+
 	GeomWireSet wires;
 	// reverse lookup cache of wire ID to wire object
 	mutable std::map<int, const GeomWire*> ident2wire;

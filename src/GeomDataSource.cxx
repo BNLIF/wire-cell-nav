@@ -60,6 +60,14 @@ bool GeomDataSource::fill_cache() const
 }
 
 
+void GeomDataSource::use_wires(const IWireGeometry& wiregeo)
+{
+    auto wires = wiregeo.get_wires();
+    for (auto wit = wires.begin(); wit != wires.end(); ++wit) {
+	this->add_wire(*wit);
+    }
+}
+
 void GeomDataSource::add_wire(const GeomWire& wire)
 {
     wires.insert(wire);

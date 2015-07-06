@@ -1,4 +1,5 @@
-#include "WireCellNav/ExampleGDS.h"
+#include "WireCellNav/ExampleWires.h"
+#include "WireCellNav/GeomDataSource.h"
 
 #include <iostream>
 #include <string>
@@ -31,9 +32,11 @@ void dump(GeomDataSource& gds, string name, const GeomWire& wire)
 
 int main()
 {
-    GeomDataSource* pgds = make_example_gds();
-    assert(pgds, "Can not make example gds");
-    GeomDataSource& gds = *pgds;
+    IWireGeometry* wires = make_example_wires();
+    assert(wires, "Failed to make wires");
+
+    GeomDataSource gds;
+    gds.use_wires(*wires);
 
     if (!gds.get_wires().size()) {
 	return 2;

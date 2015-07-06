@@ -1,4 +1,4 @@
-#include "WireCellNav/ExampleGDS.h"
+#include "WireCellNav/ExampleWires.h"
 #include "WireCellNav/GenerativeFDS.h"
 #include "WireCellNav/PepperDepositor.h"
 #include "WireCellNav/SliceDataSource.h"
@@ -29,9 +29,11 @@ int main () {
     const PepperDepositor::MinMax charge(1,100);
     PepperDepositor dep(drift_dim, trans_dim, trans_dim, charge, 5);
     
-    GeomDataSource* gds = make_example_gds(10*units::mm);
+    IWireGeometry* wires = make_example_wires(10*units::mm);
+    GeomDataSource gds;
+    gds.use_wires(*wires);
 
-    GenerativeFDS fds(dep, *gds);
+    GenerativeFDS fds(dep, gds);
 
     for (int ind=0; ind<10; ++ind) {
 	assert (fds.jump(ind) >= 0, "error: jump fds");
@@ -64,7 +66,7 @@ int main () {
 	    int chargeless_hits[3] = {0};
 	    for (int qind=0; qind < group.size(); ++qind) {
 		int chid = group[qind].first;
-		const GeomWireSelection& wires = gds->by_channel(chid);
+		const GeomWireSelection& wires = gds.by_channel(chid);
 		int plane = wires[0]->plane();
 		float charge = group[qind].second;
 		if (charge <= 0.0) {
