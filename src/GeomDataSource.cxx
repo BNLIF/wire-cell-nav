@@ -48,7 +48,7 @@ bool GeomDataSource::fill_cache() const
 	    angle_cache[iplane] = -999;
 	    continue;
 	}
-	const GeomWire& w = *wip[0];
+	const GeomWire& w = *wip[100]; // the first wire might be biased .. use the 100th wire for now
 	double dz = w.point2().z - w.point1().z;
 	double dy = w.point2().y - w.point1().y;
 	double angle = std::atan2(dz, dy);
@@ -140,8 +140,8 @@ const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) 
 
 double GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
 {
-    const GeomWire& wire0 = *this->by_planeindex(plane, 0);
-    const GeomWire& wire1 = *this->by_planeindex(plane, 1);
+    const GeomWire& wire0 = *this->by_planeindex(plane, 100);
+    const GeomWire& wire1 = *this->by_planeindex(plane, 101);
 
     double d = (wire0.point2().z - wire0.point1().z);
     if (d == 0) {		// y wires
@@ -472,6 +472,8 @@ const GeomWire* GeomDataSource::closest(const Vector& point, WirePlaneType_t pla
     dis2 = -1000;
   }
   
+  //  std::cout << dis1 << " " << dis << " " << dis2 << " " << p1.first->ident() << " " << p1.second->ident() <<  std::endl;
+
   if (fabs(dis1-dis)<fabs(dis2-dis)){
     return p1.first;
   }
@@ -492,7 +494,7 @@ void GeomDataSource::avoid_gap(Vector& p) const{
       double dis1 = wire_dist(*p1.first);
       double dis2 = wire_dist(*p1.second);
       pitch1 = pitch(plane);
-      std::cout << flag << " " << dis << " " << dis1 << " " << dis2 << " " << fabs(dis1+dis2-dis-dis) << " " << pitch1/20. << " " << p1.first->channel() << " " << p1.second->channel() << std::endl;
+      //std::cout << flag << " " << dis << " " << dis1 << " " << dis2 << " " << fabs(dis1+dis2-dis-dis) << " " << pitch1/20. << " " << p1.first->channel() << " " << p1.second->channel() << std::endl;
       if (fabs(dis1-dis-dis+dis2)/2.<pitch1/10.){
 	flag = 1; 
       }
