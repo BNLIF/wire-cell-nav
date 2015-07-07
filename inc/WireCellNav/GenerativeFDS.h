@@ -49,9 +49,10 @@ namespace WireCell {
 	virtual int size() const;
 
 	/// Explicitly set the "frame" (event) to process.  Frame number returned or -1 on error.
-	virtual int jump(int frame_number);
+	virtual int jump(int frame_number); 
 
 	virtual SimTruthSelection truth() const; 
+
 
     private:    
 	const Depositor& dep;
