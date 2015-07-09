@@ -129,13 +129,23 @@ namespace WireCell {
 	mutable std::map<WirePlaneType_t, GeomWireSelection> mm_gwsel;
 
 	mutable double angle_cache[3];
+	
+	mutable int nwires_cache[3];
+	mutable double pitch_cache[3];
 
 	// Maybe fill the cache
 	bool fill_cache() const;
 	bool fill_mm_cache() const;
 	bool fill_angle_cache() const;
 	
+	bool fill_nwires_cache() const;
+	//bool fill_pitch_cache() const;
+	
 
+	
+	mutable int flag_nwires_cache;
+	//mutable int flag_pitch_cache;
+	
     };
 
 }

@@ -7,6 +7,8 @@ using namespace std;
 using namespace WireCell;
 
 GeomDataSource::GeomDataSource()
+  : flag_nwires_cache(0)
+    //, flag_pitch_cache(0)
 {
 }
 
@@ -14,10 +16,50 @@ GeomDataSource::~GeomDataSource()
 {
 }
 
+// bool GeomDataSource::fill_pitch_cache() const{
+//   if (flag_pitch_cache == 0){
+//     flag_pitch_cache = 1;
+
+//     fill_nwires_cache();
+    
+//     for (int plane = 0; plane!=3; plane ++){
+//       int nwire = (nwires_cache[int(plane)]-1)/2.;
+//       const GeomWire& wire0 = *this->by_planeindex(WireCell::WirePlaneType_t(plane), nwire);
+//       const GeomWire& wire1 = *this->by_planeindex(WireCell::WirePlaneType_t(plane), nwire+1);
+      
+//       double d = (wire0.point2().z - wire0.point1().z);
+//       if (d == 0) {		// y wires
+// 	pitch_cache[plane] = std::abs(wire0.point1().z - wire1.point1().z);
+//       }
+      
+//       double n = (wire0.point2().y - wire0.point1().y);
+//       double m = n/d;
+//       double b0 = (wire0.point1().y - m * wire0.point1().z);
+//       double b1 = (wire1.point1().y - m * wire1.point1().z);
+    
+//       pitch_cache[plane] = std::abs(b0-b1) / sqrt(m*m + 1);
+//     }
+//   }
+//   return true;
+// }
+
+bool GeomDataSource::fill_nwires_cache() const{
+  // number of wires
+  if (flag_nwires_cache == 0 ){
+    flag_nwires_cache = 1;
+    nwires_cache[0] = wires_in_plane(WirePlaneType_t(0)).size();
+    nwires_cache[1] = wires_in_plane(WirePlaneType_t(1)).size();
+    nwires_cache[2] = wires_in_plane(WirePlaneType_t(2)).size();
+    return true;
+  }
+}
+
+
 bool GeomDataSource::fill_cache() const
 {
+ 
     size_t num = wires.size();
-
+    
     if (num <= ident2wire.size()) {
 	return false;
     }
@@ -40,6 +82,8 @@ bool GeomDataSource::fill_cache() const
 	pi2wire[wpi.first][wpi.second] = &wire;
     }
 
+    fill_nwires_cache();
+    
 
     // angle
     for (int iplane=0; iplane<3; ++iplane) {
@@ -48,15 +92,18 @@ bool GeomDataSource::fill_cache() const
 	    angle_cache[iplane] = -999;
 	    continue;
 	}
-	const GeomWire& w = *wip[100]; // the first wire might be biased .. use the 100th wire for now
+	int nwire = (nwires_cache[int(iplane)]-1)/2.+1;
+	const GeomWire& w = *wip[nwire]; // the first wire might be biased .. use the 100th wire for now
 	double dz = w.point2().z - w.point1().z;
 	double dy = w.point2().y - w.point1().y;
 	double angle = std::atan2(dz, dy);
 	if (angle>3.1415926/2.) angle -= 3.1415926;
 	angle_cache[iplane] = angle*units::radian;
     }
-
-    return true;
+    
+   
+  
+  return true;
 }
 
 
@@ -140,83 +187,89 @@ const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) 
 
 double GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
 {
-    const GeomWire& wire0 = *this->by_planeindex(plane, 100);
-    const GeomWire& wire1 = *this->by_planeindex(plane, 101);
+  // fill_pitch_cache();
+  // return pitch_cache[int(plane)];
 
-    double d = (wire0.point2().z - wire0.point1().z);
-    if (d == 0) {		// y wires
-	return std::abs(wire0.point1().z - wire1.point1().z);
-    }
-
-    double n = (wire0.point2().y - wire0.point1().y);
-    double m = n/d;
-    double b0 = (wire0.point1().y - m * wire0.point1().z);
-    double b1 = (wire1.point1().y - m * wire1.point1().z);
-
-    return std::abs(b0-b1) / sqrt(m*m + 1);
+  fill_nwires_cache();
+  int num_wire = (nwires_cache[int(plane)]-1)/2;
+  
+  const GeomWire& wire0 = *this->by_planeindex(plane, num_wire);
+  const GeomWire& wire1 = *this->by_planeindex(plane, num_wire+1);
+  
+  double d = (wire0.point2().z - wire0.point1().z);
+  if (d == 0) {		// y wires
+    return std::abs(wire0.point1().z - wire1.point1().z);
+  }
+  
+  double n = (wire0.point2().y - wire0.point1().y);
+  double m = n/d;
+  double b0 = (wire0.point1().y - m * wire0.point1().z);
+  double b1 = (wire1.point1().y - m * wire1.point1().z);
+  
+  return std::abs(b0-b1) / sqrt(m*m + 1);
 }
 
 
 WireCell::Vector GeomDataSource::pitch_unit_vector(WirePlaneType_t plane) const
 {
-    const GeomWire& wire = *this->by_planeindex(plane, 0);
-    WireCell::Vector vwire(wire.point2() - wire.point1()), ecks(1,0,0);
-    WireCell::Vector vpitch = ecks.cross(vwire);
-    return vpitch.norm();
+  const GeomWire& wire = *this->by_planeindex(plane, 0);
+  WireCell::Vector vwire(wire.point2() - wire.point1()), ecks(1,0,0);
+  WireCell::Vector vpitch = ecks.cross(vwire);
+  return vpitch.norm();
 }
 
 
 double GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
 {
-    if (0 > plane || plane >= 3) {
-        return -999;
-    }
-    fill_cache();
-    return angle_cache[plane];
+  if (0 > plane || plane >= 3) {
+    return -999;
+  }
+  fill_cache();
+  return angle_cache[plane];
 }
 
 
 static std::pair<double,double> vmm(const std::vector<double>& v)
 {
-    auto res = std::minmax_element(v.begin(),v.end());
-    return std::pair<double,double>( *res.first, *res.second);
+  auto res = std::minmax_element(v.begin(),v.end());
+  return std::pair<double,double>( *res.first, *res.second);
 }
 
 bool GeomDataSource::fill_mm_cache() const 
 {
-    // std::cerr << "fill_mm_cache "
-    //           << mm_cache[0].size() << ", "
-    //           << mm_cache[1].size() << ", "
-    //           << mm_cache[2].size()
-    //           << std::endl;
-
-    if (mm_cache[0].size()) {
-	return false;
+  // std::cerr << "fill_mm_cache "
+  //           << mm_cache[0].size() << ", "
+  //           << mm_cache[1].size() << ", "
+  //           << mm_cache[2].size()
+  //           << std::endl;
+  
+  if (mm_cache[0].size()) {
+    return false;
+  }
+  
+  std::vector<double> totx, toty, totz;
+  
+  for (int iplane=0; iplane<3; ++iplane) {
+    WirePlaneType_t tplane = (WirePlaneType_t)iplane;
+    std::vector<double> x, y, z;
+    const GeomWireSelection& ws = this->wires_in_plane(tplane);
+    size_t nwires = ws.size();
+    for (size_t wind=0; wind<nwires; ++wind) {
+      const GeomWire& w = *ws[wind];
+      
+      const Vector& one = w.point1();
+      x.push_back(one.x);             totx.push_back(one.x); 
+      y.push_back(one.y);             toty.push_back(one.y); 
+      z.push_back(one.z);             totz.push_back(one.z); 
+      const Vector& two = w.point2();
+      x.push_back(two.x);             totx.push_back(two.x); 
+      y.push_back(two.y);             toty.push_back(two.y); 
+      z.push_back(two.z);             totz.push_back(two.z); 
     }
-
-    std::vector<double> totx, toty, totz;
-
-    for (int iplane=0; iplane<3; ++iplane) {
-	WirePlaneType_t tplane = (WirePlaneType_t)iplane;
-        std::vector<double> x, y, z;
-	const GeomWireSelection& ws = this->wires_in_plane(tplane);
-	size_t nwires = ws.size();
-        for (size_t wind=0; wind<nwires; ++wind) {
-	    const GeomWire& w = *ws[wind];
-
-            const Vector& one = w.point1();
-            x.push_back(one.x);             totx.push_back(one.x); 
-            y.push_back(one.y);             toty.push_back(one.y); 
-            z.push_back(one.z);             totz.push_back(one.z); 
-            const Vector& two = w.point2();
-            x.push_back(two.x);             totx.push_back(two.x); 
-            y.push_back(two.y);             toty.push_back(two.y); 
-            z.push_back(two.z);             totz.push_back(two.z); 
-        }
-	mm_cache[0][tplane] = vmm(x);
-	mm_cache[1][tplane] = vmm(y);
-	mm_cache[2][tplane] = vmm(z);
-    }
+    mm_cache[0][tplane] = vmm(x);
+    mm_cache[1][tplane] = vmm(y);
+    mm_cache[2][tplane] = vmm(z);
+  }
     mm_cache[0][kUnknownWirePlaneType] = vmm(totx);
     mm_cache[1][kUnknownWirePlaneType] = vmm(toty);
     mm_cache[2][kUnknownWirePlaneType] = vmm(totz);
