@@ -1,63 +1,120 @@
 #include "WireCellNav/ParamWires.h"
-#include "WireCellData/Intersection.h"
-#include "WireCellData/Point.h"
+#include "WireCellUtil/Intersection.h"
 
+#include <iostream>		// debugging
 using namespace WireCell;
 
+class ParamWire : public IWire {
+    WirePlaneType_t m_plane;
+    int m_index;
+    Ray m_ray;
 
-bool ParamWires::inside(const Vector& point) const
-{
-    for (int ind=0; ind<3; ++ind) {
-	if (point[ind] < minbound[ind]) return false;
-	if (point[ind] > maxbound[ind]) return false;
+public:
+    ParamWire(WirePlaneType_t plane, int index, const Ray& ray)
+	: m_plane(plane), m_index(index), m_ray(ray)
+    {}
+
+    int ident() const {
+	int iplane = m_plane - kFirstPlane;
+	++iplane;
+	return iplane*100000 + m_index;
     }
-    return true;
-}
 
-int ParamWires::make_wire_plane(const Vector& offset, const Vector& pitch,
-			      WirePlaneType_t plane) const
+    WirePlaneType_t plane() const { return m_plane; }
+	
+    int index() const { return m_index; }
+
+    int channel() const { return ident(); }
+
+    WireCell::Ray ray() const { return m_ray; }
+
+};
+
+static void make_one_plane(WireStore& store, WirePlaneType_t plane,
+			   const Ray& bounds,
+			   const Ray& step,
+			   const Vector& drift)
 {
-    int global_count = this->get_wires().size();
-    Vector proto = drift.cross(pitch).norm(); 
+
+    int global_count = store.size();
+    Point offset = step.first;
+    Vector pitch = step.second - offset;
+    Vector proto = drift.cross(pitch).norm();
 
     int index = -1;
     while (true) {
 	++index;
 
 	double number = index;
-	Vector ptonline = offset +number*pitch;
-    
-	Vector hit1, hit2;
-	int hitmask = box_intersection(minbound, maxbound, ptonline, proto, hit1, hit2);    
+	Point pt1 = offset + number*pitch;
+	Point pt2  = pt1 + proto;
+	Ray wireray(pt1, pt2);
+
+	Ray hits;
+	int hitmask = box_intersection(bounds, wireray, hits);
 	if (3 != hitmask) {
+	    std::cerr << "plane"<<plane<<" hitmask=" << hitmask
+		      << " ray=" << wireray
+		      << " " << hits << std::endl;
 	    break;
 	}
-	int chan = global_count + index;
-	
-	wires.insert(GeomWire(chan, plane, index, chan, Point(hit1), Point(hit2)));
+
+	ParamWire* wire = new ParamWire(plane, index, hits);
+	std::pair<WireStore::iterator, bool> got = store.insert(wire);
+	if (not got.second) {
+	    delete wire;
+	}
+	    
     }
-    return index;
+	
+    std::cerr << "Made "<<index+1<<" wires for plane " << plane << std::endl;
+    std::cerr << "step = " << step << std::endl;
+    std::cerr << "bounds = " << bounds << std::endl;
 }
 
-ParamWires::ParamWires(const Vector& minbound, const Vector& maxbound, const Vector& drift,
-		       const Vector& offsetU, const Vector& pitchU,
-		       const Vector& offsetV, const Vector& pitchV,
-		       const Vector& offsetY, const Vector& pitchY)
-    : minbound(minbound)
-    , maxbound(maxbound)
-    , drift(drift)
+ParamWires::ParamWires(const Ray& bounds, 
+		       const Ray& stepU, const Ray& stepV, const Ray& stepW, 
+		       const Vector& drift)
 {
-    make_wire_plane(offsetU, pitchU, kUwire);
-    make_wire_plane(offsetV, pitchV, kVwire);
-    make_wire_plane(offsetY, pitchY, kYwire);
+    make_one_plane(m_wire_store, kUwire, bounds, stepU, drift);
+    make_one_plane(m_wire_store, kVwire, bounds, stepV, drift);
+    make_one_plane(m_wire_store, kWwire, bounds, stepW, drift);
 }
 
-const WireCell::GeomWireSet& ParamWires::get_wires() const
+const WireStore& ParamWires::wires() const
 {
-    return wires;
+    return m_wire_store;
 }
+
 
 ParamWires::~ParamWires()
 {
 }
 
+
+
+IWireProvider* WireCell::make_paramwires(float dx, float dy, float dz,
+					 float pitch, float angle)
+{
+    const float nudge = 0.5*pitch;
+
+    const Ray bounds(Point(-0.5*dx, -0.5*dy, -0.5*dz),
+		     Point(+0.5*dx, +0.5*dy, +0.5*dz));
+
+    //              drift,       Y(up/down),  Z(left/right)
+    const Vector oU(0.2*dx, -0.5*dy + nudge, -0.5*dz + nudge);
+    const Vector oV(0.3*dx, -0.5*dy + nudge, +0.5*dz - nudge);
+    const Vector oW(0.1*dx,             0.0, -0.5*dz + nudge);
+
+    const Vector pU(0, pitch*std::cos(+angle), pitch*std::sin(+angle));
+    const Ray stepU(oU, oU+pU);
+
+
+    const Vector pV(0, pitch*std::cos(-angle), pitch*std::sin(-angle));
+    const Ray stepV(oV, oV+pV);
+
+    const Vector pW(0, 0, pitch);
+    const Ray stepW(oW, oW+pW);
+
+    return new ParamWires(bounds, stepU, stepV, stepW);
+}
