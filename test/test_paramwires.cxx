@@ -9,8 +9,9 @@ using namespace std;
 
 int main()
 {
-    IWireProvider* pw = make_paramwires();
-    const WireStore& wires = pw->wires();
+    ParamWires pw;
+    pw.generate();
+    const WireStore& wires = pw.wires();
 
     cerr << "Got " << wires.size() << " wires" <<endl;
     Assert(wires.size());

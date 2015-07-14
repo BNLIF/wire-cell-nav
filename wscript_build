@@ -1,4 +1,4 @@
 # -*- python -*-
-bld.make_package('WireCellNav', use='WireCellIface')
+bld.make_package('WireCellNav', use='WireCellIface WireCellUtil')
 
 

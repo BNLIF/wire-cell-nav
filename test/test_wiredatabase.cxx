@@ -25,9 +25,10 @@ void dump(IWireDatabase& wdb, string name, const IWire& wire)
 
 int main()
 {
-    IWireProvider* pw = make_paramwires();
+    ParamWires pw;
+    pw.generate();
     WireDatabase wdb;
-    wdb.load(pw->wires());
+    wdb.load(pw.wires());
 
     Assert(wdb.wires_in_plane().size());
 
