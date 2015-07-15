@@ -1,11 +1,18 @@
 #include "WireCellNav/ParamWires.h"
 #include "WireCellUtil/Intersection.h"
+#include "WireCellUtil/NamedFactory.h"
 
 #include <cmath>
 #include <iostream> 		// debugging
 #include <vector>
 
 using namespace WireCell;
+
+WIRECELL_NAMEDFACTORY(ParamWires);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(ParamWires, IWireProvider);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(ParamWires, IConfigurable);
+
+
 
 class ParamWire : public IWire {
     WirePlaneType_t m_plane;
@@ -101,9 +108,9 @@ static void make_one_plane(WireStore& store, WirePlaneType_t plane,
 	store.insert(wire);
     }
 	
-    std::cerr << "Made "<<store.size()<<" wires for plane " << plane << std::endl;
-    std::cerr << "step = " << step << std::endl;
-    std::cerr << "bounds = " << bounds << std::endl;
+    //std::cerr << "Made "<<store.size()<<" wires for plane " << plane << std::endl;
+    //std::cerr << "step = " << step << std::endl;
+    //std::cerr << "bounds = " << bounds << std::endl;
 }
 
 
@@ -116,7 +123,8 @@ Configuration ParamWires::default_configuration() const
 "pitch_mm":{"u":3.0, "v":3.0, "w":3.0},
 "angle_deg":{"u":60, "v":120, "w":0.0},
 "offset_mm":{"u":0.0, "v":0.0, "w":0.0},
-"plane_mm":{"u":0.0, "v":1.0, "w":-1.0},
+"plane_mm":{"u":0.0, "v":1.0, "w":-1.0}
+}
 )";
     return configuration_loads(json, "json");
 }
@@ -176,6 +184,13 @@ void ParamWires::generate(const Ray& bounds,
 			  const Ray& U, const Ray& V, const Ray& W)
 {
     this->clear();
+
+    // save for posterity
+    m_bounds = bounds;
+    m_pitchU = U;
+    m_pitchV = V;
+    m_pitchW = W;
+
     make_one_plane(m_wire_store, kUwire, bounds, U);
     make_one_plane(m_wire_store, kVwire, bounds, V);
     make_one_plane(m_wire_store, kWwire, bounds, W);
@@ -218,10 +233,13 @@ const WireStore& ParamWires::wires() const
 
 void ParamWires::clear() {
     m_wire_store.clear();
+    m_bounds = m_pitchU = m_pitchV = m_pitchW = Ray();
 }
+
 ParamWires::ParamWires()
 {
 }
+
 ParamWires::~ParamWires()
 {
     this->clear();

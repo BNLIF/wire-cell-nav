@@ -15,7 +15,9 @@ namespace WireCell {
      * one-another and to be equally spaced between neighbors and
      * perpendicular to the drift direction.
      */
-    class ParamWires : public IWireProvider, public IConfigurable {
+    class ParamWires :
+	public IWireProvider,
+	public IConfigurable {
     public:
 	ParamWires();
 	virtual ~ParamWires();
@@ -88,6 +90,13 @@ namespace WireCell {
 		      float pitch = 10*units::mm,
 		      float angle = 60.0*units::degree);
 
+	/** Provide access to the rays which were used to define the wires. */
+	const Ray& bounds();
+	const Ray& pitchU();
+	const Ray& pitchV();
+	const Ray& pitchW();
+
+
 	/** Configurable interface.
 	 */
 	virtual void configure(const WireCell::Configuration& config);
@@ -103,6 +112,8 @@ namespace WireCell {
 
 	void clear();
 	WireStore m_wire_store;
+
+	Ray m_bounds, m_pitchU, m_pitchV, m_pitchW;
 
     };
 
