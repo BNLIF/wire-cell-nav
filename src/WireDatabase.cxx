@@ -71,8 +71,8 @@ void WireDatabase::load(const WireCell::WireStore& wires)
 	Ray seg1 = w1->ray();
 
 	// calculate angle
-	double dz = seg1.second.z - seg1.first.z;
-	double dy = seg1.second.y - seg1.first.y;
+	double dz = seg1.second.z() - seg1.first.z();
+	double dy = seg1.second.y() - seg1.first.y();
 	double angle = std::atan2(dz, dy);
 	if (angle > M_PI_2) {	// why do we want it smaller than 180deg?
 	    angle -= M_PI;
@@ -231,14 +231,14 @@ bool WireDatabase::crossing_point(double dis1, double dis2,
 	okay = false;
     }
     else {
-	result.y = (dis1 * a2 - dis2 *a1)/(b1*a2-b2*a1);
+	result.y((dis1 * a2 - dis2 *a1)/(b1*a2-b2*a1));
     }
 
     if (a1*b2 - a2 * b1 == 0) {
 	okay = false;
     }
     else {
-	result.z = (dis1 * b2 - dis2 * b1)/(a1*b2 - a2 * b1);
+	result.z((dis1 * b2 - dis2 * b1)/(a1*b2 - a2 * b1));
     }
     return okay;
 }

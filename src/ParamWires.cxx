@@ -170,9 +170,9 @@ void ParamWires::configure(const Configuration& cfg)
     Point oW = center + pW.norm() * offW;
 
     // Force X location of plane along the X axis.
-    oU.x = cfg.get<double>("plane_mm.u")*units::mm;
-    oV.x = cfg.get<double>("plane_mm.v")*units::mm;
-    oW.x = cfg.get<double>("plane_mm.w")*units::mm;
+    oU.x(cfg.get<double>("plane_mm.u")*units::mm);
+    oV.x(cfg.get<double>("plane_mm.v")*units::mm);
+    oW.x(cfg.get<double>("plane_mm.w")*units::mm);
 
 
     const Ray bounds(bbmin, bbmax);
