@@ -16,7 +16,7 @@ WireDatabase::~WireDatabase()
 }
 
 /// Load the wire store into this database.
-void WireDatabase::load(const WireCell::WireStore& wires)
+void WireDatabase::load(const WireCell::WireSet& wires)
 {
 //    auto res = std::minmax_element(v.begin(),v.end());
 //    return std::pair<double,double>( *res.first, *res.second);
@@ -28,7 +28,7 @@ void WireDatabase::load(const WireCell::WireStore& wires)
     // cache all reverse lookups.
     int nwires = 0;
     for (auto wit = wires.begin(); wit != wires.end(); ++wit, ++nwires) {
-	const IWire* wire = *wit;
+	Wire wire = *wit;
 
 	m_ident2wire[wire->ident()] = wire;
 	m_chan2wires[wire->channel()].push_back(wire);
@@ -67,7 +67,7 @@ void WireDatabase::load(const WireCell::WireStore& wires)
 	// in order to avoid round off error that occurs if one picks
 	// the first wire which tends to be short..
 	int half_way = nwires/2; // integer
-	const IWire* w1 = wires[half_way];
+	Wire w1 = wires[half_way];
 	Ray seg1 = w1->ray();
 
 	// calculate angle
@@ -81,7 +81,7 @@ void WireDatabase::load(const WireCell::WireStore& wires)
 
 
 	// pick next wire
-	const IWire* w2 = wires[half_way+1];
+	Wire w2 = wires[half_way+1];
 	Ray seg2 = w2->ray();
 
 	// calculate pitch vector
@@ -103,7 +103,7 @@ const WireVector& WireDatabase::wires_in_plane(WirePlaneType_t plane) const
     return m_pi2wires[iplane];
 }
 
-const IWire* WireDatabase::by_ident(int ident) const
+Wire WireDatabase::by_ident(int ident) const
 {
     auto got = m_ident2wire.find(ident);
     if (got == m_ident2wire.end()) {
@@ -113,7 +113,7 @@ const IWire* WireDatabase::by_ident(int ident) const
 }
 
 
-const IWire* WireDatabase::by_channel_segment(int channel, int segment) const
+Wire WireDatabase::by_channel_segment(int channel, int segment) const
 {
     if (segment<0) { return 0; }
     const WireVector& segments = by_channel(channel);
@@ -131,14 +131,14 @@ const WireVector& WireDatabase::by_channel(int channel) const
     return got->second;
 }
 
-const IWire* WireDatabase::by_planeindex(WirePlaneType_t plane, int index) const
+Wire WireDatabase::by_planeindex(WirePlaneType_t plane, int index) const
 {
     if (index<0) { return 0; }
     const WireVector& wires = wires_in_plane(plane);
     if (index >= wires.size()) { return 0; }
     return wires[index];
 }
-const IWire* WireDatabase::by_planeindex(const WirePlaneIndex& planeindex) const
+Wire WireDatabase::by_planeindex(const WirePlaneIndex& planeindex) const
 {
     return by_planeindex(planeindex.first, planeindex.second);
 }
@@ -179,7 +179,7 @@ WireCell::Point WireDatabase::center() const
 double WireDatabase::wire_dist(const Point& point, WirePlaneType_t plane) const
 {
     const WireVector& wip = wires_in_plane(plane);
-    const IWire* wire0 = wip[0];
+    Wire wire0 = wip[0];
     Point origin = wire0->center();
 
     Vector vdif = point - origin;
@@ -187,21 +187,21 @@ double WireDatabase::wire_dist(const Point& point, WirePlaneType_t plane) const
     return pitch_dir.dot(vdif);
 }
 	
-double WireDatabase::wire_dist(const IWire& wire) const
+double WireDatabase::wire_dist(Wire wire) const
 {
     // coincidental optimization.
-    if (!wire.index()) { return 0.0; }
+    if (!wire->index()) { return 0.0; }
 
-    return wire_dist(wire.center(), wire.plane());
+    return wire_dist(wire->center(), wire->plane());
 }
 	
-bool WireDatabase::crossing_point(const IWire& wire1, const IWire& wire2, 
+bool WireDatabase::crossing_point(Wire wire1, Wire wire2, 
 				  WireCell::Point& result) const
 {
     double dis1 = wire_dist(wire1);
     double dis2 = wire_dist(wire2);
   
-    bool okay = crossing_point(dis1,dis2,wire1.plane(),wire2.plane(), result);
+    bool okay = crossing_point(dis1, dis2, wire1->plane(), wire2->plane(), result);
     if (!okay) {
 	return false;
     }
@@ -254,8 +254,8 @@ WirePair WireDatabase::bounding_wires(const WireCell::Point& point,
 
     double dist = wire_dist(point, plane);
 
-    const IWire *wire0 = by_planeindex(plane,0);
-    double dist0 = wire_dist(*wire0);
+    Wire wire0 = by_planeindex(plane,0);
+    double dist0 = wire_dist(wire0);
 
     double find = (dist-dist0)/pitch(plane);
     int central_wiren = 0;
@@ -268,8 +268,8 @@ WirePair WireDatabase::bounding_wires(const WireCell::Point& point,
     else{
 	central_wiren = round(find);
     }
-    const IWire *central_wire = by_planeindex(plane,central_wiren);
-    double central_dist = wire_dist(*central_wire);
+    Wire central_wire = by_planeindex(plane,central_wiren);
+    double central_dist = wire_dist(central_wire);
     
     find = central_wiren + (dist - central_dist)/pitch(plane);
 
@@ -284,9 +284,9 @@ WirePair WireDatabase::bounding_wires(const WireCell::Point& point,
     // the indexed calculation becomes off-by-one.  So, do a last
     // ditch check to confirm we return what is actually the closest
     // wire.
-    const IWire *central_wire1 = by_planeindex(plane,int(find));
+    Wire central_wire1 = by_planeindex(plane,int(find));
 
-    central_dist = wire_dist(*central_wire1);
+    central_dist = wire_dist(central_wire1);
     if (central_dist < dist){
 	return WirePair(wip[int(find)], wip[int(find+1)]);
     }
@@ -299,8 +299,8 @@ WirePair WireDatabase::bounding_wires(const WireCell::Point& point,
 }
 
 
-const IWire* WireDatabase::closest(const WireCell::Point& point, 
-				   WirePlaneType_t plane) const
+Wire WireDatabase::closest(const WireCell::Point& point, 
+			   WirePlaneType_t plane) const
 {
     WirePair wp = bounding_wires(point,plane);
 
@@ -313,8 +313,8 @@ const IWire* WireDatabase::closest(const WireCell::Point& point,
     }
 
     // If actually between two wires, see which is closer
-    double dis1 = wire_dist(*wp.first);
-    double dis2 = wire_dist(*wp.second);
+    double dis1 = wire_dist(wp.first);
+    double dis2 = wire_dist(wp.second);
     float dis = wire_dist(point, plane);
 
     if (fabs(dis1-dis) < fabs(dis2-dis)){

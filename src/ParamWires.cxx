@@ -10,9 +10,9 @@ using namespace WireCell;
 
 WIRECELL_NAMEDFACTORY(ParamWires);
 WIRECELL_NAMEDFACTORY_ASSOCIATE(ParamWires, IWireProvider);
-WIRECELL_NAMEDFACTORY_ASSOCIATE(ParamWires, IConfigurable);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(ParamWires, IWireGenerator);
 
-
+static int number_of_wires = 0;
 
 class ParamWire : public IWire {
     WirePlaneType_t m_plane;
@@ -22,7 +22,13 @@ class ParamWire : public IWire {
 public:
     ParamWire(WirePlaneType_t plane, int index, const Ray& ray)
 	: m_plane(plane), m_index(index), m_ray(ray)
-    {}
+    {
+	++number_of_wires;
+    }
+    virtual ~ParamWire()
+    {
+	--number_of_wires;
+    }
 
     int ident() const {
 	int iplane = m_plane - kFirstPlane;
@@ -68,7 +74,7 @@ struct SortByIndex {
 };    
 
 
-static void make_one_plane(WireStore& store, WirePlaneType_t plane,
+static void make_one_plane(WireSet& store, WirePlaneType_t plane,
 			   const Ray& bounds,
 			   const Ray& step)
 {
@@ -102,9 +108,10 @@ static void make_one_plane(WireStore& store, WirePlaneType_t plane,
 
     // load in to store and fix up index and plane
     for (int ind=0; ind<all_wires.size(); ++ind) {
-	ParamWire* wire = all_wires[ind];
-	wire->set_index(ind);
-	wire->set_plane(plane);
+	ParamWire* pwire = all_wires[ind];
+	pwire->set_index(ind);
+	pwire->set_plane(plane);
+	Wire wire(pwire);	// intern
 	store.insert(wire);
     }
 	
@@ -114,118 +121,17 @@ static void make_one_plane(WireStore& store, WirePlaneType_t plane,
 }
 
 
-Configuration ParamWires::default_configuration() const
-{
-    std::string json = R"(
-{
-"center_mm":{"x":0.0, "y":0.0, "z":0.0},
-"size_mm":{"x":10.0, "y":1000.0, "z":1000.0},
-"pitch_mm":{"u":3.0, "v":3.0, "w":3.0},
-"angle_deg":{"u":60, "v":120, "w":0.0},
-"offset_mm":{"u":0.0, "v":0.0, "w":0.0},
-"plane_mm":{"u":0.0, "v":1.0, "w":-1.0}
-}
-)";
-    return configuration_loads(json, "json");
-}
+void ParamWires::generate(const IWireParameters& params)
 
-void ParamWires::configure(const Configuration& cfg)
-{
-    // The local origin about which all else is measured.
-    double cx = cfg.get<double>("center_mm.x")*units::mm;
-    double cy = cfg.get<double>("center_mm.y")*units::mm;
-    double cz = cfg.get<double>("center_mm.z")*units::mm;
-    const Point center(cx,cy,cz);
-    
-    // The full width sizes
-    double dx = cfg.get<double>("size_mm.x")*units::mm;
-    double dy = cfg.get<double>("size_mm.y")*units::mm;
-    double dz = cfg.get<double>("size_mm.z")*units::mm;
-    const Point deltabb(dx,dy,dz);
-    const Point bbmax = center + 0.5*deltabb;
-    const Point bbmin = center - 0.5*deltabb;
-
-    // The angles of the wires w.r.t. the positive Y axis
-    double angU = cfg.get<double>("angle_deg.u")*units::degree;
-    double angV = cfg.get<double>("angle_deg.v")*units::degree;
-    double angW = cfg.get<double>("angle_deg.w")*units::degree;
-
-    // The pitch magnitudes.
-    double pitU = cfg.get<double>("pitch_mm.u")*units::mm;
-    double pitV = cfg.get<double>("pitch_mm.v")*units::mm;
-    double pitW = cfg.get<double>("pitch_mm.w")*units::mm;
-
-    // Pitch vectors
-    const Vector pU(0, pitU*std::cos(+angU), pitU*std::sin(+angU));
-    const Vector pV(0, pitV*std::cos(+angV), pitV*std::sin(+angV));
-    const Vector pW(0, pitW*std::cos(+angW), pitW*std::sin(+angW));
-
-    // The offset in the pitch direction from the center to a wire
-    double offU = cfg.get<double>("offset_mm.u")*units::mm;
-    double offV = cfg.get<double>("offset_mm.v")*units::mm;
-    double offW = cfg.get<double>("offset_mm.w")*units::mm;
-
-    Point oU = center + pU.norm() * offU;
-    Point oV = center + pV.norm() * offV;
-    Point oW = center + pW.norm() * offW;
-
-    // Force X location of plane along the X axis.
-    oU.x(cfg.get<double>("plane_mm.u")*units::mm);
-    oV.x(cfg.get<double>("plane_mm.v")*units::mm);
-    oW.x(cfg.get<double>("plane_mm.w")*units::mm);
-
-
-    const Ray bounds(bbmin, bbmax);
-    const Ray U(oU, oU+pU), V(oV, oV+pV), W(oW, oW+pW);
-    this->generate(bounds, U, V, W);
-}
-
-void ParamWires::generate(const Ray& bounds, 
-			  const Ray& U, const Ray& V, const Ray& W)
 {
     this->clear();
 
-    // save for posterity
-    m_bounds = bounds;
-    m_pitchU = U;
-    m_pitchV = V;
-    m_pitchW = W;
-
-    make_one_plane(m_wire_store, kUwire, bounds, U);
-    make_one_plane(m_wire_store, kVwire, bounds, V);
-    make_one_plane(m_wire_store, kWwire, bounds, W);
+    make_one_plane(m_wire_store, kUwire, params.bounds(), params.pitchU());
+    make_one_plane(m_wire_store, kVwire, params.bounds(), params.pitchV());
+    make_one_plane(m_wire_store, kWwire, params.bounds(), params.pitchW());
 }
 
-void ParamWires::generate(float dx, float dy, float dz,
-			  float pitch, float angle)
-{
-    // The local origin about which all else is measured.
-    const Point center;
-    const Point deltabb(dx,dy,dz);
-    const Point bbmax = center + 0.5*deltabb;
-    const Point bbmin = center - 0.5*deltabb;
-
-    double angU = angle;
-    double angV = M_PI-angle;
-    double angW = 0.0;
-
-    // Pitch vectors
-    const Vector pU(0, pitch*std::cos(+angU), pitch*std::sin(+angU));
-    const Vector pV(0, pitch*std::cos(+angV), pitch*std::sin(+angV));
-    const Vector pW(0, pitch*std::cos(+angW), pitch*std::sin(+angW));
-
-    const Point oU(+0.25*dx, 0.0, 0.0);
-    const Point oV( 0.0    , 0.0, 0.0);
-    const Point oW(-0.25*dx, 0.0, 0.0);
-
-    const Ray bounds(bbmin, bbmax);
-    const Ray U(oU, oU+pU), V(oV, oV+pV), W(oW, oW+pW);
-    this->generate(bounds, U, V, W);
-
-}
-
-
-const WireStore& ParamWires::wires() const
+const WireSet& ParamWires::wires() const
 {
     return m_wire_store;
 }
@@ -233,7 +139,6 @@ const WireStore& ParamWires::wires() const
 
 void ParamWires::clear() {
     m_wire_store.clear();
-    m_bounds = m_pitchU = m_pitchV = m_pitchW = Ray();
 }
 
 ParamWires::ParamWires()

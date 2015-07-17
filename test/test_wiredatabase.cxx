@@ -1,4 +1,5 @@
 #include "WireCellNav/WireDatabase.h"
+#include "WireCellNav/WireParams.h"
 #include "WireCellNav/ParamWires.h"
 #include "WireCellUtil/Testing.h"
 
@@ -8,25 +9,26 @@
 using namespace WireCell;
 using namespace std;
 
-void dump(IWireDatabase& wdb, string name, const IWire& wire)
+void dump(IWireDatabase& wdb, string name, Wire wire)
 {
-    Vector center = wire.center();
+    Vector center = wire->center();
     double wire_dist = wdb.wire_dist(wire);
-    double center_dist = wdb.wire_dist(center, wire.plane());
+    double center_dist = wdb.wire_dist(center, wire->plane());
     cerr
-	<< "(" << (void*) &wire << ") "
+	<< "(" << (void*) wire.get() << ") "
 	<< name << ":\t"
-	<< wire.plane() << "/" << wire.index() << "/" << wire.ident() 
+	<< wire->plane() << "/" << wire->index() << "/" << wire->ident() 
 	<< " [" << wire_dist << "]"
-	<< " " << wire.ray() << " @ " << center 
+	<< " " << wire->ray() << " @ " << center 
 	<< endl;
     Assert(fabs(wire_dist - center_dist) < 1e-12);
 }
 
 int main()
 {
+    WireParams params;
     ParamWires pw;
-    pw.generate();
+    pw.generate(params);
     WireDatabase wdb;
     wdb.load(pw.wires());
 
@@ -57,11 +59,11 @@ int main()
 	for (int wind=0; wind<wip.size(); ++wind) {
 	    cerr << "\nplane #" << iplane << " wire #" << wind << endl;
 
-	    const IWire* wire = wip[wind];
+	    Wire wire = wip[wind];
 	    Assert(wire, "no wire");
 
-	    double wire_dist = wdb.wire_dist(*wire);
-	    dump(wdb, "CURRENT", *wire);
+	    double wire_dist = wdb.wire_dist(wire);
+	    dump(wdb, "CURRENT", wire);
 
 	    Assert(wire_dist > last_distance);
 	    last_distance = wire_dist;
@@ -74,25 +76,25 @@ int main()
 
 	    WirePair wbound = wdb.bounding_wires(center, plane);
 	    if (wbound.first) {
-		dump (wdb, "BELOW", *wbound.first);
+		dump (wdb, "BELOW", wbound.first);
 	    }
 	    if (wbound.second) {
-		dump (wdb, "ABOVE", *wbound.second);
+		dump (wdb, "ABOVE", wbound.second);
 	    }
 
 
-	    const IWire* wclosest = wdb.closest(center, plane);
-	    dump(wdb, "CLOSEST", *wclosest);
+	    Wire wclosest = wdb.closest(center, plane);
+	    dump(wdb, "CLOSEST", wclosest);
 	    Assert (wclosest && wclosest == wire, "wire isn't own closest wire");
 
 	    Vector Pbelow = center - vpitch*(0.1*pitch);
-	    const IWire* wbelow = wdb.closest(Pbelow, plane);
+	    Wire wbelow = wdb.closest(Pbelow, plane);
 	    Assert (wbelow && wbelow == wire, "just below wire isn't own closest wire");
 	    WirePair bounds_below = wdb.bounding_wires(Pbelow, plane);
 	    Assert (bounds_below.second == wire, "just below not bounded above");
 	    
 	    Vector Pabove = center + vpitch*(0.1*pitch);
-	    const IWire* wabove = wdb.closest(Pabove, plane);
+	    Wire wabove = wdb.closest(Pabove, plane);
 	    Assert (wabove && wabove == wire, "just above wire isn't own closest wire");
 	    WirePair bounds_above = wdb.bounding_wires(Pabove, plane);
 	    Assert (bounds_above.first == wire, "just above not bounded below");

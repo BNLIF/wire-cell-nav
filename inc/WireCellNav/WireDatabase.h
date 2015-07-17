@@ -8,7 +8,7 @@
 namespace WireCell {
 
     /** This provides a way to query a set of wires beyond the simple
-     * iteration that a WireCell::WireStore provides.*/
+     * iteration that a WireCell::WireSet provides.*/
     class WireDatabase : public IWireDatabase {
 
     public:
@@ -16,24 +16,24 @@ namespace WireCell {
 	virtual ~WireDatabase();
 	
 	/// Load the wire store into this database.
-	void load(const WireCell::WireStore& wires);
+	void load(const WireCell::WireSet& wires);
 
 	/// Return a collection of wires in the given plane/direction
 	/// or all of them if no direction is specified.
 	const WireVector& wires_in_plane(WirePlaneType_t plane = kUnknownWirePlaneType) const; 
 
 	/// Look up a wire by it's identifier
-	const IWire* by_ident(int ident) const;
+	Wire by_ident(int ident) const;
 
 	/// Look up a wire by it's electronics channel number.
-	const IWire* by_channel_segment(int channel, int segment) const;
+	Wire by_channel_segment(int channel, int segment) const;
 
 	/// Return all wires connected to a given channel
 	const WireVector& by_channel(int channel) const;
 
 	/// Look up a wire by its plane number and index
-	const IWire* by_planeindex(WirePlaneType_t plane, int index) const;
-	const IWire* by_planeindex(const WirePlaneIndex& planeindex) const;
+	Wire by_planeindex(WirePlaneType_t plane, int index) const;
+	Wire by_planeindex(const WirePlaneIndex& planeindex) const;
 
 	/// Return wire characteristic/average pitch (perpendicular
 	/// distance between wires) as a distance in the System of Units.
@@ -62,13 +62,13 @@ namespace WireCell {
 	/// Return the distance from the center of the first wire to
 	/// the center of the given wire projected along the direction
 	/// of the plane's wire pitch.
-	double wire_dist(const IWire& wire) const;
+	double wire_dist(Wire wire) const;
 	
 	/// Given two wires, calculate their crossing point projected
 	/// to the y-z plane.  Only y and z values of result are modified.
 	/// Return true if point is in the extent.
-	bool crossing_point(const IWire& wire1, const IWire& wire2, 
-				    WireCell::Point& result) const;
+	bool crossing_point(Wire wire1, Wire wire2, 
+			    WireCell::Point& result) const;
 
 	/// Given two lines defined as distances measured
 	/// perpendicular to the given wire plane type, calculate
@@ -92,14 +92,14 @@ namespace WireCell {
 	/// the direction perpendicular to the wires of the given
 	/// plane.  This implementation assumes wires are of uniform
 	/// pitch and angle.
-	const IWire* closest(const WireCell::Point& point, 
-				     WirePlaneType_t plane = kUnknownWirePlaneType) const;
+	Wire closest(const WireCell::Point& point, 
+		     WirePlaneType_t plane = kUnknownWirePlaneType) const;
 	
 	
     private:
 
 
-	std::unordered_map<int, const IWire*> m_ident2wire;
+	std::unordered_map<int, Wire> m_ident2wire;
 	std::unordered_map<int, WireVector> m_chan2wires;
 	WireVector m_pi2wires[3];
 	WireVector m_all_wires;	// keep this separately from pi2wires
