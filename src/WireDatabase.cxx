@@ -182,21 +182,34 @@ WireCell::Point WireDatabase::center() const
 
 double WireDatabase::wire_dist(const Point& point, WirePlaneType_t plane) const
 {
-    const WireVector& wip = wires_in_plane(plane);
-    Wire wire0 = wip[0];
-    Point origin = wire0->center();
+    // const WireVector& wip = wires_in_plane(plane);
+    // Wire wire0 = wip[0];
+    // Point origin = wire0->center();
 
-    Vector vdif = point - origin;
-    Vector pitch_dir = pitch_unit_vector(plane);
-    return pitch_dir.dot(vdif);
+    // Vector vdif = point - origin;
+    // Vector pitch_dir = pitch_unit_vector(plane);
+    // return pitch_dir.dot(vdif);
+
+    double theta = angle(plane);
+    return std::cos(theta/units::radian) *point.z() - std::sin(theta/units::radian) * point.y();
 }
 	
 double WireDatabase::wire_dist(Wire wire) const
 {
-    // coincidental optimization.
-    if (!wire->index()) { return 0.0; }
+    // why not do this all along????
+    return pitch(wire->plane()) * wire->index();
 
-    return wire_dist(wire->center(), wire->plane());
+    // // coincidental optimization.
+    // if (!wire->index()) { return 0.0; }
+
+    // int ident = wire->ident();
+    // auto cache = m_ident2dist.find(ident);
+    // if (cache == m_ident2dist.end()) { // this cache halves the time it takes to form cells
+    // 	double ret = wire_dist(wire->center(), wire->plane());
+    // 	m_ident2dist[ident] = ret;
+    // 	return ret;
+    // }
+    // return cache->second;
 }
 	
 bool WireDatabase::crossing_point(Wire wire1, Wire wire2, 

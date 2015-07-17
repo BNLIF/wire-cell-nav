@@ -34,8 +34,13 @@ int main()
     // fixme: this needs to be done by a configuration service
     auto wp_cfg = WireCell::Factory::lookup<IConfigurable>("WireParams");
     Assert(wp_cfg, "Failed to get IConfigurable from default WireParams");
-    wp_cfg->configure(wp_cfg->default_configuration());
+    auto cfg = wp_cfg->default_configuration();
+    cfg.put("pitch_mm.u", 5.0);
+    cfg.put("pitch_mm.v", 5.0);
+    cfg.put("pitch_mm.w", 5.0);
+    wp_cfg->configure(cfg);
     cout << "Got WireParams IConfigurable interface @ " << wp_cfg << endl;
+    cout << configuration_dumps(cfg) << endl;
 
     auto wp_wps = WireCell::Factory::lookup<IWireParameters>("WireParams");
     Assert(wp_wps, "Failed to get IWireParameters from default WireParams");
@@ -53,7 +58,9 @@ int main()
     const WireCell::WireSet& wires = pw_pro->wires();
     int nwires = wires.size();
     cout << "Got " << nwires << " wires" << endl;
-    Assert(1103 == nwires);
+    Assert(663 == nwires);
+    // 331 for 10mm pitch 
+    // 663 for 5 mm pitch
 
     auto wdb = WireCell::Factory::lookup<IWireDatabase>("WireDatabase");
     Assert(wdb, "Failed to get IWireDatabase from default WireDatabase");
@@ -73,6 +80,8 @@ int main()
     const WireCell::CellSet& cells = bc_pro->cells();
     int ncells = cells.size();
     cout << "Got " << ncells << " cells" << endl;
+    // ~3 second for 10mm pitch
+    // ~30 second for 5mm pitch
 
     auto cdb = WireCell::Factory::lookup<ICellDatabase>("CellDatabase");
     Assert(cdb, "Failed to get ICellDatabase from default CellDatabase");

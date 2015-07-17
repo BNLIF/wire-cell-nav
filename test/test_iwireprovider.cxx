@@ -2,10 +2,17 @@
 #include "WireCellIface/IWireProvider.h"
 #include "WireCellIface/IWireParameters.h"
 #include "WireCellIface/IWireGenerator.h"
+#include "WireCellIface/IWireDatabase.h"
 
 #include "WireCellUtil/Testing.h"
+#include "WireCellUtil/Point.h"
 
 #include "WireCellUtil/NamedFactory.h"
+
+#include "TApplication.h"
+#include "TCanvas.h"
+#include "TLine.h"
+#include "TMarker.h"
 
 #include <iostream>
 
@@ -18,6 +25,7 @@ int main()
     // These are here to force the linker to give us the symbols
     WIRECELL_NAMEDFACTORY_USE(WireParams);
     WIRECELL_NAMEDFACTORY_USE(ParamWires);
+    WIRECELL_NAMEDFACTORY_USE(WireDatabase);
 
     // fixme: this C++ dance to wire up the interfaces may eventually
     // be done inside a workflow engine.
@@ -25,7 +33,13 @@ int main()
     // fixme: this needs to be done by a configuration service
     auto wp_cfg = WireCell::Factory::lookup<IConfigurable>("WireParams");
     Assert(wp_cfg, "Failed to get IConfigurable from default WireParams");
-    wp_cfg->configure(wp_cfg->default_configuration());
+
+    auto cfg = wp_cfg->default_configuration();
+    double pitch = 10.0;
+    cfg.put("pitch_mm.u", pitch);
+    cfg.put("pitch_mm.v", pitch);
+    cfg.put("pitch_mm.w", pitch);
+    wp_cfg->configure(cfg);
     cout << "Got WireParams IConfigurable interface @ " << wp_cfg << endl;
 
     auto wp_wps = WireCell::Factory::lookup<IWireParameters>("WireParams");
@@ -41,9 +55,33 @@ int main()
     Assert(pw_pro, "Failed to get IWireProvider from default ParamWires");
     cout << "Got ParamWires IWireProvider interface @ " << pw_pro << endl;
 
-    int nwires = pw_pro->wires().size();
+    const WireCell::WireSet& wires = pw_pro->wires();
+    int nwires = wires.size();
     cout << "Got " << nwires << " wires" << endl;
-    Assert(1103 == nwires);
+    //Assert(1103 == nwires);
+
+    auto wdb = WireCell::Factory::lookup<IWireDatabase>("WireDatabase");
+    Assert(wdb, "Failed to get IWireDatabase from default WireDatabase");
+    cout << "Got WireDatabase IWireDatabase interface @ " << wdb << endl;
+    wdb->load(wires);
+
+    Ray bbox = wdb->bounding_box();
+
+    TApplication theApp("test_iwireprovider",0,0);
+    TCanvas c;
+    TLine l;
+    TMarker m;
+    c.DrawFrame(bbox.first.z(), bbox.first.y(), bbox.second.z(), bbox.second.y());
+    for (auto wit = wires.begin(); wit != wires.end(); ++wit) {
+	Wire wire = *wit;
+	Ray wray = wire->ray();
+	l.DrawLine(wray.first.z(), wray.first.y(), wray.second.z(), wray.second.y());
+	Point cent = wire->center();
+	m.DrawMarker(cent.z(), cent.y());
+    }
+    c.Print("test_iwireprovider.pdf");
+    
+    theApp.Run();
     return 0;
 }
 
