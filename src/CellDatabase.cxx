@@ -1,9 +1,14 @@
 #include "WireCellNav/CellDatabase.h"
-
 #include "WireCellUtil/IndexedSet.h"
+#include "WireCellUtil/NamedFactory.h"
 
 #include <boost/graph/adjacency_list.hpp>
 #include <vector>
+
+using namespace WireCell;
+
+WIRECELL_NAMEDFACTORY(CellDatabase);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(CellDatabase, ICellDatabase);
 
 
 

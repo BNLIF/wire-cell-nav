@@ -18,10 +18,10 @@ namespace WireCell {
 	virtual ~BoundCells();
 
 	/// Generate my cells (ICellGenerator interface).
-	void generate(const WireCell::IWireDatabase& wdb);
+	virtual void generate(const WireCell::IWireDatabasePtr wdb);
 
 	/// Lend access to the cells provided (ICellProvider interface).
-	const WireCell::CellSet& cells() const;
+	virtual const WireCell::CellSet& cells() const;
 
     private:
 	WireCell::CellSet m_store;

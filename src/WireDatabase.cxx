@@ -1,11 +1,15 @@
 #include "WireCellNav/WireDatabase.h"
 #include "WireCellUtil/Units.h"
+#include "WireCellUtil/NamedFactory.h"
 
 #include <cmath>		// std::abs() - careful not to use bare abs()
 #include <algorithm>
 
 using namespace std;
 using namespace WireCell;
+
+WIRECELL_NAMEDFACTORY(WireDatabase);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(WireDatabase, IWireDatabase);
 
 WireDatabase::WireDatabase()
 {

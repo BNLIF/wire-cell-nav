@@ -1,6 +1,15 @@
 #include "WireCellNav/BoundCells.h"
+#include "WireCellUtil/NamedFactory.h"
+
+
+#include <iostream>		// debug
+using namespace std;
 
 using namespace WireCell;
+
+WIRECELL_NAMEDFACTORY(BoundCells);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, ICellGenerator);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, ICellProvider);
 
 BoundCells::BoundCells()
 {
@@ -51,20 +60,24 @@ public:
 };
 
 
-void BoundCells::generate(const WireCell::IWireDatabase& wdb)
+void BoundCells::generate(const WireCell::IWireDatabasePtr wdb)
 {
     m_store.clear();
 
     // This is Xin's cell definition algorithm sung to the tune of
     // graph minor.
 
-    const WireCell::WireVector& u_wires = wdb.wires_in_plane(kUwire);
-    const WireCell::WireVector& v_wires = wdb.wires_in_plane(kVwire);
-    const WireCell::WireVector& w_wires = wdb.wires_in_plane(kWwire);
+    const WireCell::WireVector& u_wires = wdb->wires_in_plane(kUwire);
+    const WireCell::WireVector& v_wires = wdb->wires_in_plane(kVwire);
+    const WireCell::WireVector& w_wires = wdb->wires_in_plane(kWwire);
 
-    float pitch_u = wdb.pitch(kUwire);
-    float pitch_v = wdb.pitch(kVwire);
-    float pitch_w = wdb.pitch(kYwire);
+    cerr << "U: " << u_wires.size() << " "
+	 << "V: " << v_wires.size() << " "
+	 << "W: " << w_wires.size() << endl;
+
+    float pitch_u = wdb->pitch(kUwire);
+    float pitch_v = wdb->pitch(kVwire);
+    float pitch_w = wdb->pitch(kYwire);
     
     std::pair<int,int> box_ind[4] = { // allows loops over a box of indices
         std::pair<int,int>(0,0),
@@ -79,13 +92,13 @@ void BoundCells::generate(const WireCell::IWireDatabase& wdb)
     for (int u_ind=0; u_ind < u_wires.size(); ++u_ind) {
         WireCell::Wire u_wire = u_wires[u_ind];
 	uvw_wires[0] = u_wire;
-        float dis_u_wire = wdb.wire_dist(u_wire);
+        float dis_u_wire = wdb->wire_dist(u_wire);
         float dis_u[2] = { dis_u_wire - pitch_u, dis_u_wire + pitch_u }; // half-line minmax
 
         for (int v_ind=0; v_ind < v_wires.size(); ++v_ind) {
             WireCell::Wire v_wire = v_wires[v_ind];
 	    uvw_wires[1] = v_wire;
-            float dis_v_wire = wdb.wire_dist(v_wire);
+            float dis_v_wire = wdb->wire_dist(v_wire);
             float dis_v[2] = { dis_v_wire - pitch_v, dis_v_wire + pitch_v };
 
 
@@ -95,14 +108,14 @@ void BoundCells::generate(const WireCell::IWireDatabase& wdb)
                 // fixme: we are not handling the case where one
                 // of these crossing points are outside the wire
                 // plane boundary.
-                wdb.crossing_point(dis_u[box_ind[ind].first], dis_v[box_ind[ind].second], kUwire, kVwire, puv[ind]);
-                dis_puv[ind] = wdb.wire_dist(puv[ind], kYwire);
+                wdb->crossing_point(dis_u[box_ind[ind].first], dis_v[box_ind[ind].second], kUwire, kVwire, puv[ind]);
+                dis_puv[ind] = wdb->wire_dist(puv[ind], kYwire);
             }
 
             for (int w_ind=0; w_ind < w_wires.size(); ++w_ind) {
                 WireCell::Wire w_wire = w_wires[w_ind];
 		uvw_wires[2] = w_wire;
-                float dis_w_wire = wdb.wire_dist(w_wire);
+                float dis_w_wire = wdb->wire_dist(w_wire);
                 float dis_w[2] = { dis_w_wire - pitch_w, dis_w_wire + pitch_w };
 
                 WireCell::PointVector pcell;
@@ -120,10 +133,10 @@ void BoundCells::generate(const WireCell::IWireDatabase& wdb)
                 for (int ind=0; ind<4; ++ind) {
                     {           // fresh scope
                         WireCell::Vector pointvec;
-                        if (wdb.crossing_point(dis_u[box_ind[ind].first], dis_w[box_ind[ind].second], 
+                        if (wdb->crossing_point(dis_u[box_ind[ind].first], dis_w[box_ind[ind].second], 
                                                kUwire, kYwire, pointvec)) 
                             {
-                                float disv = wdb.wire_dist(pointvec, kVwire);
+                                float disv = wdb->wire_dist(pointvec, kVwire);
                                 if (dis_v[0] <= disv && disv < dis_v[1]) {
                                     pcell.push_back(pointvec);
                                 }
@@ -132,10 +145,10 @@ void BoundCells::generate(const WireCell::IWireDatabase& wdb)
 
                     {           // fresh scope
                         WireCell::Vector pointvec;
-                        if (wdb.crossing_point(dis_v[box_ind[ind].first], dis_w[box_ind[ind].second], 
+                        if (wdb->crossing_point(dis_v[box_ind[ind].first], dis_w[box_ind[ind].second], 
                                                kVwire, kYwire, pointvec)) 
                             {
-                                float disu = wdb.wire_dist(pointvec, kUwire);
+                                float disu = wdb->wire_dist(pointvec, kUwire);
                                 if (dis_u[0] <= disu && disu < dis_u[1]) {
                                     pcell.push_back(pointvec);
                                 }
