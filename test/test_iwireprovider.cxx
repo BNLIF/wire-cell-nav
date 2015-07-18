@@ -20,7 +20,7 @@ using namespace WireCell;
 using namespace std;
 
 
-int main()
+int main(int argc, char* argv[])
 {
     // These are here to force the linker to give us the symbols
     WIRECELL_NAMEDFACTORY_USE(WireParams);
@@ -67,7 +67,10 @@ int main()
 
     Ray bbox = wdb->bounding_box();
 
-    TApplication theApp("test_iwireprovider",0,0);
+    TApplication* theApp = 0;
+    if (argc > 1) {
+	theApp = new TApplication ("test_iwireprovider",0,0);
+    }
     TCanvas c;
     TLine l;
     TMarker m;
@@ -79,9 +82,13 @@ int main()
 	Point cent = wire->center();
 	m.DrawMarker(cent.z(), cent.y());
     }
-    c.Print("test_iwireprovider.pdf");
-    
-    theApp.Run();
+    if (theApp) {
+	theApp->Run();
+    }
+    else {			// batch
+	c.Print("test_iwireprovider.pdf");
+    }
+
     return 0;
 }
 

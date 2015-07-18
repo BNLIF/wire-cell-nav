@@ -51,13 +51,13 @@ public:		     // just for us lucky functions local to this file
 };
 
 
-static ParamWire* make_wire(int index, const Point& offset, const Point& pitch,
+static ParamWire* make_wire(int index, const Point& point,
 			    const Point& proto, const Ray& bounds)
 {
     double number = index;
-    Point pt1 = offset + number*pitch;
-    Point pt2  = pt1 + proto;
-    Ray wireray(pt1, pt2);
+    const Point pt1 = point;
+    const Point pt2  = pt1 + proto;
+    const Ray wireray(pt1, pt2);
 
     Ray hits;
     int hitmask = box_intersection(bounds, wireray, hits);
@@ -79,27 +79,31 @@ static void make_one_plane(WireSet& store, WirePlaneType_t plane,
 			   const Ray& step)
 {
     const Vector drift(-1,0,0);
-    int global_count = store.size();
-    Point offset = step.first;
-    Vector pitch = step.second - offset;
-    Vector proto = drift.cross(pitch).norm();
+    const Point starting_point = step.first;
+    const Vector pitch = step.second - starting_point;
+    const Vector proto = drift.cross(pitch).norm();
 
 
     std::vector<ParamWire*> all_wires;
 
     int pos_index = 0;
+    Point offset = starting_point;
     while (true) {		// go in positive pitch direction
-	ParamWire* wire = make_wire(pos_index, offset, pitch, proto, bounds);
+	ParamWire* wire = make_wire(pos_index, offset, proto, bounds);
 	if (! wire) { break; }
 	all_wires.push_back(wire);
+	offset = wire->center() + pitch;
 	pos_index += 1;
     }
 
-    int neg_index = -1;		// avoid doing 0 twice
+    int neg_index = -1;		// now go in negative pitch direction
+    offset = all_wires[0]->center();
+    const Vector neg_pitch = -1.0 * pitch;
     while (true) {		// go in negative pitch direction
-	ParamWire* wire = make_wire(neg_index, offset, pitch, proto, bounds);
+	ParamWire* wire = make_wire(neg_index, offset, proto, bounds);
 	if (! wire) { break; }
 	all_wires.push_back(wire);
+	offset = wire->center() + neg_pitch;
 	neg_index -= 1;
     }
 
