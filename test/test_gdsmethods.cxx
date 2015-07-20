@@ -57,7 +57,9 @@ int main()
 	}
 
 	for (int wind=0; wind<wip.size(); ++wind) {
-	    cerr << "\nplane #" << iplane << " wire #" << wind << endl;
+	    cerr << "\nplane #" << iplane << " wire #" << wind
+		 << " pitch=" << pitch << " " << vpitch
+		 << endl;
 
 
 	    const GeomWire* wire = wip[wind];
@@ -82,9 +84,18 @@ int main()
 	    assert (wclosest && wclosest == wire, "wire isn't own closest wire");
 
 	    Vector Pbelow = center - vpitch*(0.1*pitch);
+	    double below_dist = gds.wire_dist(Pbelow, plane);
+	    cerr << "below: [" << below_dist << "] " <<  Pbelow << endl;
+
 	    const GeomWire* wbelow = gds.closest(Pbelow, plane);
 	    assert (wbelow && wbelow == wire, "just below wire isn't own closest wire");
 	    GeomWirePair bounds_below = gds.bounds(Pbelow, plane);
+	    if (bounds_below.first) {
+	    dump(gds, "BELOW 1st", *bounds_below.first);
+	    }
+	    if (bounds_below.second) {
+		dump(gds, "BELOW 2nd", *bounds_below.second);
+	    }
 	    assert (bounds_below.second == wire, "just below not bounded above");
 	    
 

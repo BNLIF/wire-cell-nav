@@ -8,24 +8,30 @@ using namespace WireCell;
 WireCell::GeomDataSource* WireCell::make_example_gds(float pitch, float angle,
 						     float yextent, float zextent)
 {
-    float nudge = 0.5*pitch;
     float dx=10*units::mm;
     float dy=yextent;
     float dz=zextent;
 
-    Vector bmin(-0.5*dx, -0.5*dy, -0.5*dz);
-    Vector bmax(+0.5*dx, +0.5*dy, +0.5*dz);
-    Vector drift(1,0,0);
+    float angU = angle;
+    float angV = M_PI-angU;
+    float angW = 0.0;
 
-    Vector oU(0.2*dx, -0.5*dy + nudge, -0.5*dz + nudge);
-    Vector oV(0.3*dx, -0.5*dy + nudge, +0.5*dz - nudge);
-    Vector oW(0.1*dx,           nudge, -0.5*dz + nudge);
+    const Vector center;
+    const Vector deltabb(dx,dy,dz);
+    const Vector bmin = center - 0.5*deltabb;
+    const Vector bmax = center + 0.5*deltabb;
 
-    Vector pU(0, pitch*std::cos(+angle), pitch*std::sin(+angle));
-    Vector pV(0, pitch*std::cos(-angle), pitch*std::sin(-angle));
-    Vector pW(0, 0, pitch);
+    // pitch vectors
+    const Vector pU(0, pitch*std::cos(+angU), pitch*std::sin(+angU));
+    const Vector pV(0, pitch*std::cos(+angV), pitch*std::sin(+angV));
+    const Vector pW(0, pitch*std::cos(+angW), pitch*std::sin(+angW));
 
-    return new WireCell::ParamGDS(bmin,bmax,drift, oU,pU, oV,pV, oW,pW);
+    // offset/starting points
+    const Vector oU(+0.25*dx, 0.0, 0.0);
+    const Vector oV( 0.0    , 0.0, 0.0);
+    const Vector oW(-0.25*dx, 0.0, 0.0);
+
+    return new WireCell::ParamGDS(bmin,bmax, oU,pU, oV,pV, oW,pW);
 }    
 
 

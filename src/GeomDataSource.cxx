@@ -137,7 +137,7 @@ const GeomWireSelection& GeomDataSource::wires_in_plane(WirePlaneType_t plane) c
 	}
     }
 
-    //cerr << "Generated " << ws.size() << " wires for plane " << plane << endl;
+    cerr << "Generated " << ws.size() << " wires for plane " << plane << endl;
 
     return ws;
 }

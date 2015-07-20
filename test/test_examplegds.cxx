@@ -19,9 +19,9 @@ int main()
 
     int ntot = gds.get_wires().size();
     cerr << "#wires = " << ntot << endl;
-    assert(ntot == 1103);
+    assert(ntot == 1243);
 
-    int want_nwires[] = {385, 385, 333};
+    int want_nwires[] = {455, 455, 333};
 
     for (int iplane=0; iplane<3; ++iplane) {
 	WirePlaneType_t plane = (WirePlaneType_t)iplane;
