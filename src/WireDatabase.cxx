@@ -47,7 +47,7 @@ void WireDatabase::load(const WireCell::WireSet& wires)
 	}
     }    
     m_all_wires.reserve(nwires);
-    
+
     // figure out boundary of wire planes
     for (int ind=0; ind<3; ++ind) { // xyz
 	pair<DVIt, DVIt> mm = minmax_element(all_xyz[ind].begin(),
@@ -94,6 +94,10 @@ void WireDatabase::load(const WireCell::WireSet& wires)
 	const Vector parr = vdir.dot(diff) * vdir;
 	const Vector perp = diff - parr;
 	m_pitches[iplane] = perp;
+	m_pitch_mags[iplane] = perp.magnitude();
+	m_pitch_units[iplane] = perp.norm();
+
+	m_origins[iplane] = wires[0]->center();
     }
 }
 
@@ -150,14 +154,14 @@ Wire WireDatabase::by_planeindex(const WirePlaneIndex& planeindex) const
 double WireDatabase::pitch(WirePlaneType_t plane) const
 {
     if (plane < kFirstPlane || plane > kLastPlane) { return 0; }
-    return m_pitches[plane].magnitude();
+    return m_pitch_mags[plane];
 }
 
 
 WireCell::Vector WireDatabase::pitch_unit_vector(WirePlaneType_t plane) const
 {
     if (plane < kFirstPlane || plane > kLastPlane) { return Vector(); }
-    return m_pitches[plane].norm();
+    return m_pitch_units[plane];
 }
 
 double WireDatabase::angle(WirePlaneType_t plane) const
@@ -182,10 +186,7 @@ WireCell::Point WireDatabase::center() const
 
 double WireDatabase::wire_dist(const Point& point, WirePlaneType_t plane) const
 {
-    const WireVector& wip = wires_in_plane(plane);
-    Wire wire0 = wip[0];
-    Point origin = wire0->center();
-
+    const Point& origin = m_origins[plane];
     Vector vdif = point - origin;
     Vector pitch_dir = pitch_unit_vector(plane);
     return pitch_dir.dot(vdif);

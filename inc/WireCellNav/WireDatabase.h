@@ -104,8 +104,11 @@ namespace WireCell {
 	WireVector m_pi2wires[3];
 	WireVector m_all_wires;	// keep this separately from pi2wires
 				// so we can return a const ref.
+	Vector m_origins[3];
 	double m_angles[3];
 	Vector m_pitches[3];
+	Vector m_pitch_units[3];
+	double m_pitch_mags[3];
 	Ray m_bbox;
 
     };
