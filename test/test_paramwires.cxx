@@ -40,7 +40,7 @@ void test1()
 void test2()
 {
     double pitches[] = {10.0, 5.0, 3.0, -1};
-    int want[] = {331, 663, 1103, 0};
+    int want[] = {371, 747, 1243, 0};
     for (int ind=0; pitches[ind] > 0.0; ++ind) {
 	WireParams params;
 	Configuration cfg = params.default_configuration();
@@ -52,8 +52,8 @@ void test2()
 	pw.generate(params);
 	int nwires = pw.wires().size();
 	cout << ind << ": pitch=" << pitches[ind] << " nwires=" << nwires << " (want=" << want[ind] << ")" << endl;
-	Assert(nwires == want[ind]);
-	Assert(configuration_dumps(cfg).size());
+	Assert(nwires == want[ind], "Wrong number of wires");
+	Assert(configuration_dumps(cfg).size(), "Failed to dump cfg");
     }
 }
 

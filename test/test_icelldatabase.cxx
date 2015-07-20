@@ -58,9 +58,7 @@ int main()
     const WireCell::WireSet& wires = pw_pro->wires();
     int nwires = wires.size();
     cout << "Got " << nwires << " wires" << endl;
-    Assert(663 == nwires);
-    // 331 for 10mm pitch 
-    // 663 for 5 mm pitch
+    Assert(747 == nwires);
 
     auto wdb = WireCell::Factory::lookup<IWireDatabase>("WireDatabase");
     Assert(wdb, "Failed to get IWireDatabase from default WireDatabase");

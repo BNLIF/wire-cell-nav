@@ -97,8 +97,8 @@ static void make_one_plane(WireSet& store, WirePlaneType_t plane,
     }
 
     int neg_index = -1;		// now go in negative pitch direction
-    offset = all_wires[0]->center();
     const Vector neg_pitch = -1.0 * pitch;
+    offset = all_wires[0]->center() + neg_pitch; // start one below first upward going one
     while (true) {		// go in negative pitch direction
 	ParamWire* wire = make_wire(neg_index, offset, proto, bounds);
 	if (! wire) { break; }

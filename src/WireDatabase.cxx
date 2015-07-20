@@ -182,16 +182,16 @@ WireCell::Point WireDatabase::center() const
 
 double WireDatabase::wire_dist(const Point& point, WirePlaneType_t plane) const
 {
-    // const WireVector& wip = wires_in_plane(plane);
-    // Wire wire0 = wip[0];
-    // Point origin = wire0->center();
+    const WireVector& wip = wires_in_plane(plane);
+    Wire wire0 = wip[0];
+    Point origin = wire0->center();
 
-    // Vector vdif = point - origin;
-    // Vector pitch_dir = pitch_unit_vector(plane);
-    // return pitch_dir.dot(vdif);
+    Vector vdif = point - origin;
+    Vector pitch_dir = pitch_unit_vector(plane);
+    return pitch_dir.dot(vdif);
 
-    double theta = angle(plane);
-    return std::cos(theta/units::radian) *point.z() - std::sin(theta/units::radian) * point.y();
+//    double theta = angle(plane);
+//    return std::cos(theta/units::radian) *point.z() - std::sin(theta/units::radian) * point.y();
 }
 	
 double WireDatabase::wire_dist(Wire wire) const
