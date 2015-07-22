@@ -221,13 +221,12 @@ void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
 
 
 WireCell::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound, 
-				 double angle, double uvpitch, double wpitch)
+				 double angle, double pitch)
     : GeomDataSource()
     , m_minbound(minbound)
     , m_maxbound(maxbound)
 {
-    if (wpitch == 0.0) { wpitch = uvpitch; }
-    uvw_wire_mesh(angle, uvpitch);
+    uvw_wire_mesh(angle, pitch);
 }
 
 WireCell::WrappedGDS::~WrappedGDS()

@@ -45,23 +45,15 @@ namespace WireCell {
 	 * \param maxbound is a vector giving the maxbound point of
 	 * the bounding box.
 	 *
-	 * \param offsetU is a point on a wire in the U plane of face
-	 * A.  
+	 * \param angle gives the absolute value of the U and V angles
+	 * w.r.t. the W (aka Y) wires..
 	 *
-	 * \param pitchU is a vector perpendicular to and connecting
-	 * two neighboring wires in the U plane of face A.
-	 *
-	 * \param offsetV offset vector for V wires on face A.
-	 *
-	 * \param pitchV pitch vector for V wires on face A.
-	 * 
-	 * \param offsetW offset vector for W wires on face A.
-	 *
-	 * \param pitchW pitch vector for W wires on face A.
+	 * \param pitch gives the perpendicular distance between any
+	 * two consecutive wires in a plane.
 	 * 
 	 */
     	WrappedGDS(const Vector& minbound, const Vector& maxbound, 
-		   double angle, double uvpitch, double wpitch = 0.0);
+		   double angle, double pitch);
     	virtual ~WrappedGDS();
 
     private:
