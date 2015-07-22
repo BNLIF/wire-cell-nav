@@ -37,12 +37,12 @@ static int make_ident(int face, int top_ind, int uvw, int segment)
 
 static int make_chan(int face, int top_ind, int uvw)
 {
-    return (top_ind+1) +                    (uvw+1)*10000 + (face+1)*100000;
+    return (top_ind+1) +                   (uvw+1)*10000 + (face+1)*100000;
 }
 
 
 
-void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch)
+void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
 {
     const Vector drift(-1,0,0);
 
@@ -66,8 +66,8 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch)
     int n_horz_steps = int((m_maxbound.z - m_minbound.z)/horz_step_mag);
     int n_vert_steps = int((m_maxbound.y - m_minbound.y)/vert_step_mag);
 
-    cerr << n_horz_steps << " horizontal steps" << endl;
-    cerr << n_vert_steps << " vertical steps" << endl;
+    //cerr << n_horz_steps << " horizontal steps" << endl;
+    //cerr << n_vert_steps << " vertical steps" << endl;
     
     // calculate new bounds
     const Vector center_bb = 0.5*(m_maxbound+ m_minbound);
@@ -114,10 +114,10 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch)
     v_ul.insert(v_ul.end(), rhs.begin(),  rhs.end());
     v_ul.insert(v_ul.end(), top.rbegin(), top.rend());
 
-    cerr << "#ru: " << u_ru.size() << endl;
-    cerr << "#ur: " << u_ur.size() << endl;
-    cerr << "#lu: " << v_lu.size() << endl;
-    cerr << "#ul: " << v_ul.size() << endl;
+    // cerr << "#ru: " << u_ru.size() << endl;
+    // cerr << "#ur: " << u_ur.size() << endl;
+    // cerr << "#lu: " << v_lu.size() << endl;
+    // cerr << "#ul: " << v_ul.size() << endl;
 
     map<VectorPtrPair, int> pair2ind;
     for (int ind=0; ind<npoints; ++ind) {
@@ -141,7 +141,7 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch)
     for (int top_ind=0; top_ind < top.size(); ++top_ind) {
 
 	VectorPtr starting_point = top[top_ind];
-	cerr << "START" << top_ind << " " << *(starting_point.get()) <<endl;
+	//cerr << "START" << top_ind << " " << *(starting_point.get()) <<endl;
 
 	// starting u or v
 	for (int starting_uv = 0; starting_uv < 2; ++starting_uv) {
@@ -149,9 +149,10 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch)
 	    vector<VectorPtr> points;
 	    points.push_back(starting_point);
 	    get_points(points, wm, bot_set, starting_point, starting_uv);
-	    cerr << "GOT " << points.size() << " points for uv=" << starting_uv << endl;
-
+	    //cerr << "GOT " << points.size() << " points for uv=" << starting_uv << endl;
+	    
 	    for (int ipt=0; ipt<points.size()-1; ++ipt) {
+		int segment = ipt;
 
 		int this_uv = (starting_uv + ipt)%2;
 
@@ -167,7 +168,7 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch)
 			this_x_val *= -1;
 		    }
 
-		    int ident = make_ident(this_face, top_ind, this_face_uv, ipt);
+		    int ident = make_ident(this_face, top_ind, this_face_uv, segment);
 		    int chan = make_chan(this_face, top_ind, this_face_uv);
 		    
 
@@ -176,18 +177,45 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch)
 		    p1.x = p2.x = this_x_val;
 
 		    GeomWire gw(ident,
-				WirePlaneType_t((starting_uv + ipt)%2),
+				WirePlaneType_t((((starting_uv + ipt)%2) + this_face)%2),
 				pair2ind[VectorPtrPair(points[ipt],points[ipt+1])],
-				chan, p1, p2);
+				chan,
+				p1, p2,
+				segment, this_face, 0);
 
-		    cerr << gw << " " << gw.point1() << " " << gw.point2() << endl;
+		    //cerr << gw << " " << gw.point1() << " " << gw.point2() << endl;
 		    this->add_wire(gw);
 		}
 	    }
 	}
     }
 
+    // W wires	
+    for (int ind=0; ind < top.size(); ++ind) {
+	VectorPtr top_point = top[ind];
+	VectorPtr bot_point = bot[ind];
+
+	for (int this_face = 0; this_face < 2; ++this_face) {
+
+	    double this_x_val = x_delta; // u
+	    if (this_face) { // "B" face
+		this_x_val *= -1;
+	    }
     
+	    int ident = make_ident(this_face, ind, 2, 0);
+	    int chan = make_chan(this_face, ind, 2);
+
+	    Point p1(*top_point.get());
+	    Point p2(*bot_point.get());
+	    p1.x = p2.x = this_x_val;
+
+	    GeomWire gw(ident,
+			kYwire,
+			ind,
+			chan, p1, p2, 0, this_face, 0);
+	    this->add_wire(gw);
+	}
+    }
 }
 
 
@@ -199,7 +227,7 @@ WireCell::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound,
     , m_maxbound(maxbound)
 {
     if (wpitch == 0.0) { wpitch = uvpitch; }
-    uv_wire_mesh(angle, uvpitch);
+    uvw_wire_mesh(angle, uvpitch);
 }
 
 WireCell::WrappedGDS::~WrappedGDS()

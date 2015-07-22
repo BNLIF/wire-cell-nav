@@ -69,7 +69,7 @@ namespace WireCell {
     	Vector m_minbound, m_maxbound;
 
 
-	void uv_wire_mesh(double angle, double uvpitch);
+	void uvw_wire_mesh(double angle, double uvpitch);
 
     };
     
