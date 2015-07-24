@@ -12,6 +12,38 @@ WIRECELL_NAMEDFACTORY_ASSOCIATE(CellDatabase, ICellDatabase);
 
 
 
+
+
+WireCell::CellDatabase::CellDatabase()
+//    : m_graph(0)
+{
+}
+
+WireCell::CellDatabase::~CellDatabase()
+{
+    this->clear();
+}
+
+
+void WireCell::CellDatabase::clear()
+{
+    // if (m_graph) {
+    // 	delete m_graph;
+    // 	m_graph = 0;
+    // }
+}
+
+// fixme: 
+void WireCell::CellDatabase::load(cell_range cells) {}
+wire_range WireCell::CellDatabase::wires(Cell cell) const {}
+cell_range WireCell::CellDatabase::cells(Wire wire) const {}
+Cell WireCell::CellDatabase::cell(wire_range wires) const {}
+cell_range WireCell::CellDatabase::neighbors(Cell cell) const {}
+
+
+
+#if 0				// fixme: reenable
+
 /// Each vertex of the graph has a "type" and an index into a
 /// vector of objects of corresponding type.:
 /// - cell indexes into an array of Cell
@@ -145,27 +177,6 @@ void WireCell::Graph::record(WireCell::Cell thecell)
 
 
 
-
-WireCell::CellDatabase::CellDatabase()
-    : m_graph(0)
-{
-}
-
-WireCell::CellDatabase::~CellDatabase()
-{
-    this->clear();
-}
-
-
-void WireCell::CellDatabase::clear()
-{
-    if (m_graph) {
-	delete m_graph;
-	m_graph = 0;
-    }
-}
-
-
 void WireCell::CellDatabase::load(const WireCell::CellSet& cellset)
 {
     this->clear();
@@ -201,3 +212,4 @@ WireCell::CellVector WireCell::CellDatabase::neighbors(WireCell::Cell cell) cons
     return CellVector();	// fixme
 }
 
+#endif	// fixme

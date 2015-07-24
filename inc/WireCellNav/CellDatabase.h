@@ -15,30 +15,29 @@ namespace WireCell {
 	CellDatabase();
 	virtual ~CellDatabase();
 
-	/// Load the underling cell data. (ICellDatabase)
-	virtual void load(const WireCell::CellSet& cells);
+	/// Load the underling cell data.
+	virtual void load(cell_range cells);
 
 	/// Return collection of wires which are associated with the
-	/// given cell. (ICellDatabase)
-	virtual WireVector wires(Cell cell) const;
+	/// given cell.
+	virtual wire_range wires(Cell cell) const;
 	
-	/// Return collection of cells associated with the given
-	/// wire. (ICellDatabase)
-	virtual CellVector cells(Wire wire) const;
+	/// Return collection of cells associated with the given wire.
+	virtual cell_range cells(Wire wire) const;
 
 	/// Return the one cell associated with the collection of
-	/// wires or NULL. (ICellDatabase)
-	virtual Cell cell(const WireVector& wires) const;
+	/// wires or NULL.
+	virtual Cell cell(wire_range wires) const;
 
-	/// Return collection of nearest neighbor
-	/// cells. (ICellDatabase)
-	virtual CellVector neighbors(Cell cell) const;
+	/// Return collection of nearest neighbor cells.
+	virtual cell_range neighbors(Cell cell) const;
+
 
     private:
 
 	void clear();
 
-	Graph* m_graph;
+//	Graph* m_graph;
     };
 
 } // namespace WireCell

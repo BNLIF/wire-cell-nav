@@ -1,6 +1,10 @@
 #include "WireCellNav/BoundCells.h"
 #include "WireCellUtil/NamedFactory.h"
+#include "WireCellUtil/Point.h"
+#include "WireCellUtil/Units.h"
 
+#include <boost/range.hpp>
+#include <iterator>
 
 #include <iostream>		// debug
 using namespace std;
@@ -11,26 +15,19 @@ WIRECELL_NAMEDFACTORY(BoundCells);
 WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, ICellGenerator);
 WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, ICellProvider);
 
-BoundCells::BoundCells()
-{
-}
-
-BoundCells::~BoundCells()
-{
-}
-
 
 // This is the actual implementation of the cell we provide.  It is
 // buried in this implementation for a reason.  It's not a publicly
 // accessible class.
+namespace WireCell {
 class BoundCell : public ICell {
     
     int m_ident;
     PointVector m_corners;	// this is likely a source of a lot of memory usage
-    WireVector m_wires;
+    const std::vector<const IWire*> m_wires;
 
 public:
-    BoundCell(int id, const PointVector& pcell, const WireVector& wires)
+    BoundCell(int id, const PointVector& pcell, const std::vector<const IWire*>& wires)
 	: m_ident(id), m_corners(pcell), m_wires(wires) {}
     virtual ~BoundCell() {}	// do not further inherit.
 
@@ -54,31 +51,120 @@ public:
 	return m_corners;
     }
 
-    virtual WireCell::WireVector wires() const {
-	return m_wires;
+//    virtual WireCell::WireVector wires() const {
+//	return m_wires;
+//    }
+};
+}
+
+
+// Return a Ray going from the center point of wires[0] to a point on
+// wire[1] and perpendicular to both.
+static Ray pitch2(const std::vector<const IWire*>& wires)
+{
+    // Use two consecutive wires from the center to determine the pitch. 
+    int ind = wires.size()/2;
+    const IWire* one = wires[ind];
+    const IWire* two = wires[ind+1];
+    const Ray p = ray_pitch(one->ray(), two->ray());
+
+    // Move the pitch to the first wire
+    const IWire* zero = wires[0];
+    const Vector center0 = zero->center();
+    return Ray(center0, center0 + ray_vector(p));
+}
+
+static Vector axis(const std::vector<const IWire*>& wires)
+{
+    int ind = wires.size()/2;
+    return ray_vector(wires[ind]->ray()).norm();
+}
+
+struct WireByIndex {
+    bool operator() (const IWire* lhs, const IWire *rhs) const {
+	if (lhs->plane() == rhs->plane()) {
+	    return lhs->index() < rhs->index();
+	}
+	return lhs->plane() < lhs->plane();
     }
 };
 
+Vector origin_cross(const std::vector<const IWire*>& ones,
+		    const std::vector<const IWire*>& twos) {
+    Vector cross = ray_pitch(ones[0]->ray(), twos[0]->ray()).first;
+    cross.x(0.0);
+    return cross;
+}
 
-void BoundCells::generate(const WireCell::IWireDatabasePtr wdb)
+
+void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
 {
     m_store.clear();
 
-    // This is Xin's cell definition algorithm sung to the tune of
-    // graph minor.
+    /* This was originally Xin's cell algorithm but only the concept
+       remains.
 
-    const WireCell::WireVector& u_wires = wdb->wires_in_plane(kUwire);
-    const WireCell::WireVector& v_wires = wdb->wires_in_plane(kVwire);
-    const WireCell::WireVector& w_wires = wdb->wires_in_plane(kWwire);
+       The idea is based on "crossing points" and "wire half-way
+       lines".  Crossing points are the points in the Y-Z plane where
+       lines which are parallel to that plane cross.  Wire half-way
+       lines are the lines running parallel to a given wire and within
+       the wire plane which are 1/2 the of a pitch distance away.
 
-    cerr << "U: " << u_wires.size() << " "
-	 << "V: " << v_wires.size() << " "
-	 << "W: " << w_wires.size() << endl;
+       The algorithm visits each U and V wire pair and determines
+       their crossing point.  If this point is outside the bounding
+       box of the wire planes it is discarded.  Otherwise, the four
+       crossing points of each wire half-way lines are found.  Any
+       that are inside the bounding box are saved as candidate cell
+       corner points.
 
-    float pitch_u = wdb->pitch(kUwire);
-    float pitch_v = wdb->pitch(kVwire);
-    float pitch_w = wdb->pitch(kYwire);
+       Then, for each W wire, these four points are checked and any
+       which are withing 1/2 pitch of the wire are kept as cell corner
+       points.
+
+       In addition the wire half-way crossing points for the W wire
+       and the U wire are found and checked to be within the wire
+       half-way distance with the current V wires.  This is repeated
+       with U and V swapped.  Surviving points are added to the list
+       of cell corner points.
+
+    */
     
+    vector<const IWire*> u_wires, v_wires, w_wires;
+    copy_if(wires_begin, wires_end, back_inserter(u_wires), select_u_wires);
+    copy_if(wires_begin, wires_end, back_inserter(v_wires), select_v_wires);
+    copy_if(wires_begin, wires_end, back_inserter(w_wires), select_w_wires);
+
+    WireByIndex wbi_sorter;
+    std::sort(u_wires.begin(), u_wires.end(), wbi_sorter);
+    std::sort(v_wires.begin(), v_wires.end(), wbi_sorter);
+    std::sort(w_wires.begin(), w_wires.end(), wbi_sorter);
+
+    const Ray pitch_u_ray = pitch2(u_wires);
+    const Ray pitch_v_ray = pitch2(v_wires);
+    const Ray pitch_w_ray = pitch2(w_wires);
+
+    const double pitch_u = ray_length(pitch_u_ray);
+    const double pitch_v = ray_length(pitch_v_ray);
+    const double pitch_w = ray_length(pitch_w_ray);
+    
+    const Vector axis_u = axis(u_wires);
+    const Vector axis_v = axis(v_wires);
+    const Vector axis_w = axis(w_wires);
+    const Vector jump_u = axis_u * (pitch_u / sin(2.0 * acos(axis_w.dot(axis_u))));
+    const Vector jump_v = axis_v * (pitch_v / sin(2.0 * acos(axis_w.dot(axis_v))));
+
+    // jumps from a wire crossing point to the four half-wire crossing
+    // points, in cyclical order.
+    const Vector cross_jump_uv[4] = {
+	+ 0.5*jump_u + 0.5*jump_v, // +Y/Z=0
+	+ 0.5*jump_u - 0.5*jump_v, // Y=0/+Z
+	- 0.5*jump_u - 0.5*jump_v, // -Y/Z=0
+	- 0.5*jump_u + 0.5*jump_v  // Y=0/-Z
+    };
+
+    //const double tolerance = 0.1*units::mm;
+    const double tolerance = 0.0; // fixme: generate noisy wires and test this value
+
     std::pair<int,int> box_ind[4] = { // allows loops over a box of indices
         std::pair<int,int>(0,0),
         std::pair<int,int>(0,1),
@@ -87,79 +173,83 @@ void BoundCells::generate(const WireCell::IWireDatabasePtr wdb)
     };
 
     // pack it up and send it out
-    WireVector uvw_wires(3);
+    std::vector<const IWire*> uvw_wires(3);
 
-    for (int u_ind=0; u_ind < u_wires.size(); ++u_ind) {
-        WireCell::Wire u_wire = u_wires[u_ind];
-	uvw_wires[0] = u_wire;
-        float dis_u_wire = wdb->wire_dist(u_wire);
-        float dis_u[2] = { dis_u_wire - pitch_u, dis_u_wire + pitch_u }; // half-line minmax
+    const Vector origin_uv = origin_cross(u_wires, v_wires);
 
-        for (int v_ind=0; v_ind < v_wires.size(); ++v_ind) {
-            WireCell::Wire v_wire = v_wires[v_ind];
-	    uvw_wires[1] = v_wire;
-            float dis_v_wire = wdb->wire_dist(v_wire);
-            float dis_v[2] = { dis_v_wire - pitch_v, dis_v_wire + pitch_v };
+    for (int u_ind = 0; u_ind < u_wires.size(); ++u_ind) {
+	const IWire& u_wire = *u_wires[u_ind];
+	uvw_wires[0] = &u_wire;
 
+	for (int v_ind = 0; v_ind < v_wires.size(); ++v_ind) {
+	    const IWire& v_wire = *v_wires[v_ind];
+	    uvw_wires[1] = &v_wire;
+
+	    // source of precision loss?
+	    Vector cross_uv = origin_uv + double(u_ind)*jump_v + double(v_ind)*jump_u;
 
             std::vector<Vector> puv(4);
-            float dis_puv[4];
-            for (int ind=0; ind<4; ++ind) {
-                // fixme: we are not handling the case where one
-                // of these crossing points are outside the wire
-                // plane boundary.
-                wdb->crossing_point(dis_u[box_ind[ind].first], dis_v[box_ind[ind].second], kUwire, kVwire, puv[ind]);
-                dis_puv[ind] = wdb->wire_dist(puv[ind], kYwire);
-            }
+            double dis_puv[4];
+	    for (int ind=0; ind<4; ++ind) {
+		puv[ind] = cross_uv + cross_jump_uv[ind];
+	    }
 
-            for (int w_ind=0; w_ind < w_wires.size(); ++w_ind) {
-                WireCell::Wire w_wire = w_wires[w_ind];
-		uvw_wires[2] = w_wire;
-                float dis_w_wire = wdb->wire_dist(w_wire);
-                float dis_w[2] = { dis_w_wire - pitch_w, dis_w_wire + pitch_w };
+	    // Prefilter W wires, only bother checking those nearby.
+	    int max_w_ind = min(int((puv[1].z() + 0.5*pitch_w)/pitch_w), int(w_wires.size()-1));
+	    int min_w_ind = max(int((puv[3].z() - 0.5*pitch_w)/pitch_w), 0);
+	    for (int w_ind = min_w_ind; w_ind <= max_w_ind; ++w_ind) {
+		const IWire& w_wire = *w_wires[w_ind];
+		uvw_wires[2] = &w_wire;
+
+		double target_w = w_ind * pitch_w;
 
                 WireCell::PointVector pcell;
+		vector<int> uv_ind;
 
+		bool inside_uv[4];
+		// check which of the four U/V crossings are near this W wire.
                 for (int ind=0; ind<4; ++ind) {
-                    if (dis_w[0] <= dis_puv[ind] && dis_puv[ind] < dis_w[1]) {
-                        pcell.push_back(puv[ind]);
+		    if (fabs(target_w - puv[ind].z()) < 0.5*(pitch_w + tolerance)) {
+			inside_uv[ind] = true;
+			pcell.push_back(puv[ind]);
                     }
+		    else {
+			inside_uv[ind] = false;
+		    }
                 }
 
-                if (!pcell.size()) { 
-                    continue;
+                if (!pcell.size()) {
+		    // fixme: check if this fires, it shouldn't due to the pre-filtering of W wires
+                    continue;	
                 }
 
-                for (int ind=0; ind<4; ++ind) {
-                    {           // fresh scope
-                        WireCell::Vector pointvec;
-                        if (wdb->crossing_point(dis_u[box_ind[ind].first], dis_w[box_ind[ind].second], 
-                                               kUwire, kYwire, pointvec)) 
-                            {
-                                float disv = wdb->wire_dist(pointvec, kVwire);
-                                if (dis_v[0] <= disv && disv < dis_v[1]) {
-                                    pcell.push_back(pointvec);
-                                }
-                            }
-                    }
+		vector<std::pair<int,int> > to_break;
+		for (int ind=0; ind<4; ++ind) {
+		    int other_ind = (ind+1)%4;
+		    if (inside_uv[ind] && inside_uv[other_ind]) {
+			continue;
+		    }
+		    if (inside_uv[ind]) {
+			to_break.push_back(std::pair<int,int>(ind, other_ind));
+		    }
+		    else {
+			to_break.push_back(std::pair<int,int>(other_ind, ind));
+		    }
+		}
 
-                    {           // fresh scope
-                        WireCell::Vector pointvec;
-                        if (wdb->crossing_point(dis_v[box_ind[ind].first], dis_w[box_ind[ind].second], 
-                                               kVwire, kYwire, pointvec)) 
-                            {
-                                float disu = wdb->wire_dist(pointvec, kUwire);
-                                if (dis_u[0] <= disu && disu < dis_u[1]) {
-                                    pcell.push_back(pointvec);
-                                }
-                            }
-                    }
-
-                }
-
+		for (int ind = 0; ind < to_break.size(); ++ind) {
+		    const Vector& p_in = puv[to_break[ind].first];
+		    const Vector& p_out = puv[to_break[ind].second];
+		    
+		    double over_z = p_in.z() - target_w - 0.5*pitch_w;
+		    Vector diff = p_out - p_in;
+		    double rel = over_z / diff.z();
+		    Vector corner = p_in + rel*diff;
+		    pcell.push_back(corner);
+		}
+			
 		// result
-		Cell thecell(new BoundCell(m_store.size(), pcell, uvw_wires));
-		m_store.insert(thecell);
+		m_store.push_back(new BoundCell(m_store.size(), pcell, uvw_wires));
 
             } // W wires
         } // v wires
@@ -168,7 +258,25 @@ void BoundCells::generate(const WireCell::IWireDatabasePtr wdb)
 
 
 
-const WireCell::CellSet& BoundCells::cells() const
+typedef WireCell::IteratorAdapter< std::vector<BoundCell*>::iterator, cell_base_iterator > bc_iterator;
+
+WireCell::cell_iterator BoundCells::cells_begin()
 {
-    return m_store;
+    return bc_iterator(m_store.begin());
 }
+
+
+WireCell::cell_iterator BoundCells::cell_end()
+{
+    return bc_iterator(m_store.end());
+}
+
+
+BoundCells::BoundCells()
+{
+}
+
+BoundCells::~BoundCells()
+{
+}
+

@@ -14,6 +14,7 @@ WIRECELL_NAMEDFACTORY_ASSOCIATE(ParamWires, IWireGenerator);
 
 static int number_of_wires = 0;
 
+namespace WireCell {
 class ParamWire : public IWire {
     WirePlaneType_t m_plane;
     int m_index;
@@ -44,12 +45,16 @@ public:
 
     WireCell::Ray ray() const { return m_ray; }
 
-public:		     // just for us lucky functions local to this file
+    /// fixme: supply
+    int segment() const {return 0;}
+    int face() const {return 0;}
+    int apa() const {return 0;}
+
     void set_index(int ind) { m_index = ind; }
     void set_plane(WirePlaneType_t plane) { m_plane = plane; }
 
 };
-
+}
 
 static ParamWire* make_wire(int index, const Point& point,
 			    const Point& proto, const Ray& bounds)
@@ -74,15 +79,13 @@ struct SortByIndex {
 };    
 
 
-static void make_one_plane(WireSet& store, WirePlaneType_t plane,
-			   const Ray& bounds,
-			   const Ray& step)
+void ParamWires::make_one_plane(WirePlaneType_t plane, const Ray& bounds, const Ray& step)
 {
     const Vector drift(-1,0,0);
     const Point starting_point = step.first;
     const Vector pitch = step.second - starting_point;
-    const Vector proto = drift.cross(pitch).norm();
-
+    const Vector proto = pitch.cross(drift).norm();
+    
 
     std::vector<ParamWire*> all_wires;
 
@@ -115,8 +118,7 @@ static void make_one_plane(WireSet& store, WirePlaneType_t plane,
 	ParamWire* pwire = all_wires[ind];
 	pwire->set_index(ind);
 	pwire->set_plane(plane);
-	Wire wire(pwire);	// intern
-	store.insert(wire);
+	m_wire_store.push_back(pwire);
     }
 	
     //std::cerr << "Made "<<store.size()<<" wires for plane " << plane << std::endl;
@@ -130,16 +132,22 @@ void ParamWires::generate(const IWireParameters& params)
 {
     this->clear();
 
-    make_one_plane(m_wire_store, kUwire, params.bounds(), params.pitchU());
-    make_one_plane(m_wire_store, kVwire, params.bounds(), params.pitchV());
-    make_one_plane(m_wire_store, kWwire, params.bounds(), params.pitchW());
+    make_one_plane(kUwire, params.bounds(), params.pitchU());
+    make_one_plane(kVwire, params.bounds(), params.pitchV());
+    make_one_plane(kWwire, params.bounds(), params.pitchW());
 }
 
-const WireSet& ParamWires::wires() const
+
+typedef IteratorAdapter< std::vector<ParamWire*>::iterator, wire_base_iterator > pw_iterator;
+
+WireCell::wire_iterator ParamWires::wires_begin()
 {
-    return m_wire_store;
+    return pw_iterator(m_wire_store.begin());
 }
-
+WireCell::wire_iterator ParamWires::wires_end()
+{
+    return pw_iterator(m_wire_store.end());
+}
 
 void ParamWires::clear() {
     m_wire_store.clear();

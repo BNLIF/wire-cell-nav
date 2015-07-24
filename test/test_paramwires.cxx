@@ -2,6 +2,8 @@
 #include "WireCellNav/WireParams.h"
 #include "WireCellUtil/Testing.h"
 
+#include <boost/range.hpp>
+
 #include <iostream>
 #include <cmath>
 
@@ -13,17 +15,18 @@ void test1()
     WireParams params;
     ParamWires pw;
     pw.generate(params);
-    const WireSet& wires = pw.wires();
+
+    std::vector<const IWire*> wires(pw.wires_begin(), pw.wires_end());
 
     cerr << "Got " << wires.size() << " wires" <<endl;
     Assert(wires.size());
     int last_plane = -1;
     int last_index = -1;
-    for (auto wit=wires.begin(); wit != wires.end(); ++wit) {
-	Wire wire = *wit;
-	int iplane = wire->plane() - kFirstPlane;
-	int ident = (1+iplane)*100000 + wire->index();
-	Assert(ident == wire->ident());
+    for (auto wit = wires.begin(); wit != wires.end(); ++wit) {
+	const IWire& wire = **wit;
+	int iplane = wire.plane() - kFirstPlane;
+	int ident = (1+iplane)*100000 + wire.index();
+	Assert(ident == wire.ident());
 
 	if (iplane == last_plane) {
 	    ++last_index;
@@ -32,7 +35,7 @@ void test1()
 	    last_plane = iplane;
 	    last_index = 0;
 	}
-	Assert(last_index == wire->index());
+	Assert(last_index == wire.index());
 
     }
 }
@@ -50,7 +53,8 @@ void test2()
 	params.configure(cfg);
 	ParamWires pw;
 	pw.generate(params);
-	int nwires = pw.wires().size();
+	std::vector<const IWire*> wires(pw.wires_begin(), pw.wires_end());
+	int nwires = wires.size();
 	cout << ind << ": pitch=" << pitches[ind] << " nwires=" << nwires << " (want=" << want[ind] << ")" << endl;
 	Assert(nwires == want[ind], "Wrong number of wires");
 	Assert(configuration_dumps(cfg).size(), "Failed to dump cfg");

@@ -4,9 +4,12 @@
 #include "WireCellIface/IWireProvider.h"
 #include "WireCellIface/IWireGenerator.h"
 
-#include <map>
+#include <vector>
 
 namespace WireCell {
+
+    // internal
+    class ParamWire;
 
     /** A provider of wire (segment) geometry as generated from parameters.
      *
@@ -14,6 +17,7 @@ namespace WireCell {
      * one-another and to be equally spaced between neighbors and
      * perpendicular to the drift direction.
      */
+
     class ParamWires :
 	public IWireGenerator,
 	public IWireProvider {
@@ -23,16 +27,19 @@ namespace WireCell {
 
 	void generate(const WireCell::IWireParameters& params);
 
-	/// Lend access to the store of produced wires.  IWireProvider
-	/// interface.
-	const WireSet& wires() const;
-
+	/// Access the wires
+	wire_iterator wires_begin();
+	wire_iterator wires_end();
 
     private:
 
 	void clear();
-	WireSet m_wire_store;
 
+	void make_one_plane(WirePlaneType_t plane, const Ray& bounds, const Ray& step);
+
+
+	typedef std::vector<ParamWire*> ParamWireStore;
+	ParamWireStore m_wire_store;
 
     };
 
