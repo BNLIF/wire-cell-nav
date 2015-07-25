@@ -75,11 +75,13 @@ int GenerativeFDS::jump(int frame_number)
 	float charge = hits[ind].second;
 	int tbin = int((pt.x-xmm.second)/bin_drift_distance);
 	
+	//	std::cout << tbin << " " << pt.x/units::cm << std::endl;
+
 	// adding in the diffusion
 	// assuming the velocity is 1.6 mm/us
 	float drift_time = (pt.x-xmm.second)/(1.6*units::millimeter); // us
-	float DL = 5; //cm^2/s
-	float DT = 13; //cm^2/s
+	float DL = 5.3; //cm^2/s
+	float DT = 12.8; //cm^2/s
 	float sigmaL = sqrt(2.*DL*drift_time*1e-6) * units::cm;
 	float sigmaT = sqrt(2.*DT*drift_time*1e-6) * units::cm;
 	
@@ -176,7 +178,7 @@ int GenerativeFDS::jump(int frame_number)
 		allwires.push_back(trans_wires.at(qw));
 		float tcharge = charge * long_integral.at(qt) * 
 		  trans_integral.at(qw);
-		tcharge = gRandom->Poisson(tcharge);
+		//	tcharge = gRandom->Poisson(tcharge);
 		allcharge.push_back(tcharge);
 		sum_charge += tcharge;
 	      }
