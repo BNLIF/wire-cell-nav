@@ -60,27 +60,44 @@ int main(int argc, char* argv[])
     cout << "Got " << nwires << " wires" << endl;
     //Assert(1103 == nwires);
 
-#if 0				// fixme: reenable
-    auto wdb = WireCell::Factory::lookup<IWireDatabase>("WireDatabase");
-    Assert(wdb, "Failed to get IWireDatabase from default WireDatabase");
-    cout << "Got WireDatabase IWireDatabase interface @ " << wdb << endl;
-    wdb->load(wires);
 
-    Ray bbox = wdb->bounding_box();
+    // auto wdb = WireCell::Factory::lookup<IWireDatabase>("WireDatabase");
+    // Assert(wdb, "Failed to get IWireDatabase from default WireDatabase");
+    // cout << "Got WireDatabase IWireDatabase interface @ " << wdb << endl;
+    // wdb->load(wires);
+
+    // Ray bbox = wdb->bounding_box();
+
+    WireCell::BoundingBox boundingbox;
+    for (int ind = 0; ind < wires.size(); ++ind) {
+	boundingbox(wires[ind]->ray());
+    }
+    const Ray& bbox = boundingbox.bounds;
 
     TApplication* theApp = 0;
     if (argc > 1) {
 	theApp = new TApplication ("test_iwireprovider",0,0);
     }
+
     TCanvas c;
     TLine l;
     TMarker m;
+    m.SetMarkerSize(1);
+    m.SetMarkerStyle(20);
+    int colors[] = {2,4,1};
+
     c.DrawFrame(bbox.first.z(), bbox.first.y(), bbox.second.z(), bbox.second.y());
     for (auto wit = wires.begin(); wit != wires.end(); ++wit) {
-	Wire wire = *wit;
-	Ray wray = wire->ray();
+	const IWire& wire = **wit;
+
+	Ray wray = wire.ray();
+
+	int iplane = wire.plane();
+
+	l.SetLineColor(colors[iplane]);
 	l.DrawLine(wray.first.z(), wray.first.y(), wray.second.z(), wray.second.y());
-	Point cent = wire->center();
+	Point cent = wire.center();
+	m.SetMarkerColor(colors[iplane]);
 	m.DrawMarker(cent.z(), cent.y());
     }
     if (theApp) {
@@ -89,7 +106,7 @@ int main(int argc, char* argv[])
     else {			// batch
 	c.Print("test_iwireprovider.pdf");
     }
-#endif
+
     return 0;
 }
 
