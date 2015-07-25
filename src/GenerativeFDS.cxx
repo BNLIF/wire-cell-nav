@@ -1,6 +1,5 @@
 #include "WireCellNav/GenerativeFDS.h"
 #include "TMath.h"
-#include "TRandom.h"
 
 using namespace WireCell;
 using namespace std;
@@ -94,12 +93,16 @@ int GenerativeFDS::jump(int frame_number)
 	long_integral.push_back(integral(sigmaL,(pt.x-xmm.second),tbin*bin_drift_distance,(tbin+1)*bin_drift_distance));
 	for (int kk =0; kk!=ntbin;kk++){
 	  int tt = tbin - kk - 1;
-	  long_tbin.push_back(tt);
-	  long_integral.push_back(integral(sigmaL,(pt.x-xmm.second),tt*bin_drift_distance,(tt+1)*bin_drift_distance));
-
+	  if (tt >0){
+	    long_tbin.push_back(tt);
+	    long_integral.push_back(integral(sigmaL,(pt.x-xmm.second),tt*bin_drift_distance,(tt+1)*bin_drift_distance));
+	  }
+	  
 	  tt = tbin + kk + 1;
-	  long_tbin.push_back(tt);
-	  long_integral.push_back(integral(sigmaL,(pt.x-xmm.second),tt*bin_drift_distance,(tt+1)*bin_drift_distance));
+	  if (tt < bins_per_frame){
+	    long_tbin.push_back(tt);
+	    long_integral.push_back(integral(sigmaL,(pt.x-xmm.second),tt*bin_drift_distance,(tt+1)*bin_drift_distance));
+	  }
 	}
 
 	// std::cout << sigmaL/units::mm << std::endl;
@@ -178,7 +181,6 @@ int GenerativeFDS::jump(int frame_number)
 		allwires.push_back(trans_wires.at(qw));
 		float tcharge = charge * long_integral.at(qt) * 
 		  trans_integral.at(qw);
-		//	tcharge = gRandom->Poisson(tcharge);
 		allcharge.push_back(tcharge);
 		sum_charge += tcharge;
 	      }
