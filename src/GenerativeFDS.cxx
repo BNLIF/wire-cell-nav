@@ -176,29 +176,38 @@ int GenerativeFDS::jump(int frame_number)
 		allwires.push_back(trans_wires.at(qw));
 		float tcharge = charge * long_integral.at(qt) * 
 		  trans_integral.at(qw);
-		tcharge = gRandom->Gaus(tcharge,sqrt(tcharge));
+		tcharge = gRandom->Poisson(tcharge);
 		allcharge.push_back(tcharge);
 		sum_charge += tcharge;
 	      }
 	    }
+	    
+	    // for (int qx = 0; qx!=allcharge.size();qx++){
+	    //   const GeomWire* wire3 = allwires.at(qx);
+	    //   int chid3 = wire3->channel();
+	    //   std::cout << alltime.at(qx) << " " << charge << " " << 
+	    // 	allcharge.at(qx) << " " << chid3 << std::endl;
+	    // }
+	    // std::cout << std::endl;
+
 	    //do normalization ... 
 	    for (int qx = 0; qx!=allcharge.size();qx++){
 	      const GeomWire* wire3 = allwires.at(qx);
-	      chid = wire3->channel();
+	      int chid3 = wire3->channel();
 	      int tbin3 = alltime.at(qx);
-	      float charge3 = allcharge.at(qx)/sum_charge;
+	      float charge3 = allcharge.at(qx)/sum_charge*charge;
 	      
-	      TraceIndexMap::iterator it = tim.find(chid);
+	      TraceIndexMap::iterator it = tim.find(chid3);
 	      int trace_index = frame.traces.size(); // if new
 	      if (it == tim.end()) {
-		Trace t;
-		t.chid = chid;
-		t.tbin = 0;
-		t.charge.resize(bins_per_frame, 0.0);
-		tim[chid] = frame.traces.size();
-		frame.traces.push_back(t);
+	    	Trace t;
+	    	t.chid = chid3;
+	    	t.tbin = 0;
+	    	t.charge.resize(bins_per_frame, 0.0);
+	    	tim[chid3] = frame.traces.size();
+	    	frame.traces.push_back(t);
 	      }else {		// already seen
-		trace_index = it->second;
+	    	trace_index = it->second;
 	      }
 	      Trace& trace = frame.traces[trace_index];
 	      
