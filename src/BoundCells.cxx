@@ -16,6 +16,20 @@ WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, ICellGenerator);
 WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, ICellProvider);
 
 
+struct AngularSort {
+    Point center;
+    AngularSort(const Point& center) : center(center) { }
+
+    bool operator()(const Point& lhs, const Point& rhs) {
+	const Vector a = (lhs-center).norm();
+	const Vector b = (rhs-center).norm();
+	double theta_a = atan2(a.y(), a.z());
+	double theta_b = atan2(b.y(), b.z());
+	return theta_a < theta_b;
+    }
+
+};
+
 // This is the actual implementation of the cell we provide.  It is
 // buried in this implementation for a reason.  It's not a publicly
 // accessible class.
@@ -28,8 +42,11 @@ namespace WireCell {
 
     public:
 	BoundCell(int id, const PointVector& pcell, const std::vector<const IWire*>& wires)
-	    : m_ident(id), m_corners(pcell), m_wires(wires) {}
-	virtual ~BoundCell() {}	// do not further inherit.
+	    : m_ident(id), m_corners(pcell), m_wires(wires) {
+	    std::sort(m_corners.begin(), m_corners.end(), AngularSort(center()));
+	}
+	virtual ~BoundCell() {
+	}	// do not further inherit.
 
 	virtual int ident() const { return m_ident; }
 
@@ -148,7 +165,7 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
     const Ray pitch_v_ray = pitch2(v_wires);
     const Ray pitch_w_ray = pitch2(w_wires);
 
-    cerr << "pitche vectors:\n"
+    cerr << "pitch vectors:\n"
     	 << "\tU: " << pitch_u_ray.first << "-->" << pitch_u_ray.second << "\n"
     	 << "\tV: " << pitch_v_ray.first << "-->" << pitch_v_ray.second << "\n"
     	 << "\tW: " << pitch_w_ray.first << "-->" << pitch_w_ray.second << endl;
@@ -157,10 +174,10 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
     const double pitch_v = ray_length(pitch_v_ray);
     const double pitch_w = ray_length(pitch_w_ray);
     
-
     const Vector axis_u = axis(u_wires);
     const Vector axis_v = axis(v_wires);
     const Vector axis_w = axis(w_wires);
+
     const Vector jump_u = axis_u * (pitch_u / sin(2.0 * acos(axis_w.dot(axis_u))));
     const Vector jump_v = axis_v * (pitch_v / sin(2.0 * acos(axis_w.dot(axis_v))));
 

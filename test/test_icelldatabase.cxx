@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     auto wp_cfg = WireCell::Factory::lookup<IConfigurable>("WireParams");
     Assert(wp_cfg, "Failed to get IConfigurable from default WireParams");
     auto cfg = wp_cfg->default_configuration();
-    double pitch_mm = 10.0;
+    double pitch_mm = 100.0;
     cfg.put("pitch_mm.u", pitch_mm);
     cfg.put("pitch_mm.v", pitch_mm);
     cfg.put("pitch_mm.w", pitch_mm);

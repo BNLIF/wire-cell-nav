@@ -34,7 +34,7 @@ Configuration WireParams::default_configuration() const
 "pitch_mm":{"u":3.0, "v":3.0, "w":3.0},
 "angle_deg":{"u":60, "v":120, "w":0.0},
 "offset_mm":{"u":0.0, "v":0.0, "w":0.0},
-"plane_mm":{"u":0.0, "v":1.0, "w":-1.0}
+"plane_mm":{"u":3.0, "v":2.0, "w":1.0}
 }
 )";
     return configuration_loads(json, "json");
