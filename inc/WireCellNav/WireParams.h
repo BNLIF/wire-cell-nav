@@ -12,52 +12,9 @@ namespace WireCell {
 	public IWireParameters,
 	public IConfigurable  {
     public:
-	/** Fundamentally, the wires are defined by four rays.
-	 *
-	 * Three planes of wires are labeled, U, V and W.  There is no
-	 * internal convention as to which plane is which except that
-	 * the label indicates the direction that their wires point
-	 * (and not their transverse pitch direction).
-	 *
-	 * The coordinate conventions are defined as:
-	 * 
-	 * - wire planes are parallel to the Y-Z plane.
-	 *
-	 * - electrons drift in the negative-X direction.
-	 *
-	 * - wire angles are measured in the Y-Z plane w.r.t. the
-	 *   direction of the Y-axis.
-	 *
-	 * - cross-product of the direction of a plane's wires to the
-	 *   direction of the plane's pitch is the direction of drift
-	 *   (WxP=D).
-	 *
-	 * Thus wire angles
-	 *
-	 * - (0,90)  : wires point in +Y,-Z direction, pitch in +Y,+Z
-	 * - (90,180): wires point in -Y,-Z direction, pitch in +Y,-Z
-	 * 
-	 * The wires planes are fully specified by four rays.
-	 *
-	 * \param bounds is a WireCell::Ray with its tail at the
-	 * negative-most corner and its head at the positive-most
-	 * corner of a rectangular bounding box.  All wires will be
-	 * constructed so that they terminate on the walls of this
-	 * box.
-	 *
-	 * \param U is a WireCell::Ray which is in the wire plane and
-	 * points in a direction perpendicular to the wire direction.
-	 * Both tail and head points should be inside the bounding box
-	 * and on wires.
-	 *
-	 * \param V is same but same for V wire plane.
-	 *
-	 * \param W is same but for for W wire plane.
-	 *
-	 * Note, this class does not implement wire wrapping.  Wire
-	 * and channel ID numbers are equated.
-	 *
-	 */
+
+	/// Directly set the fundamental parameters.
+	/// See WireCell::IWireParameters.
 	void set(const Ray& bounds,
 		 const Ray& U, const Ray& V, const Ray& W);
 
@@ -66,18 +23,33 @@ namespace WireCell {
 	 *
 	 * This method gives a simpler, more restricted interface to
 	 * setting the wire parameter.  It follows the same
-	 * conventions as the one above but assumes the bounding box
-	 * is centered on the origin, assumes U points in the +Y,-Z, V
-	 * points in the -Y,-Z and W points in the +Y(Z=0) directions.
-	 * U is at +0.25*dx, W is at -0.25*dx and V is at x=0.  It is
-	 * assumed that one wire of every plane goes through Y=0,Z=0.
-	 * It is assumed all planes have equal pitch.
+	 * conventions as the one above but assumes:
+	 *
+	 * - The bounding box is centered on the origin.
+	 *
+	 * - One wire of each plane intersects the X-axis.
+	 *
+	 * - The magnitudes of the U and V angles are equal.
+	 *
+	 * - The pitches of all three planes are the same.
+	 *
+	 * - The X values W, V and U planes evening distributed on the
+	 * positive half of the X covered by the bounding box.
+	 *
+	 * \param dx, dy, dz are the full widths of the bounding box
+	 * in the associated direction.
+	 *
+	 * \param pitch is the perpendicular distance between two
+	 * adjacent wires in a plane.
+	 *
+	 * \param angle is the absolute angular distance from the U
+	 * and V wires and the Y-axis.
 	 */
-	void set(float dx=10*units::mm,
-		 float dy=1*units::meter,
-		 float dz=1*units::meter,
-		 float pitch = 10*units::mm,
-		 float angle = 60.0*units::degree);
+	void set(double dx=10*units::mm,
+		 double dy=1*units::meter,
+		 double dz=1*units::meter,
+		 double pitch = 10*units::mm,
+		 double angle = 60.0*units::degree);
 
 	/** Provide access to the rays which were used to define the wires. */
 	const Ray& bounds() const;

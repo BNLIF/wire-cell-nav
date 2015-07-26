@@ -81,12 +81,11 @@ struct SortByIndex {
 
 void ParamWires::make_one_plane(WirePlaneType_t plane, const Ray& bounds, const Ray& step)
 {
-    const Vector drift(-1,0,0);
+    const Vector xaxis(1,0,0);
     const Point starting_point = step.first;
     const Vector pitch = step.second - starting_point;
-    const Vector proto = pitch.cross(drift).norm();
+    const Vector proto = pitch.cross(xaxis).norm();
     
-
     std::vector<ParamWire*> all_wires;
 
     int pos_index = 0;

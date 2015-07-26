@@ -11,18 +11,18 @@ WIRECELL_NAMEDFACTORY_ASSOCIATE(WireParams, IConfigurable);
 WIRECELL_NAMEDFACTORY_ASSOCIATE(WireParams, IWireParameters);
 
 
-static int n_wireparams = 0;
+//static int n_wireparams = 0;
 
 WireParams::WireParams()
 {
-    ++n_wireparams;
-    cerr << "WireParams(" << n_wireparams << ")" << endl;
+    //++n_wireparams;
+    //cerr << "WireParams(" << n_wireparams << ")" << endl;
     this->set();
 }
 WireParams::~WireParams()
 {
-    --n_wireparams;
-    cerr << "~WireParams(" << n_wireparams << ")" << endl;
+    //--n_wireparams;
+    //cerr << "~WireParams(" << n_wireparams << ")" << endl;
 }
 
 Configuration WireParams::default_configuration() const
@@ -101,8 +101,8 @@ void WireParams::set(const Ray& bounds,
     m_pitchW = W;
 }
 
-void WireParams::set(float dx, float dy, float dz,
-		     float pitch, float angle)
+void WireParams::set(double dx, double dy, double dz,
+		     double pitch, double angle)
 {
     // The local origin about which all else is measured.
     const Point center;
@@ -110,21 +110,32 @@ void WireParams::set(float dx, float dy, float dz,
     const Point bbmax = center + 0.5*deltabb;
     const Point bbmin = center - 0.5*deltabb;
 
-    double angU = angle;
-    double angV = M_PI-angle;
+    double angU = +angle;
+    double angV = -angle;
     double angW = 0.0;
 
-    // Pitch vectors
-    const Vector pU(0, pitch*std::cos(+angU), pitch*std::sin(+angU));
-    const Vector pV(0, pitch*std::cos(+angV), pitch*std::sin(+angV));
-    const Vector pW(0, pitch*std::cos(+angW), pitch*std::sin(+angW));
+    // Wire directions
+    const Vector wU(0, std::cos(angU), std::sin(angU));
+    const Vector wV(0, std::cos(angV), std::sin(angV));
+    const Vector wW(0,              1,              0);
 
-    const Point oU(+0.25*dx, 0.0, 0.0);
-    const Point oV( 0.0    , 0.0, 0.0);
-    const Point oW(-0.25*dx, 0.0, 0.0);
+    const Vector xaxis(1,0,0);
+    const Vector pU = pitch*xaxis.cross(wU);
+    const Vector pV = pitch*xaxis.cross(wV);
+    const Vector pW = pitch*xaxis.cross(wW);
+
+    // cerr << "pU=" << pU << endl;
+    // cerr << "pV=" << pV << endl;
+    // cerr << "pW=" << pW << endl;
+
+    const Point oU(0.375*dx, 0.0, 0.0);
+    const Point oV(0.250*dx, 0.0, 0.0);
+    const Point oW(0.125*dx, 0.0, 0.0);
 
     const Ray bounds(bbmin, bbmax);
-    const Ray U(oU, oU+pU), V(oV, oV+pV), W(oW, oW+pW);
+    const Ray U(oU, oU+pU);
+    const Ray V(oV, oV+pV);
+    const Ray W(oW, oW+pW);
     this->set(bounds, U, V, W);
 
 }

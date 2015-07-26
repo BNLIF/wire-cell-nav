@@ -20,42 +20,42 @@ WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, ICellProvider);
 // buried in this implementation for a reason.  It's not a publicly
 // accessible class.
 namespace WireCell {
-class BoundCell : public ICell {
+    class BoundCell : public ICell {
     
-    int m_ident;
-    PointVector m_corners;	// this is likely a source of a lot of memory usage
-    const std::vector<const IWire*> m_wires;
+	int m_ident;
+	PointVector m_corners;	// this is likely a source of a lot of memory usage
+	const std::vector<const IWire*> m_wires;
 
-public:
-    BoundCell(int id, const PointVector& pcell, const std::vector<const IWire*>& wires)
-	: m_ident(id), m_corners(pcell), m_wires(wires) {}
-    virtual ~BoundCell() {}	// do not further inherit.
+    public:
+	BoundCell(int id, const PointVector& pcell, const std::vector<const IWire*>& wires)
+	    : m_ident(id), m_corners(pcell), m_wires(wires) {}
+	virtual ~BoundCell() {}	// do not further inherit.
 
-    virtual int ident() const { return m_ident; }
+	virtual int ident() const { return m_ident; }
 
-    virtual double area() const { return 0.0; /*fixme*/}
+	virtual double area() const { return 0.0; /*fixme*/}
 
-    virtual WireCell::Point center() const {
-	/// fixme
+	virtual WireCell::Point center() const {
+	    /// fixme
 
-	WireCell::Point center;
-	size_t npos = m_corners.size();
-	for (int ind=0; ind<npos; ++ind) {
-	    center = center + m_corners[ind];
+	    WireCell::Point center;
+	    size_t npos = m_corners.size();
+	    for (int ind=0; ind<npos; ++ind) {
+		center = center + m_corners[ind];
+	    }
+	    double norm = 1.0/npos;
+	    return  norm * center;
 	}
-	double norm = 1.0/npos;
-	return  norm * center;
-    }
 
-    virtual WireCell::PointVector corners() const {
-	return m_corners;
-    }
+	virtual WireCell::PointVector corners() const {
+	    return m_corners;
+	}
 
 //    virtual WireCell::WireVector wires() const {
 //	return m_wires;
 //    }
-};
-}
+    };
+} // namespace WireCell;
 
 
 // Return a Ray going from the center point of wires[0] to a point on
@@ -139,14 +139,25 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
     std::sort(v_wires.begin(), v_wires.end(), wbi_sorter);
     std::sort(w_wires.begin(), w_wires.end(), wbi_sorter);
 
+    cerr << "#wires: "
+	 << u_wires.size() << ", "
+	 << v_wires.size() << ", "
+	 << w_wires.size() <<endl;
+
     const Ray pitch_u_ray = pitch2(u_wires);
     const Ray pitch_v_ray = pitch2(v_wires);
     const Ray pitch_w_ray = pitch2(w_wires);
+
+    cerr << "pitche vectors:\n"
+    	 << "\tU: " << pitch_u_ray.first << "-->" << pitch_u_ray.second << "\n"
+    	 << "\tV: " << pitch_v_ray.first << "-->" << pitch_v_ray.second << "\n"
+    	 << "\tW: " << pitch_w_ray.first << "-->" << pitch_w_ray.second << endl;
 
     const double pitch_u = ray_length(pitch_u_ray);
     const double pitch_v = ray_length(pitch_v_ray);
     const double pitch_w = ray_length(pitch_w_ray);
     
+
     const Vector axis_u = axis(u_wires);
     const Vector axis_v = axis(v_wires);
     const Vector axis_w = axis(w_wires);
@@ -165,12 +176,6 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
     //const double tolerance = 0.1*units::mm;
     const double tolerance = 0.0; // fixme: generate noisy wires and test this value
 
-    std::pair<int,int> box_ind[4] = { // allows loops over a box of indices
-        std::pair<int,int>(0,0),
-        std::pair<int,int>(0,1),
-        std::pair<int,int>(1,1),
-        std::pair<int,int>(1,0)
-    };
 
     // pack it up and send it out
     std::vector<const IWire*> uvw_wires(3);
@@ -266,7 +271,7 @@ WireCell::cell_iterator BoundCells::cells_begin()
 }
 
 
-WireCell::cell_iterator BoundCells::cell_end()
+WireCell::cell_iterator BoundCells::cells_end()
 {
     return bc_iterator(m_store.end());
 }
