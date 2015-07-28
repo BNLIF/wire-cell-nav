@@ -7,6 +7,7 @@
 #include <vector>
 
 using namespace WireCell;
+using namespace std;
 
 WIRECELL_NAMEDFACTORY(ParamWires);
 WIRECELL_NAMEDFACTORY_ASSOCIATE(ParamWires, IWireProvider);
@@ -69,6 +70,10 @@ static ParamWire* make_wire(int index, const Point& point,
     if (3 != hitmask) {
 	return 0;
     }
+    // ray should point generally towards +Y
+    if (hits.first.y() > hits.second.y()) {
+	hits = Ray(hits.second, hits.first);
+    }
     return new ParamWire(kUnknownWirePlaneType, index, hits);
 }
 
@@ -86,40 +91,46 @@ void ParamWires::make_one_plane(WirePlaneType_t plane, const Ray& bounds, const 
     const Vector pitch = step.second - starting_point;
     const Vector proto = pitch.cross(xaxis).norm();
     
-    std::vector<ParamWire*> all_wires;
+    //cerr << plane << " pitch=" << pitch << " proto=" << proto << " start=" << starting_point << endl;
+
+    std::vector<ParamWire*> these_wires;
 
     int pos_index = 0;
     Point offset = starting_point;
     while (true) {		// go in positive pitch direction
 	ParamWire* wire = make_wire(pos_index, offset, proto, bounds);
 	if (! wire) { break; }
-	all_wires.push_back(wire);
+	these_wires.push_back(wire);
 	offset = wire->center() + pitch;
 	pos_index += 1;
     }
 
     int neg_index = -1;		// now go in negative pitch direction
     const Vector neg_pitch = -1.0 * pitch;
-    offset = all_wires[0]->center() + neg_pitch; // start one below first upward going one
+    offset = these_wires[0]->center() + neg_pitch; // start one below first upward going one
     while (true) {		// go in negative pitch direction
 	ParamWire* wire = make_wire(neg_index, offset, proto, bounds);
 	if (! wire) { break; }
-	all_wires.push_back(wire);
+	these_wires.push_back(wire);
 	offset = wire->center() + neg_pitch;
 	neg_index -= 1;
     }
 
     // order by index
-    std::sort(all_wires.begin(), all_wires.end(), SortByIndex());
+    std::sort(these_wires.begin(), these_wires.end(), SortByIndex());
 
     // load in to store and fix up index and plane
-    for (int ind=0; ind<all_wires.size(); ++ind) {
-	ParamWire* pwire = all_wires[ind];
+    for (int ind=0; ind<these_wires.size(); ++ind) {
+	ParamWire* pwire = these_wires[ind];
 	pwire->set_index(ind);
 	pwire->set_plane(plane);
 	m_wire_store.push_back(pwire);
+
+	//cerr << plane << "/#" << ind << pwire->ray().first << " --> " << pwire->ray().second << endl;
     }
 	
+
+
     //std::cerr << "Made "<<store.size()<<" wires for plane " << plane << std::endl;
     //std::cerr << "step = " << step << std::endl;
     //std::cerr << "bounds = " << bounds << std::endl;

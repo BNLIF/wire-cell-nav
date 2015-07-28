@@ -5,9 +5,9 @@
 
 #include "TApplication.h"
 #include "TCanvas.h"
-#include "TView.h"
-#include "TPolyLine3D.h"
-#include "TPolyMarker3D.h"
+#include "TH1F.h"
+#include "TArrow.h"
+#include "TLine.h"
 
 #include <boost/range.hpp>
 
@@ -17,60 +17,17 @@
 using namespace WireCell;
 using namespace std;
 
-void test1()
-{
-    WireParams params;
-    ParamWires pw;
-    pw.generate(params);
-
-    std::vector<const IWire*> wires(pw.wires_begin(), pw.wires_end());
-
-    cerr << "Got " << wires.size() << " wires" <<endl;
-    Assert(wires.size());
-    int last_plane = -1;
-    int last_index = -1;
-    for (auto wit = wires.begin(); wit != wires.end(); ++wit) {
-	const IWire& wire = **wit;
-	int iplane = wire.plane() - kFirstPlane;
-	int ident = (1+iplane)*100000 + wire.index();
-	Assert(ident == wire.ident());
-
-	if (iplane == last_plane) {
-	    ++last_index;
-	}
-	else {
-	    last_plane = iplane;
-	    last_index = 0;
-	}
-	Assert(last_index == wire.index());
-
-    }
-}
-
-void test2()
-{
-    double pitches[] = {10.0, 5.0, 3.0, -1};
-    int want[] = {371, 747, 1243, 0};
-    for (int ind=0; pitches[ind] > 0.0; ++ind) {
-	WireParams params;
-	Configuration cfg = params.default_configuration();
-	cfg.put("pitch_mm.u", pitches[ind]);
-	cfg.put("pitch_mm.v", pitches[ind]);
-	cfg.put("pitch_mm.w", pitches[ind]);
-	params.configure(cfg);
-	ParamWires pw;
-	pw.generate(params);
-	std::vector<const IWire*> wires(pw.wires_begin(), pw.wires_end());
-	int nwires = wires.size();
-	cout << ind << ": pitch=" << pitches[ind] << " nwires=" << nwires << " (want=" << want[ind] << ")" << endl;
-	Assert(nwires == want[ind], "Wrong number of wires");
-	Assert(configuration_dumps(cfg).size(), "Failed to dump cfg");
-    }
-}
 
 void test3D(bool interactive)
 {
     WireParams params;
+    double pitch = 10.0;
+    auto cfg = params.default_configuration();
+    cfg.put("pitch_mm.u", pitch);
+    cfg.put("pitch_mm.v", pitch);
+    cfg.put("pitch_mm.w", pitch);
+    params.configure(cfg);
+
     ParamWires pw;
     pw.generate(params);
 
@@ -78,17 +35,17 @@ void test3D(bool interactive)
 
     TApplication* theApp = 0;
     if (interactive) {
-	theApp = new TApplication ("test_iwireprovider",0,0);
+	theApp = new TApplication ("test_paramwires",0,0);
     }
 
-    TCanvas c;
+    TCanvas c("c","c",500,500);
+    TH1F* frame = c.DrawFrame(bbox.first.z(), bbox.first.y(),
+			      bbox.second.z(), bbox.second.y());
+    frame->SetTitle("red=U, blue=V, +X (-drift) direction into page");
+    frame->SetXTitle("Transverse Z direction");
+    frame->SetYTitle("Transverse Y (W) direction");
 
-    TView* view = TView::CreateView(1);
-    view->SetRange(bbox.first.x(),bbox.first.y(),bbox.first.z(),
-		   bbox.second.x(),bbox.second.y(),bbox.second.z());
-    view->ShowAxis();
     int colors[3] = {2, 4, 1};
-
 
     std::vector<const IWire*> wires(pw.wires_begin(), pw.wires_end());
     Assert(wires.size(), "Got no wires");
@@ -110,15 +67,15 @@ void test3D(bool interactive)
 	int index = wire.index();
 
 	Assert(n_wires[iplane], "Empty plane");
-	double width = ((index+1)*max_width)/n_wires[iplane];
+	double width = 1.0+ (((index+1)*max_width)/n_wires[iplane]);
 
 	const Ray ray = wire.ray();
-	TPolyLine3D* pl = new TPolyLine3D(2);
-	pl->SetPoint(0, ray.first.x(), ray.first.y(), ray.first.z());
-	pl->SetPoint(1, ray.second.x(), ray.second.y(), ray.second.z());
-	pl->SetLineColor(colors[iplane]);
-	pl->SetLineWidth(width);
-	pl->Draw();
+
+	TArrow* a_wire = new TArrow(ray.first.z(), ray.first.y(),
+				    ray.second.z(), ray.second.y(), 0.01, "|>");
+	a_wire->SetLineColor(colors[iplane]);
+	a_wire->SetLineWidth(width);
+	a_wire->Draw();
     }
 
     if (theApp) {
@@ -132,10 +89,6 @@ void test3D(bool interactive)
 
 int main(int argc, char** argv)
 {
-    test1();
-    test2();
     test3D(argc>1);
-    
-
     return 0;
 }
