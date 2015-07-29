@@ -52,7 +52,7 @@ void draw_cells(BoundCells& bc)
 
     vector<const ICell*> cells(bc.cells_begin(), bc.cells_end());
 
-    const double reduce = 0.9;
+    const double reduce = 0.8;
     int ncells = cells.size();
     cerr << "ncells = " << ncells << endl;
     for (int cind = 0; cind < ncells; ++cind) {
@@ -102,10 +102,13 @@ int main(int argc, char** argv)
      * 100.0, 37, 263, 6
      */
     double pitch = 50.0;	// leave it large so the results can actually be seen
+    double angle_deg = 60.0;
     auto cfg = params.default_configuration();
     cfg.put("pitch_mm.u", pitch);
     cfg.put("pitch_mm.v", pitch);
     cfg.put("pitch_mm.w", pitch);
+    cfg.put("angle_deg.u", angle_deg);
+    cfg.put("angle_deg.v", -angle_deg);
     params.configure(cfg);
 
     ParamWires pw;
@@ -124,7 +127,7 @@ int main(int argc, char** argv)
 	theApp = new TApplication ("test_boundcells",0,0);
     }
 
-    TCanvas c;
+    TCanvas c("c","c",500,500);
     const double enlarge = 2.0;
     c.DrawFrame(enlarge*bbox.first.z(), enlarge*bbox.first.y(),
 		enlarge*bbox.second.z(), enlarge*bbox.second.y());
