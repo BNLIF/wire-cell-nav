@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 
     WireParams params;
 
-    /* Some timing numbers for default 10m x 10m:
+    /* Some timing numbers for default 1m x 1m:
      * p(mm), #w, #c, t(ms)
      * 3.0, 1243, 288211, 5358
      * 5.0, 747, 104273, 1938
