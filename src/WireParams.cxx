@@ -32,7 +32,7 @@ Configuration WireParams::default_configuration() const
 "center_mm":{"x":0.0, "y":0.0, "z":0.0},
 "size_mm":{"x":10.0, "y":1000.0, "z":1000.0},
 "pitch_mm":{"u":3.0, "v":3.0, "w":3.0},
-"angle_deg":{"u":60, "v":120, "w":0.0},
+"angle_deg":{"u":60.0, "v":-60.0, "w":0.0},
 "offset_mm":{"u":0.0, "v":0.0, "w":0.0},
 "plane_mm":{"u":3.0, "v":2.0, "w":1.0}
 }
@@ -61,15 +61,20 @@ void WireParams::configure(const Configuration& cfg)
     double angV = cfg.get<double>("angle_deg.v")*units::degree;
     double angW = cfg.get<double>("angle_deg.w")*units::degree;
 
+    const Vector wU(0, std::cos(angU), std::sin(angU));
+    const Vector wV(0, std::cos(angV), std::sin(angV));
+    const Vector wW(0, std::cos(angW), std::sin(angW));
+
     // The pitch magnitudes.
     double pitU = cfg.get<double>("pitch_mm.u")*units::mm;
     double pitV = cfg.get<double>("pitch_mm.v")*units::mm;
     double pitW = cfg.get<double>("pitch_mm.w")*units::mm;
 
     // Pitch vectors
-    const Vector pU(0, pitU*std::cos(+angU), pitU*std::sin(+angU));
-    const Vector pV(0, pitV*std::cos(+angV), pitV*std::sin(+angV));
-    const Vector pW(0, pitW*std::cos(+angW), pitW*std::sin(+angW));
+    const Vector xaxis(1,0,0);
+    const Vector pU = pitU*xaxis.cross(wU);
+    const Vector pV = pitV*xaxis.cross(wV);
+    const Vector pW = pitW*xaxis.cross(wW);
 
     // The offset in the pitch direction from the center to a wire
     double offU = cfg.get<double>("offset_mm.u")*units::mm;

@@ -121,12 +121,17 @@ Vector origin_cross(const std::vector<const IWire*>& ones,
     const Ray& ray2 = twos[0]->ray();
     const Ray cross = ray_pitch(ray1, ray2);
 
-    cerr << "Ray1 = " << ray1.first << " --> " << ray1.second << endl;
-    cerr << "Ray2 = " << ray2.first << " --> " << ray2.second << endl;
-    cerr << "Cross: " << cross.first << " --> " << cross.second << endl;
+    // cerr << "Ray1 = " << ray1.first << " --> " << ray1.second << endl;
+    // cerr << "Ray2 = " << ray2.first << " --> " << ray2.second << endl;
+    // cerr << "Cross: " << cross.first << " --> " << cross.second << endl;
     return cross.first;
 }
 
+
+bool is_point_inside_w_lane(const Point& point, const double& w_lane_center, const double& w_lane_half_width)
+{
+    return fabs(w_lane_center - point.z()) < w_lane_half_width;
+}
 
 void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
 {
@@ -170,10 +175,10 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
     std::sort(v_wires.begin(), v_wires.end(), wbi_sorter);
     std::sort(w_wires.begin(), w_wires.end(), wbi_sorter);
 
-    cerr << "#wires: "
-	 << u_wires.size() << ", "
-	 << v_wires.size() << ", "
-	 << w_wires.size() <<endl;
+    // cerr << "#wires: "
+    // 	 << u_wires.size() << ", "
+    // 	 << v_wires.size() << ", "
+    // 	 << w_wires.size() <<endl;
 
     const Ray pitch_u_ray = pitch2(u_wires);
     const Ray pitch_v_ray = pitch2(v_wires);
@@ -183,26 +188,26 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
     const double pitch_v = ray_length(pitch_v_ray);
     const double pitch_w = ray_length(pitch_w_ray);
 
-    cerr << "pitch vectors:\n"
-    	 << "\tU: " << pitch_u_ray.first << "-->" << pitch_u_ray.second << " |" << pitch_u << "|\n"
-    	 << "\tV: " << pitch_v_ray.first << "-->" << pitch_v_ray.second << " |" << pitch_v << "|\n"
-    	 << "\tW: " << pitch_w_ray.first << "-->" << pitch_w_ray.second << " |" << pitch_w << "|\n";
+    // cerr << "pitch vectors:\n"
+    // 	 << "\tU: " << pitch_u_ray.first << "-->" << pitch_u_ray.second << " |" << pitch_u << "|\n"
+    // 	 << "\tV: " << pitch_v_ray.first << "-->" << pitch_v_ray.second << " |" << pitch_v << "|\n"
+    // 	 << "\tW: " << pitch_w_ray.first << "-->" << pitch_w_ray.second << " |" << pitch_w << "|\n";
 
     
     const Vector axis_u = axis(u_wires);
     const Vector axis_v = axis(v_wires);
     const Vector axis_w = axis(w_wires);
-    cerr << "u_wires[0] = " << u_wires[0]->ray().first << " --> " << u_wires[0]->ray().second << endl;
-    cerr << "v_wires[0] = " << v_wires[0]->ray().first << " --> " << v_wires[0]->ray().second << endl;
-    cerr << "w_wires[0] = " << w_wires[0]->ray().first << " --> " << w_wires[0]->ray().second << endl;
-    cerr << "axis_u = " << axis_u << " u0=" << ray_vector(u_wires[0]->ray()) << endl;
-    cerr << "axis_v = " << axis_v << " v0=" << ray_vector(v_wires[0]->ray()) << endl;
-    cerr << "axis_w = " << axis_w << " w0=" << ray_vector(w_wires[0]->ray()) << endl;
+    // cerr << "u_wires[0] = " << u_wires[0]->ray().first << " --> " << u_wires[0]->ray().second << endl;
+    // cerr << "v_wires[0] = " << v_wires[0]->ray().first << " --> " << v_wires[0]->ray().second << endl;
+    // cerr << "w_wires[0] = " << w_wires[0]->ray().first << " --> " << w_wires[0]->ray().second << endl;
+    // cerr << "axis_u = " << axis_u << " u0=" << ray_vector(u_wires[0]->ray()) << endl;
+    // cerr << "axis_v = " << axis_v << " v0=" << ray_vector(v_wires[0]->ray()) << endl;
+    // cerr << "axis_w = " << axis_w << " w0=" << ray_vector(w_wires[0]->ray()) << endl;
 
     const Vector jump_u = axis_u * (pitch_u / sin(2.0 * acos(axis_w.dot(axis_u))));
     const Vector jump_v = axis_v * (pitch_v / sin(2.0 * acos(axis_w.dot(axis_v))));
-    cerr << "jump_u = " << jump_u << endl;
-    cerr << "jump_v = " << jump_v << endl;
+    // cerr << "jump_u = " << jump_u << endl;
+    // cerr << "jump_v = " << jump_v << endl;
 
     // jumps from a wire crossing point to the four half-wire crossing
     // points, in cyclical order.
@@ -212,19 +217,21 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
 	- 0.5*jump_u - 0.5*jump_v, // -Y/Z=0
 	- 0.5*jump_u + 0.5*jump_v  // Y=0/-Z
     };
-    cerr << "cross jump:" << endl;
-    for(int cjind=0; cjind<4; ++cjind) {
-	cerr << "\t" << cjind << ": " << cross_jump_uv[cjind] << endl;
-    }
+    // cerr << "cross jump:" << endl;
+    // for(int cjind=0; cjind<4; ++cjind) {
+    // 	cerr << "\t" << cjind << ": " << cross_jump_uv[cjind] << endl;
+    // }
+
+    const double y_buffer = 0.0; //cross_jump_uv[0].magnitude();
 
     // fixme: generate noisy wires and test this value
-    const double tolerance = 0.1*units::mm;
+    const double tolerance = 0.0*units::mm;
 
     BoundingBox bb;
     for (auto wit = wires_begin; wit != wires_end; ++wit) {
 	bb((*wit)->ray());
     }
-    cerr << "Cell bounding box: " << bb.bounds.first << " -->  " << bb.bounds.second  << endl;
+    //cerr << "Cell bounding box: " << bb.bounds.first << " -->  " << bb.bounds.second  << endl;
     
     // pack it up and send it out
     std::vector<const IWire*> uvw_wires(3);
@@ -233,6 +240,7 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
 
     const double first_w_z = w_wires[0]->ray().first.z();
     const double last_w_z = w_wires[w_wires.size()-1]->ray().first.z();    
+    const double w_lane_half_width = 0.5*(pitch_w + tolerance);
 
     for (int u_ind = 0; u_ind < u_wires.size(); ++u_ind) {
 	const IWire& u_wire = *u_wires[u_ind];
@@ -245,8 +253,11 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
 	    // Are these jumps a source of precision loss?
 	    Vector cross_uv = origin_uv - double(u_ind)*jump_v + double(v_ind)*jump_u;
 
-	    bool is_in_bb = bb.inside(cross_uv);
-	    if (!is_in_bb) {
+	    if (cross_uv.z() < bb.bounds.first.z() - 0.5*pitch_w ||
+		cross_uv.z() > bb.bounds.second.z() + 0.5*pitch_w ||
+		cross_uv.y() < bb.bounds.first.y() - y_buffer ||
+		cross_uv.y() > bb.bounds.second.y() + y_buffer)
+	    {
 		// cerr << "outside: " << u_ind << "/" << v_ind << " " << cross_uv
 		//      << " U:" << u_wire.ray().first << " --> " << u_wire.ray().second << " "
 		//      << " V:" << v_wire.ray().first << " --> " << v_wire.ray().second << " "
@@ -255,7 +266,6 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
 	    }
 
             std::vector<Vector> puv(4);
-            double dis_puv[4];
 	    for (int cjind=0; cjind<4; ++cjind) {
 		puv[cjind] = cross_uv + cross_jump_uv[cjind];
 	    }
@@ -265,46 +275,44 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
 	    int max_w_ind = min(int((puv[1].z() - first_w_z + 0.5*pitch_w)/pitch_w), int(w_wires.size()-1));
 	    int min_w_ind = max(int((puv[3].z() - first_w_z - 0.5*pitch_w)/pitch_w), 0);
 
+	    // cerr << "\nChecking W: " << u_ind << "/" << v_ind << " w_ind(max/min)=" << min_w_ind << "/" << max_w_ind
+	    // 	 << " crossing=" << cross_uv
+	    // 	 << endl;
 	    for (int w_ind = min_w_ind; w_ind <= max_w_ind; ++w_ind) {
 		const IWire& w_wire = *w_wires[w_ind];
 		uvw_wires[2] = &w_wire;
 
-		double target_w = w_ind * pitch_w + first_w_z;
+		double target_w_z = w_ind * pitch_w + first_w_z;
 
-		//cerr << "\n" << u_ind << "/" << v_ind << "/" << w_ind << " w=" << target_w << " " << cross_uv << endl;
+		//cerr << "\n" << u_ind << "/" << v_ind << "/" << w_ind << " w=" << target_w_z << " " << cross_uv << endl;
 
                 WireCell::PointVector pcell;
 
 		bool inside_uv[4];
 		// check which of the four U/V crossings are near this W wire.
                 for (int cjind=0; cjind<4; ++cjind) {
-		    double inside_half_pitch = 0.5*(pitch_w + tolerance);
-		    if (fabs(target_w - puv[cjind].z()) < inside_half_pitch) {
-			inside_uv[cjind] = true;
+		    bool is_inlane = is_point_inside_w_lane(puv[cjind], target_w_z, w_lane_half_width);
+		    inside_uv[cjind] = is_inlane;
+		    if (inside_uv[cjind]) {
 			pcell.push_back(puv[cjind]);
                     }
-		    else {
-			inside_uv[cjind] = false;
-		    }
-		    // cerr << "tf:" << inside_uv[cjind] << " "
-		    // 	 << u_ind << "/" << v_ind << "/" << w_ind << "/" << cjind
-		    // 	 << " target_w=" << target_w << " puv_z=" << puv[cjind].z()
-		    // 	 << " hpitch=" << inside_half_pitch << endl;
                 }
 
                 if (!pcell.size()) {
-		    // fixme: check if this fires, it shouldn't due to the pre-filtering of W wires
-		    //cerr << "No corners for: " << cross_uv << endl;
                     continue;	
                 }
 
+		// go around the cross finding edges to break
 		vector<std::pair<int,int> > to_break;
 		for (int cjind=0; cjind<4; ++cjind) {
 		    int other_ind = (cjind+1)%4;
 		    if (inside_uv[cjind] && inside_uv[other_ind]) {
-			continue;
+			continue; // both inside
 		    }
-		    if (inside_uv[cjind]) {
+		    if (!(inside_uv[cjind] || inside_uv[other_ind])) {
+			continue; // both outside
+		    }
+		    if (inside_uv[cjind]) { // order inside-first
 			to_break.push_back(std::pair<int,int>(cjind, other_ind));
 		    }
 		    else {
@@ -315,13 +323,21 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
 		for (int tbind = 0; tbind < to_break.size(); ++tbind) {
 		    const Vector& p_in = puv[to_break[tbind].first];
 		    const Vector& p_out = puv[to_break[tbind].second];
-		    
-		    double over_z = p_in.z() - target_w - 0.5*pitch_w;
+
+		    double break_z = 0.0;
+		    if (p_out.z() > target_w_z) {
+			break_z = target_w_z + 0.5*pitch_w - p_in.z();
+		    }
+		    else {
+			break_z = target_w_z - 0.5*pitch_w - p_in.z();
+		    }
+
 		    Vector diff = p_out - p_in;
-		    double rel = over_z / diff.z();
+		    double rel = break_z / diff.z();
 		    Vector corner = p_in + rel*diff;
 		    // cerr << tbind << " breaking: " << to_break[tbind].first << "/" << to_break[tbind].second
-		    // 	 << " = " << p_in << " --> " << p_out << " = " << corner
+		    //  	 << " = " << p_in << " --> " << p_out << " = " << corner
+		    // 	 << " break_z=" << break_z << " rel=" << rel
 		    // 	 << endl;
 		    pcell.push_back(corner);
 		}
