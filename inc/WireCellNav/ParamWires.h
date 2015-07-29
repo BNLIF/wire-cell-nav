@@ -1,8 +1,8 @@
 #ifndef WIRECELLNAV_PARAMWIRES_H
 #define WIRECELLNAV_PARAMWIRES_H
 
-#include "WireCellIface/IWireProvider.h"
 #include "WireCellIface/IWireGenerator.h"
+#include "WireCellIface/IWire.h"
 
 #include <vector>
 
@@ -20,7 +20,7 @@ namespace WireCell {
 
     class ParamWires :
 	public IWireGenerator,
-	public IWireProvider {
+	public IWireSequence {
     public:
 	ParamWires();
 	virtual ~ParamWires();
@@ -28,8 +28,9 @@ namespace WireCell {
 	void generate(const WireCell::IWireParameters& params);
 
 	/// Access the wires
-	wire_iterator wires_begin();
-	wire_iterator wires_end();
+	wire_iterator wires_begin() const;
+	wire_iterator wires_end() const;
+	size_t wires_size() const { return m_wire_store.size(); }
 
     private:
 

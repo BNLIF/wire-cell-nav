@@ -2,12 +2,9 @@
 
 #include "WireCellIface/IWireParameters.h"
 #include "WireCellIface/IWireGenerator.h"
-#include "WireCellIface/IWireProvider.h"
-#include "WireCellIface/IWireDatabase.h"
 
-#include "WireCellIface/ICellGenerator.h"
-#include "WireCellIface/ICellProvider.h"
-#include "WireCellIface/ICellDatabase.h"
+#include "WireCellIface/ICell.h"
+#include "WireCellIface/ITiling.h"
 
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/TimeKeeper.h"
@@ -36,9 +33,7 @@ int main(int argc, char* argv[])
     // These are here to force the linker to give us the symbols
     WIRECELL_NAMEDFACTORY_USE(WireParams);
     WIRECELL_NAMEDFACTORY_USE(ParamWires);
-//    WIRECELL_NAMEDFACTORY_USE(WireDatabase);
     WIRECELL_NAMEDFACTORY_USE(BoundCells);
-//    WIRECELL_NAMEDFACTORY_USE(CellDatabase);
 
     cout << tk("factories made") << endl;
 
@@ -67,34 +62,29 @@ int main(int argc, char* argv[])
     cout << "Got ParamWires IWireGenerator interface @ " << pw_gen << endl;
     pw_gen->generate(*wp_wps);
 
-    auto pw_pro = WireCell::Factory::lookup<IWireProvider>("ParamWires");
-    Assert(pw_pro, "Failed to get IWireProvider from default ParamWires");
-    cout << "Got ParamWires IWireProvider interface @ " << pw_pro << endl;
+    auto pw_seq = WireCell::Factory::lookup<IWireSequence>("ParamWires");
+    Assert(pw_seq, "Failed to get IWireSequence from default ParamWires");
+    cout << "Got ParamWires IWireSequence interface @ " << pw_seq << endl;
 
-    std::vector<const IWire*> wires(pw_pro->wires_begin(), pw_pro->wires_end());
+    std::vector<const IWire*> wires(pw_seq->wires_begin(), pw_seq->wires_end());
     int nwires = wires.size();
     cout << "Got " << nwires << " wires" << endl;
     //Assert(747 == nwires);
     cout << tk("Got ParamWires to local collection") << endl;
 
 
-    // auto wdb = WireCell::Factory::lookup<IWireDatabase>("WireDatabase");
-    // Assert(wdb, "Failed to get IWireDatabase from default WireDatabase");
-    // cout << "Got WireDatabase IWireDatabase interface @ " << wdb << endl;
-    // wdb->load(wires);
-
-    auto bc_gen = WireCell::Factory::lookup<ICellGenerator>("BoundCells");
-    Assert(bc_gen, "Failed to get ICellGenerator from default BoundCells");
-    cout << "Got BoundCells ICellGenerator interface @ " << bc_gen << endl;
-    bc_gen->generate(pw_pro->wires_begin(), pw_pro->wires_end());
+    auto bc_sink = WireCell::Factory::lookup<IWireSink>("BoundCells");
+    Assert(bc_sink, "Failed to get IWireSink from default BoundCells");
+    cout << "Got BoundCells IWireSink interface @ " << bc_sink << endl;
+    bc_sink->sink(pw_seq->wires_begin(), pw_seq->wires_end());
     cout << tk("BoundCells generated") << endl;
 
-    auto bc_pro = WireCell::Factory::lookup<ICellProvider>("BoundCells");
-    Assert(bc_pro, "Failed to get ICellProvider from default BoundCells");
-    cout << "Got BoundCells ICellProvider interface @ " << bc_pro << endl;
+    auto bc_seq = WireCell::Factory::lookup<ICellSequence>("BoundCells");
+    Assert(bc_seq, "Failed to get ICellSequence from default BoundCells");
+    cout << "Got BoundCells ICellSequence interface @ " << bc_seq << endl;
 
-    std::vector<const ICell*> cells(bc_pro->cells_begin(),
-				    bc_pro->cells_end() );
+    std::vector<const ICell*> cells(bc_seq->cells_begin(),
+				    bc_seq->cells_end() );
     int ncells = cells.size();
     cout << "Got " << ncells << " cells" << endl;
     cout << tk("Got BoundCells to local collection") << endl;
@@ -111,14 +101,9 @@ int main(int argc, char* argv[])
     const Ray& bbox = boundingbox.bounds;
     cout << tk("Made bounding box") << endl;
 
-    // auto cdb = WireCell::Factory::lookup<ICellDatabase>("CellDatabase");
-    // Assert(cdb, "Failed to get ICellDatabase from default CellDatabase");
-    // cout << "Got CellDatabase ICellDatabase interface @ " << cdb << endl;
-    // cdb->load(bc_pro->cells());
-
     TApplication* theApp = 0;
     if (argc > 1) {
-	theApp = new TApplication ("test_iwireprovider",0,0);
+	theApp = new TApplication ("test_iwirecell",0,0);
     }
     TCanvas c;
     TMarker m;
@@ -146,7 +131,7 @@ int main(int argc, char* argv[])
 	theApp->Run();
     }
     else {			// batch
-	c.Print("test_icelldatabase.pdf");
+	c.Print("test_iwirecell.pdf");
     }
 
 

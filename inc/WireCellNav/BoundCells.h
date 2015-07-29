@@ -1,8 +1,8 @@
 #ifndef WIRECELLNAV_BOUNDCELLS
 #define WIRECELLNAV_BOUNDCELLS
 
-#include "WireCellIface/ICellGenerator.h"
-#include "WireCellIface/ICellProvider.h"
+#include "WireCellIface/IWire.h"
+#include "WireCellIface/ICell.h"
 
 namespace WireCell {
 
@@ -11,8 +11,8 @@ namespace WireCell {
 
     /** A provider of cells using the bounded wire algorithm. */
     class BoundCells :
-	public ICellGenerator,
-	public ICellProvider
+	public IWireSink,
+	public ICellSequence
     {
 
     public:
@@ -20,15 +20,16 @@ namespace WireCell {
 	BoundCells();
 	virtual ~BoundCells();
 
-	/// Generate my cells (ICellGenerator interface).
-	void generate(wire_iterator begin, wire_iterator end);
+	/// Generate my cells (IWireSink interface).
+	void sink(wire_iterator begin, wire_iterator end);
 
 	/// Return iterator to first cell provided.
-	cell_iterator cells_begin();
+	cell_iterator cells_begin() const;
 
 	/// Return iterator to one past last cell provided.
-	cell_iterator cells_end();
+	cell_iterator cells_end() const;
 
+	size_t cells_size() const { return m_store.size(); }
 
     private:
 	typedef std::vector<BoundCell*> BoundCellStore;

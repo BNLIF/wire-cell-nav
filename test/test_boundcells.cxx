@@ -116,7 +116,7 @@ int main(int argc, char** argv)
     cout << tk("generated wires") << endl;
 
     BoundCells bc;
-    bc.generate(pw.wires_begin(), pw.wires_end());
+    bc.sink(pw.wires_begin(), pw.wires_end());
 
     cout << tk("generated cells") << endl;
 

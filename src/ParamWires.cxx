@@ -10,8 +10,8 @@ using namespace WireCell;
 using namespace std;
 
 WIRECELL_NAMEDFACTORY(ParamWires);
-WIRECELL_NAMEDFACTORY_ASSOCIATE(ParamWires, IWireProvider);
 WIRECELL_NAMEDFACTORY_ASSOCIATE(ParamWires, IWireGenerator);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(ParamWires, IWireSequence);
 
 static int number_of_wires = 0;
 
@@ -148,13 +148,13 @@ void ParamWires::generate(const IWireParameters& params)
 }
 
 
-typedef IteratorAdapter< std::vector<ParamWire*>::iterator, wire_base_iterator > pw_iterator;
+typedef IteratorAdapter< std::vector<ParamWire*>::const_iterator, WireCell::wire_base_iterator > pw_iterator;
 
-WireCell::wire_iterator ParamWires::wires_begin()
+WireCell::wire_iterator ParamWires::wires_begin() const
 {
     return pw_iterator(m_wire_store.begin());
 }
-WireCell::wire_iterator ParamWires::wires_end()
+WireCell::wire_iterator ParamWires::wires_end() const
 {
     return pw_iterator(m_wire_store.end());
 }

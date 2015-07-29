@@ -1,3 +1,5 @@
+#include "WireCellIface/IWireSelectors.h"
+
 #include "WireCellNav/BoundCells.h"
 #include "WireCellUtil/NamedFactory.h"
 #include "WireCellUtil/Point.h"
@@ -12,8 +14,8 @@ using namespace std;
 using namespace WireCell;
 
 WIRECELL_NAMEDFACTORY(BoundCells);
-WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, ICellGenerator);
-WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, ICellProvider);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, IWireSink);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(BoundCells, ICellSequence);
 
 
 struct AngularSort {
@@ -133,7 +135,7 @@ bool is_point_inside_w_lane(const Point& point, const double& w_lane_center, con
     return fabs(w_lane_center - point.z()) < w_lane_half_width;
 }
 
-void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
+void BoundCells::sink(wire_iterator wires_begin, wire_iterator wires_end)
 {
     m_store.clear();
 
@@ -352,15 +354,16 @@ void BoundCells::generate(wire_iterator wires_begin, wire_iterator wires_end)
 
 
 
-typedef WireCell::IteratorAdapter< std::vector<BoundCell*>::iterator, cell_base_iterator > bc_iterator;
 
-WireCell::cell_iterator BoundCells::cells_begin()
+typedef IteratorAdapter< std::vector<BoundCell*>::const_iterator, WireCell::cell_base_iterator > bc_iterator;
+
+WireCell::cell_iterator BoundCells::cells_begin() const
 {
     return bc_iterator(m_store.begin());
 }
 
 
-WireCell::cell_iterator BoundCells::cells_end()
+WireCell::cell_iterator BoundCells::cells_end() const
 {
     return bc_iterator(m_store.end());
 }

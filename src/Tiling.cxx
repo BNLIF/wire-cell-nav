@@ -1,4 +1,4 @@
-#include "WireCellNav/CellDatabase.h"
+#include "WireCellNav/Tiling.h"
 #include "WireCellUtil/IndexedSet.h"
 #include "WireCellUtil/NamedFactory.h"
 
@@ -7,25 +7,24 @@
 
 using namespace WireCell;
 
-WIRECELL_NAMEDFACTORY(CellDatabase);
-WIRECELL_NAMEDFACTORY_ASSOCIATE(CellDatabase, ICellDatabase);
+WIRECELL_NAMEDFACTORY(Tiling);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(Tiling, ICellSink);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(Tiling, ITiling);
 
 
 
-
-
-WireCell::CellDatabase::CellDatabase()
+Tiling::Tiling()
 //    : m_graph(0)
 {
 }
 
-WireCell::CellDatabase::~CellDatabase()
+Tiling::~Tiling()
 {
     this->clear();
 }
 
 
-void WireCell::CellDatabase::clear()
+void Tiling::clear()
 {
     // if (m_graph) {
     // 	delete m_graph;
@@ -33,12 +32,12 @@ void WireCell::CellDatabase::clear()
     // }
 }
 
-// fixme: 
-void WireCell::CellDatabase::load(cell_range cells) {}
-wire_range WireCell::CellDatabase::wires(Cell cell) const {}
-cell_range WireCell::CellDatabase::cells(Wire wire) const {}
-Cell WireCell::CellDatabase::cell(wire_range wires) const {}
-cell_range WireCell::CellDatabase::neighbors(Cell cell) const {}
+// fixme: actually implement some day....
+void Tiling::sink(cell_iterator begin, cell_iterator end) {}
+wire_range Tiling::wires(const ICell& cell) const {}
+cell_range Tiling::cells(const IWire& wire) const {}
+cell_range Tiling::cell(const std::vector<const IWire*>& wires) const {}
+cell_range Tiling::neighbors(const ICell& cell) const {}
 
 
 
@@ -177,7 +176,7 @@ void WireCell::Graph::record(WireCell::Cell thecell)
 
 
 
-void WireCell::CellDatabase::load(const WireCell::CellSet& cellset)
+void WireCell::WireCell::load(const WireCell::CellSet& cellset)
 {
     this->clear();
     m_graph = new Graph();
@@ -188,12 +187,12 @@ void WireCell::CellDatabase::load(const WireCell::CellSet& cellset)
     }
 }
 
-WireCell::WireVector WireCell::CellDatabase::wires(WireCell::Cell cell) const
+WireCell::WireVector WireCell::WireCell::wires(WireCell::Cell cell) const
 {
     return cell->wires();	// this one is easy
 }
 
-WireCell::CellVector WireCell::CellDatabase::cells(WireCell::Wire wire) const
+WireCell::CellVector WireCell::WireCell::cells(WireCell::Wire wire) const
 {
     if (!m_graph) {
 	return CellVector();
@@ -202,12 +201,12 @@ WireCell::CellVector WireCell::CellDatabase::cells(WireCell::Wire wire) const
     return m_graph->cells(wire);
 }
 
-WireCell::Cell WireCell::CellDatabase::cell(const WireCell::WireVector& wires) const
+WireCell::Cell WireCell::WireCell::cell(const WireCell::WireVector& wires) const
 {
     return Cell();		// fixme
 }
 
-WireCell::CellVector WireCell::CellDatabase::neighbors(WireCell::Cell cell) const
+WireCell::CellVector WireCell::WireCell::neighbors(WireCell::Cell cell) const
 {
     return CellVector();	// fixme
 }

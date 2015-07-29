@@ -1,6 +1,5 @@
 #include "WireCellIface/IConfigurable.h"
-#include "WireCellIface/IWireProvider.h"
-#include "WireCellIface/IWireParameters.h"
+#include "WireCellIface/IWire.h"
 #include "WireCellIface/IWireGenerator.h"
 #include "WireCellIface/IWireSelectors.h"
 
@@ -69,11 +68,11 @@ int main(int argc, char* argv[])
 
     cout << tk("Generated ParamWires") << endl;
 
-    auto pw_pro = WireCell::Factory::lookup<IWireProvider>("ParamWires");
-    Assert(pw_pro, "Failed to get IWireProvider from default ParamWires");
-    cout << "Got ParamWires IWireProvider interface @ " << pw_pro << endl;
+    auto pw_seq = WireCell::Factory::lookup<IWireSequence>("ParamWires");
+    Assert(pw_seq, "Failed to get IWireSequence from default ParamWires");
+    cout << "Got ParamWires IWireSequence interface @ " << pw_seq << endl;
 
-    std::vector<const IWire*> wires(pw_pro->wires_begin(), pw_pro->wires_end());
+    std::vector<const IWire*> wires(pw_seq->wires_begin(), pw_seq->wires_end());
     int nwires = wires.size();
     cout << "Got " << nwires << " wires" << endl;
     //Assert(1103 == nwires);
