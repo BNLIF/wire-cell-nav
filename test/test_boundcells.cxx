@@ -100,15 +100,21 @@ int main(int argc, char** argv)
      * 20.0, 185, 6561, 132
      * 50.0, 75, 1067, 22
      * 100.0, 37, 263, 6
+     *
+     * with 2m x 2m,
+     * 3.0, 2485, 1154415, 21283
      */
-    double pitch = 50.0;	// leave it large so the results can actually be seen
+    double pitch = 50.0*units::mm; // leave it large so the results can actually be seen
     double angle_deg = 60.0;
+    double full_width = 1.0*units::meter;
     auto cfg = params.default_configuration();
     cfg.put("pitch_mm.u", pitch);
     cfg.put("pitch_mm.v", pitch);
     cfg.put("pitch_mm.w", pitch);
     cfg.put("angle_deg.u", angle_deg);
     cfg.put("angle_deg.v", -angle_deg);
+    cfg.put("size_mm.y", full_width);
+    cfg.put("size_mm.z", full_width);
     params.configure(cfg);
 
     ParamWires pw;
@@ -130,10 +136,10 @@ int main(int argc, char** argv)
     TCanvas c("c","c",500,500);
     const double enlarge = 2.0;
     c.DrawFrame(enlarge*bbox.first.z(), enlarge*bbox.first.y(),
-		enlarge*bbox.second.z(), enlarge*bbox.second.y());
+    		enlarge*bbox.second.z(), enlarge*bbox.second.y());
 
     TBox* box = new TBox(bbox.first.z(), bbox.first.y(),
-			 bbox.second.z(), bbox.second.y());
+    			 bbox.second.z(), bbox.second.y());
     box->Draw();
     cout << tk("set up canvas") << endl;
     draw_cells(bc);
