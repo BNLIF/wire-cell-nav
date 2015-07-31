@@ -6,6 +6,7 @@
 #include "WireCellIface/ICell.h"
 #include "WireCellIface/ITiling.h"
 
+#include "WireCellUtil/BoundingBox.h"
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/TimeKeeper.h"
 
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
 	// of the planes
 	boundingbox(cells[ind]->center());
     }
-    const Ray& bbox = boundingbox.bounds;
+    const Ray& bbox = boundingbox.bounds();
     cout << tk("Made bounding box") << endl;
 
     TApplication* theApp = 0;

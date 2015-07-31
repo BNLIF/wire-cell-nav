@@ -14,20 +14,12 @@ int main(int argc, char** argv)
 {
     WireParams wp;
 
-    BoundingBox bb;
-    bb(wp.pitchU());
-    bb(wp.pitchV());
-    bb(wp.pitchW());
-    const Ray bbox(2.0*bb.bounds.first, 2.0*bb.bounds.second);
-
     TApplication* theApp = 0;
     if (argc > 1) {
 	theApp = new TApplication ("test_iwireprovider",0,0);
     }
 
     TCanvas c("c","c",500,500);
-    //TH1F* frame = c.DrawFrame(bbox.first.z(), bbox.first.y(),
-    //bbox.second.z(), bbox.second.y());
     TH1F* frame = c.DrawFrame(0,-10, 20,10);
     frame->SetTitle("Pitch (thick) and wire (thin) red=U, blue=V, +X (-drift) direction into page");
     frame->SetXTitle("Transverse Z direction");

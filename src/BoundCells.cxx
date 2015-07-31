@@ -3,6 +3,7 @@
 #include "WireCellNav/BoundCells.h"
 #include "WireCellUtil/NamedFactory.h"
 #include "WireCellUtil/Point.h"
+#include "WireCellUtil/BoundingBox.h"
 #include "WireCellUtil/Units.h"
 
 #include <boost/range.hpp>
@@ -75,6 +76,12 @@ namespace WireCell {
 //    }
     };
 } // namespace WireCell;
+
+
+
+//
+// fixme: some of this code is more generically available in WireSummary
+// 
 
 
 // Return a Ray going from the center point of wires[0] to a point on
@@ -255,10 +262,10 @@ void BoundCells::sink(wire_iterator wires_begin, wire_iterator wires_end)
 	    // Are these jumps a source of precision loss?
 	    Vector cross_uv = origin_uv - double(u_ind)*jump_v + double(v_ind)*jump_u;
 
-	    if (cross_uv.z() < bb.bounds.first.z() - 0.5*pitch_w ||
-		cross_uv.z() > bb.bounds.second.z() + 0.5*pitch_w ||
-		cross_uv.y() < bb.bounds.first.y() - y_buffer ||
-		cross_uv.y() > bb.bounds.second.y() + y_buffer)
+	    if (cross_uv.z() < bb.bounds().first.z() - 0.5*pitch_w ||
+		cross_uv.z() > bb.bounds().second.z() + 0.5*pitch_w ||
+		cross_uv.y() < bb.bounds().first.y() - y_buffer ||
+		cross_uv.y() > bb.bounds().second.y() + y_buffer)
 	    {
 		// cerr << "outside: " << u_ind << "/" << v_ind << " " << cross_uv
 		//      << " U:" << u_wire.ray().first << " --> " << u_wire.ray().second << " "

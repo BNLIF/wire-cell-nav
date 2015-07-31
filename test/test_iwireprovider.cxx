@@ -5,6 +5,7 @@
 
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/TimeKeeper.h"
+#include "WireCellUtil/BoundingBox.h"
 #include "WireCellUtil/Point.h"
 
 #include "WireCellUtil/NamedFactory.h"
@@ -90,7 +91,7 @@ int main(int argc, char* argv[])
     for (int ind = 0; ind < wires.size(); ++ind) {
 	boundingbox(wires[ind]->ray());
     }
-    const Ray& bbox = boundingbox.bounds;
+    const Ray& bbox = boundingbox.bounds();
 
     cout << tk("Made bounding box") << endl;
 
