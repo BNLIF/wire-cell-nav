@@ -1,5 +1,6 @@
 #include "WireCellNav/DepoTransport.h"
 #include "WireCellUtil/Testing.h"
+#include "WireCellUtil/GeneratorIter.h"
 #include "MyDepo.h"
 
 #include <map>
@@ -71,13 +72,27 @@ int main()
     // 	}
     // }
 
-    depoptr_range transported = depo_transport(abeg, aend, 0, drift_velocity);
+    typedef GeneratorIter<DepoTransport, IDepoPtr> gen_depoptr_iter;
+    typedef IteratorAdapter< gen_depoptr_iter, WireCell::depoptr_base_iterator > gen_iter;
 
-    cout << endl;
-    for (auto dit = transported.first; dit != transported.second; ++dit) {
-    	IDepoPtr p(*dit);
-    	cout << "itr: " << dump(p) << endl;
+    gen_depoptr_iter gen_begin(DepoTransport(abeg, aend, 0, drift_velocity));
+    gen_depoptr_iter gen_end(DepoTransport(aend, aend, 0, drift_velocity));
+
+    Assert(gen_begin != gen_end, "Gen iters already equal.");
+
+    for (auto git = gen_begin; git != gen_end; ++git) {
+    	IDepoPtr p(*git);
+    	cout << "transported: " << dump(p) << endl;
     }
+
+
+    // depoptr_range transported = depo_transport(abeg, aend, 0, drift_velocity);
+
+    // cout << endl;
+    // for (auto dit = transported.first; dit != transported.second; ++dit) {
+    // 	IDepoPtr p(*dit);
+    // 	cout << "transported: " << dump(p) << endl;
+    // }
 
     return 0;
 }

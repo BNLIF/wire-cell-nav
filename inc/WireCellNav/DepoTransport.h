@@ -20,6 +20,10 @@ namespace WireCell {
 		      double location=0*units::meter,
 		      double drift_velocity = 1.6*units::mm/units::microsecond);
 
+	DepoTransport(const DepoTransport& rhs);
+
+	DepoTransport& operator=(const DepoTransport& rhs);
+
 	/// The next IDepo, transported to the location.
 	IDepoPtr operator()();
 
@@ -37,6 +41,7 @@ namespace WireCell {
     private:
 	typedef std::set<IDepoPtr, IDepoPtrDriftCompare> DepoPtrVector;
 	DepoPtrVector m_buffer;
+	double m_location;
 	double m_drift_velocity;
 	depoptr_iterator m_it, m_end;
 
