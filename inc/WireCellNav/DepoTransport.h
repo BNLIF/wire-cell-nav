@@ -5,6 +5,8 @@
 
 #include "WireCellUtil/Units.h"
 
+#include <string>
+
 namespace WireCell {
 
 
@@ -14,51 +16,39 @@ namespace WireCell {
 
     class DepoTransport {
     public:
-	DepoTransport(depo_iterator begin, depo_iterator end, double x=0);
-	
-	
+	DepoTransport(depoptr_iterator begin, depoptr_iterator end,
+		      double location=0*units::meter,
+		      double drift_velocity = 1.6*units::mm/units::microsecond);
 
-    };
+	/// The next IDepo, transported to the location.
+	IDepoPtr operator()();
 
-    
-........................
+	/// Return false once there are no more IDepo objects.
+	operator bool() const;
 
-use GeneratorIter
+	/// Compare equality against another DepoTransport.
+	bool operator==(const DepoTransport& rhs) const;
 
-................................g
-
-
-
-    class DepoTransport : public IDepoSink, public IDepoSequence {
-    public:
-
-	/** Create a DepoTransport.
-	 *
-	 * \param location gives the value along the X-axis of the
-	 * plane to which the depositions are transported.
-	 */
-	DepoTransport(double location = 0*units::meter);
-	virtual ~DepoTransport();
-
-	/// Configure the object.
-	// void configure(FrameConfigObject....);
-	// fixme: make configurable.
-
-	/// Give input depositions.
-	void sink(depo_iterator begin, depo_iterator end) {
-	    m_depos = depo_range(begin, end);
-	}
-
-	/// Access the frames that this DepoTransport makes.
-	depo_iterator depos_begin() const;
-	depo_iterator depos_end() const;
+	std::string dump(const IDepoPtr& p);
+	IDepoPtr top();
+	IDepoPtr bot();
+	IDepoPtr pop();
 
     private:
+	typedef std::set<IDepoPtr, IDepoPtrDriftCompare> DepoPtrVector;
+	DepoPtrVector m_buffer;
+	double m_drift_velocity;
+	depoptr_iterator m_it, m_end;
 
-	double m_start_time;
-
+	// read recent input stream
+	bool buffer();	
     };
-    
+
+    /// Return a transported range of IDepoPtrs. 
+    depoptr_range depo_transport(depoptr_iterator begin, depoptr_iterator end,
+				 double location=0*units::meter,
+				 double drift_velocity = 1.6*units::mm/units::microsecond);
+
 }
 
 #endif
