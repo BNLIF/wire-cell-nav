@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 
     // fixme: this needs to be done by a configuration service
     auto wp_cfg = WireCell::Factory::lookup<IConfigurable>("WireParams");
-    Assert(wp_cfg, "Failed to get IConfigurable from default WireParams");
+    AssertMsg(wp_cfg, "Failed to get IConfigurable from default WireParams");
 
     auto cfg = wp_cfg->default_configuration();
     double pitch = 10.0;
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     wp_cfg->configure(cfg);
 
     auto wp_wps = WireCell::Factory::lookup<IWireParameters>("WireParams");
-    Assert(wp_wps, "Failed to get IWireParameters from default WireParams");
+    AssertMsg(wp_wps, "Failed to get IWireParameters from default WireParams");
     cout << "Got WireParams IWireParameters interface @ " << wp_wps << endl;
     
     cout << tk("Configured WireParams") << endl;
@@ -63,14 +63,14 @@ int main(int argc, char* argv[])
 
 
     auto pw_gen = WireCell::Factory::lookup<IWireGenerator>("ParamWires");
-    Assert(pw_gen, "Failed to get IWireGenerator from default ParamWires");
+    AssertMsg(pw_gen, "Failed to get IWireGenerator from default ParamWires");
     cout << "Got ParamWires IWireGenerator interface @ " << pw_gen << endl;
     pw_gen->generate(*wp_wps);
 
     cout << tk("Generated ParamWires") << endl;
 
     auto pw_seq = WireCell::Factory::lookup<IWireSequence>("ParamWires");
-    Assert(pw_seq, "Failed to get IWireSequence from default ParamWires");
+    AssertMsg(pw_seq, "Failed to get IWireSequence from default ParamWires");
     cout << "Got ParamWires IWireSequence interface @ " << pw_seq << endl;
 
     std::vector<const IWire*> wires(pw_seq->wires_begin(), pw_seq->wires_end());
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
     cout << tk("Made local wire collection") << endl;
 
     // auto wdb = WireCell::Factory::lookup<IWireDatabase>("WireDatabase");
-    // Assert(wdb, "Failed to get IWireDatabase from default WireDatabase");
+    // AssertMsg(wdb, "Failed to get IWireDatabase from default WireDatabase");
     // cout << "Got WireDatabase IWireDatabase interface @ " << wdb << endl;
     // wdb->load(wires);
 

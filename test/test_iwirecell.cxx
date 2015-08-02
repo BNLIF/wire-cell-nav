@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
     // fixme: this needs to be done by a configuration service
     auto wp_cfg = WireCell::Factory::lookup<IConfigurable>("WireParams");
-    Assert(wp_cfg, "Failed to get IConfigurable from default WireParams");
+    AssertMsg(wp_cfg, "Failed to get IConfigurable from default WireParams");
     auto cfg = wp_cfg->default_configuration();
     double pitch_mm = 100.0;
     cfg.put("pitch_mm.u", pitch_mm);
@@ -55,16 +55,16 @@ int main(int argc, char* argv[])
     //cout << configuration_dumps(cfg) << endl;
 
     auto wp_wps = WireCell::Factory::lookup<IWireParameters>("WireParams");
-    Assert(wp_wps, "Failed to get IWireParameters from default WireParams");
+    AssertMsg(wp_wps, "Failed to get IWireParameters from default WireParams");
     cout << "Got WireParams IWireParameters interface @ " << wp_wps << endl;
     
     auto pw_gen = WireCell::Factory::lookup<IWireGenerator>("ParamWires");
-    Assert(pw_gen, "Failed to get IWireGenerator from default ParamWires");
+    AssertMsg(pw_gen, "Failed to get IWireGenerator from default ParamWires");
     cout << "Got ParamWires IWireGenerator interface @ " << pw_gen << endl;
     pw_gen->generate(*wp_wps);
 
     auto pw_seq = WireCell::Factory::lookup<IWireSequence>("ParamWires");
-    Assert(pw_seq, "Failed to get IWireSequence from default ParamWires");
+    AssertMsg(pw_seq, "Failed to get IWireSequence from default ParamWires");
     cout << "Got ParamWires IWireSequence interface @ " << pw_seq << endl;
 
     std::vector<const IWire*> wires(pw_seq->wires_begin(), pw_seq->wires_end());
@@ -75,13 +75,13 @@ int main(int argc, char* argv[])
 
 
     auto bc_sink = WireCell::Factory::lookup<IWireSink>("BoundCells");
-    Assert(bc_sink, "Failed to get IWireSink from default BoundCells");
+    AssertMsg(bc_sink, "Failed to get IWireSink from default BoundCells");
     cout << "Got BoundCells IWireSink interface @ " << bc_sink << endl;
     bc_sink->sink(pw_seq->wires_begin(), pw_seq->wires_end());
     cout << tk("BoundCells generated") << endl;
 
     auto bc_seq = WireCell::Factory::lookup<ICellSequence>("BoundCells");
-    Assert(bc_seq, "Failed to get ICellSequence from default BoundCells");
+    AssertMsg(bc_seq, "Failed to get ICellSequence from default BoundCells");
     cout << "Got BoundCells ICellSequence interface @ " << bc_seq << endl;
 
     std::vector<const ICell*> cells(bc_seq->cells_begin(),
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     int ncells = cells.size();
     cout << "Got " << ncells << " cells" << endl;
     cout << tk("Got BoundCells to local collection") << endl;
-    Assert(ncells, "Got no cells");
+    AssertMsg(ncells, "Got no cells");
 
     WireCell::BoundingBox boundingbox;
     for (int ind = 0; ind < cells.size(); ++ind) {

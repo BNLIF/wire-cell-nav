@@ -63,8 +63,8 @@ void test2()
 	std::vector<const IWire*> wires(pw.wires_begin(), pw.wires_end());
 	int nwires = wires.size();
 	cout << ind << ": pitch=" << pitches[ind] << " nwires=" << nwires << " (want=" << want[ind] << ")" << endl;
-	Assert(nwires == want[ind], "Wrong number of wires");
-	Assert(configuration_dumps(cfg).size(), "Failed to dump cfg");
+	AssertMsg(nwires == want[ind], "Wrong number of wires");
+	AssertMsg(configuration_dumps(cfg).size(), "Failed to dump cfg");
     }
 }
 
@@ -91,7 +91,7 @@ void test3D(bool interactive)
 
 
     std::vector<const IWire*> wires(pw.wires_begin(), pw.wires_end());
-    Assert(wires.size(), "Got no wires");
+    AssertMsg(wires.size(), "Got no wires");
 
     vector<const IWire*> u_wires, v_wires, w_wires;
     copy_if(wires.begin(), wires.end(), back_inserter(u_wires), select_u_wires);
@@ -109,7 +109,7 @@ void test3D(bool interactive)
 	int iplane = wire.plane();
 	int index = wire.index();
 
-	Assert(n_wires[iplane], "Empty plane");
+	AssertMsg(n_wires[iplane], "Empty plane");
 	double width = ((index+1)*max_width)/n_wires[iplane];
 
 	const Ray ray = wire.ray();

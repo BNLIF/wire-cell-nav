@@ -48,7 +48,7 @@ void test3D(bool interactive)
     int colors[3] = {2, 4, 1};
 
     std::vector<const IWire*> wires(pw.wires_begin(), pw.wires_end());
-    Assert(wires.size(), "Got no wires");
+    AssertMsg(wires.size(), "Got no wires");
 
     vector<const IWire*> u_wires, v_wires, w_wires;
     copy_if(wires.begin(), wires.end(), back_inserter(u_wires), select_u_wires);
@@ -66,7 +66,7 @@ void test3D(bool interactive)
 	int iplane = wire.plane();
 	int index = wire.index();
 
-	Assert(n_wires[iplane], "Empty plane");
+	AssertMsg(n_wires[iplane], "Empty plane");
 	double width = 1.0+ (((index+1)*max_width)/n_wires[iplane]);
 
 	const Ray ray = wire.ray();
