@@ -1,5 +1,6 @@
-#include "WireCellNav/DepoCollection.h"
-#include "WireCellNav/DepoTransporter.h"
+#include "WireCellNav/Drifter.h"
+
+#include "WireCellUtil/RangeFeed.h"
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/TimeKeeper.h"
 
@@ -14,11 +15,14 @@ using namespace std;
 
 typedef std::pair<double, double> tpair;
 typedef std::pair<double, double> xpair;
+typedef std::vector<IDepo::const_ptr> Track;
 
 const double drift_velocity = 1.0;
 
 
-void make_track(std::vector<IDepoPtr>& track, const tpair& t, const xpair& x, double charge=0.0)
+
+void make_track(Track& track, const tpair& t, const xpair& x,
+		double charge=0.0)
 {
     const double tstep = 0.01;
 
@@ -27,12 +31,12 @@ void make_track(std::vector<IDepoPtr>& track, const tpair& t, const xpair& x, do
 
     for (double now = t.first; now <= t.second; now += tstep) {
 	double frac = (t.second-now)/deltat;
-	IDepoPtr p(new MyDepo(now, Point(x.first + frac*deltax, 0, 0), charge));
+	IDepo::const_ptr p(new MyDepo(now, Point(x.first + frac*deltax, 0, 0), charge));
 	track.push_back(p);
     }
 }
 
-std::string dump(const IDepoPtr& p)
+std::string dump(const IDepo::const_ptr& p)
 {
     stringstream ss;
     double x = p->pos().x(), t = p->time(), tau = t+x/drift_velocity;
@@ -41,7 +45,7 @@ std::string dump(const IDepoPtr& p)
 }
 
 struct ByTime {
-    bool operator()(const IDepoPtr& lhs, const IDepoPtr& rhs) {
+    bool operator()(const IDepo::const_ptr& lhs, const IDepo::const_ptr& rhs) {
 	if (lhs->time() == rhs->time()) {
 	    return &lhs < &rhs;
 	}
@@ -49,9 +53,7 @@ struct ByTime {
     }
 };
 
-typedef IteratorAdapter< std::vector<IDepoPtr>::iterator, depoptr_base_iterator > adapted_iter;
-
-int test_sort(std::vector<IDepoPtr>& activity)
+int test_sort(Track& activity)
 {
     int norig = activity.size();
     cout << "Starting with " << norig << " depositions" << endl;
@@ -67,38 +69,37 @@ int test_sort(std::vector<IDepoPtr>& activity)
     return nsorted;
 }
 
-int test_collection(std::vector<IDepoPtr>& activity)
+int test_feed(Track& activity)
 {
-    int ncol=0, norig = activity.size();
-    DepoCollection dc(depoptr_range(adapted_iter(activity.begin()),
-				    adapted_iter(activity.end())));
+    int count=0, norig = activity.size();
+    RangeFeed<Track::iterator> feed(activity.begin(), activity.end());
     IDepo::const_ptr p;
-    while ((p=dc.depo_gen())) {
-	cout << "col: #" << ncol << " " << dump(p) << endl;
-	++ncol;
+    while ((p=feed())) {
+	cout << "feed: #" << count << " " << dump(p) << endl;
+	++count;
     }
-    AssertMsg(ncol == norig , "Lost some points from collection"); 
+    AssertMsg(count == norig , "Lost some points from feed"); 
+
 }
-
-int test_transport(std::vector<IDepoPtr>& activity)    
+int test_drifted(Track& activity)
 {
-    int ntrans = 0, norig = activity.size();
+    int count=0, norig = activity.size();
+    RangeFeed<Track::iterator> feed(activity.begin(), activity.end());
+    Drifter drifter(0, drift_velocity);
+    drifter.connect(feed);
 
-    DepoCollection dc(depoptr_range(adapted_iter(activity.begin()),
-				    adapted_iter(activity.end())));
-    DepoTransporter dt(dc, 0, drift_velocity);
     IDepo::const_ptr p;
-    while ((p=dt.depo_gen())) {
-	cout << "trans: #" << ntrans << " " << dump(p) << endl;
-	++ntrans;
+    while ((p=drifter())) {
+	cout << "drift: #" << count << " " << dump(p) << endl;
+	++count;
     }
-    AssertMsg(ntrans == norig , "Lost some points from transport"); 
+    AssertMsg(count == norig , "Lost some points drifting"); 
 }
 
 int main()
 {
     TimeKeeper tk("test_depotransport");
-    std::vector<IDepoPtr> activity;
+    Track activity;
     make_track(activity, tpair(10,11), xpair(10,11), 1);
     make_track(activity, tpair(12,13), xpair(1,2), 2);// close but late
     make_track(activity, tpair(9,10), xpair(13,11), 3);// far but early
@@ -107,9 +108,9 @@ int main()
     
     test_sort(activity);	// side effects needed by all tests
     cout << tk("sorted") << endl;
-    test_collection(activity);
+    test_feed(activity);
     cout << tk("collection") << endl;
-    test_transport(activity);
+    test_drifted(activity);
     cout << tk("transport") << endl;
     cout << tk.summary() << endl;
     return 0;
