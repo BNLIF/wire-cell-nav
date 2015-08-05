@@ -41,10 +41,10 @@ namespace WireCell {
     
 	int m_ident;
 	PointVector m_corners;	// this is likely a source of a lot of memory usage
-	const std::vector<const IWire*> m_wires;
+	const std::vector<IWire::pointer> m_wires;
 
     public:
-	BoundCell(int id, const PointVector& pcell, const std::vector<const IWire*>& wires)
+	BoundCell(int id, const PointVector& pcell, const std::vector<IWire::pointer>& wires)
 	    : m_ident(id), m_corners(pcell), m_wires(wires) {
 	    std::sort(m_corners.begin(), m_corners.end(), AngularSort(center()));
 	}
@@ -86,28 +86,28 @@ namespace WireCell {
 
 // Return a Ray going from the center point of wires[0] to a point on
 // wire[1] and perpendicular to both.
-static Ray pitch2(const std::vector<const IWire*>& wires)
+static Ray pitch2(const std::vector<IWire::pointer>& wires)
 {
     // Use two consecutive wires from the center to determine the pitch. 
     int ind = wires.size()/2;
-    const IWire* one = wires[ind];
-    const IWire* two = wires[ind+1];
+    IWire::pointer one = wires[ind];
+    IWire::pointer two = wires[ind+1];
     const Ray p = ray_pitch(one->ray(), two->ray());
 
     // Move the pitch to the first wire
-    const IWire* zero = wires[0];
+    IWire::pointer zero = wires[0];
     const Vector center0 = zero->center();
     return Ray(center0, center0 + ray_vector(p));
 }
 
-static Vector axis(const std::vector<const IWire*>& wires)
+static Vector axis(const std::vector<IWire::pointer>& wires)
 {
     int ind = wires.size()/2;
     return ray_vector(wires[ind]->ray()).norm();
 }
 
 struct WireByIndex {
-    bool operator() (const IWire* lhs, const IWire *rhs) const {
+    bool operator() (IWire::pointer lhs, IWire::pointer rhs) const {
 	if (lhs->plane() == rhs->plane()) {
 	    return lhs->index() < rhs->index();
 	}
@@ -115,8 +115,8 @@ struct WireByIndex {
     }
 };
 
-Vector origin_cross(const std::vector<const IWire*>& ones,
-		    const std::vector<const IWire*>& twos)
+Vector origin_cross(const std::vector<IWire::pointer>& ones,
+		    const std::vector<IWire::pointer>& twos)
 {
     // double A1 = r1.second.y()-r1.first.y();
     // double B1 = r1.second.z()-r1.first.z();
@@ -142,7 +142,7 @@ bool is_point_inside_w_lane(const Point& point, const double& w_lane_center, con
     return fabs(w_lane_center - point.z()) < w_lane_half_width;
 }
 
-void BoundCells::sink(wire_iterator wires_begin, wire_iterator wires_end)
+void BoundCells::sink(const IWire::iterator_range& wr)
 {
     m_store.clear();
 
@@ -174,10 +174,10 @@ void BoundCells::sink(wire_iterator wires_begin, wire_iterator wires_end)
 
     */
     
-    vector<const IWire*> u_wires, v_wires, w_wires;
-    copy_if(wires_begin, wires_end, back_inserter(u_wires), select_u_wires);
-    copy_if(wires_begin, wires_end, back_inserter(v_wires), select_v_wires);
-    copy_if(wires_begin, wires_end, back_inserter(w_wires), select_w_wires);
+    vector<IWire::pointer> u_wires, v_wires, w_wires;
+    copy_if(boost::begin(wr), boost::end(wr), back_inserter(u_wires), select_u_wires);
+    copy_if(boost::begin(wr), boost::end(wr), back_inserter(v_wires), select_v_wires);
+    copy_if(boost::begin(wr), boost::end(wr), back_inserter(w_wires), select_w_wires);
 
     WireByIndex wbi_sorter;
     std::sort(u_wires.begin(), u_wires.end(), wbi_sorter);
@@ -237,13 +237,13 @@ void BoundCells::sink(wire_iterator wires_begin, wire_iterator wires_end)
     const double tolerance = 0.0*units::mm;
 
     BoundingBox bb;
-    for (auto wit = wires_begin; wit != wires_end; ++wit) {
+    for (auto wit = boost::begin(wr); wit != boost::end(wr); ++wit) {
 	bb((*wit)->ray());
     }
     //cerr << "Cell bounding box: " << bb.bounds.first << " -->  " << bb.bounds.second  << endl;
     
     // pack it up and send it out
-    std::vector<const IWire*> uvw_wires(3);
+    std::vector<IWire::pointer> uvw_wires(3);
 
     const Vector origin_uv = origin_cross(u_wires, v_wires);
 
@@ -252,12 +252,12 @@ void BoundCells::sink(wire_iterator wires_begin, wire_iterator wires_end)
     const double w_lane_half_width = 0.5*(pitch_w + tolerance);
 
     for (int u_ind = 0; u_ind < u_wires.size(); ++u_ind) {
-	const IWire& u_wire = *u_wires[u_ind];
-	uvw_wires[0] = &u_wire;
+	IWire::pointer u_wire = u_wires[u_ind];
+	uvw_wires[0] = u_wire;
 
 	for (int v_ind = 0; v_ind < v_wires.size(); ++v_ind) {
-	    const IWire& v_wire = *v_wires[v_ind];
-	    uvw_wires[1] = &v_wire;
+	    IWire::pointer v_wire = v_wires[v_ind];
+	    uvw_wires[1] = v_wire;
 
 	    // Are these jumps a source of precision loss?
 	    Vector cross_uv = origin_uv - double(u_ind)*jump_v + double(v_ind)*jump_u;
@@ -288,8 +288,8 @@ void BoundCells::sink(wire_iterator wires_begin, wire_iterator wires_end)
 	    // 	 << " crossing=" << cross_uv
 	    // 	 << endl;
 	    for (int w_ind = min_w_ind; w_ind <= max_w_ind; ++w_ind) {
-		const IWire& w_wire = *w_wires[w_ind];
-		uvw_wires[2] = &w_wire;
+		IWire::pointer w_wire = w_wires[w_ind];
+		uvw_wires[2] = w_wire;
 
 		double target_w_z = w_ind * pitch_w + first_w_z;
 
@@ -352,7 +352,7 @@ void BoundCells::sink(wire_iterator wires_begin, wire_iterator wires_end)
 		}
 			
 		// result
-		m_store.push_back(new BoundCell(m_store.size(), pcell, uvw_wires));
+		m_store.push_back(ICell::pointer(new BoundCell(m_store.size(), pcell, uvw_wires)));
 
             } // W wires
         } // v wires
@@ -361,18 +361,15 @@ void BoundCells::sink(wire_iterator wires_begin, wire_iterator wires_end)
 
 
 
-
-typedef IteratorAdapter< std::vector<BoundCell*>::const_iterator, WireCell::cell_base_iterator > bc_iterator;
-
-WireCell::cell_iterator BoundCells::cells_begin() const
+ICellSequence::cell_iterator BoundCells::cells_begin() 
 {
-    return bc_iterator(m_store.begin());
+    return cell_iterator(adapt(m_store.begin()));
 }
 
 
-WireCell::cell_iterator BoundCells::cells_end() const
+ICellSequence::cell_iterator BoundCells::cells_end()
 {
-    return bc_iterator(m_store.end());
+    return cell_iterator(adapt(m_store.end()));
 }
 
 

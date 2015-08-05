@@ -20,7 +20,7 @@ namespace WireCell {
 	// fixme: configurable
 
 	/// Set the wires to use (IWireSink).  
-	virtual void sink(wire_iterator begin, wire_iterator end);
+	virtual void sink(wire_range wires);
 
 	/// Connect a feed of depositions at the wire plane
 	void connect(const DepoFeeder& feed);

@@ -17,12 +17,12 @@ static Ray pitch2(const IWireVector& wires)
 {
     // Use two consecutive wires from the center to determine the pitch. 
     int ind = wires.size()/2;
-    const IWire* one = wires[ind];
-    const IWire* two = wires[ind+1];
+    IWire::pointer one = wires[ind];
+    IWire::pointer two = wires[ind+1];
     const Ray p = ray_pitch(one->ray(), two->ray());
 
     // Move the pitch to the first wire
-    const IWire* zero = wires[0];
+    IWire::pointer zero = wires[0];
     const Vector center0 = zero->center();
     return Ray(center0, center0 + ray_vector(p));
 }
@@ -36,17 +36,17 @@ struct WirePlaneCache {
     Vector pitch_unit;
     double pitch_mag;
 
-    WirePlaneCache(WirePlaneType_t plane, wire_iterator begin, wire_iterator end)
+    WirePlaneCache(WirePlaneType_t plane, IWire::iterator_range wr)
 	: plane(plane), iplane(int(plane))
     {
-	copy_if(begin, end, back_inserter(wires), select_uvw_wires[iplane]);
+	copy_if(boost::begin(wr), boost::end(wr), back_inserter(wires), select_uvw_wires[iplane]);
 	pitch_ray = pitch2(wires);
 	pitch_vector = ray_vector(pitch_ray); // cache
 	pitch_unit = pitch_vector.norm();     // the
 	pitch_mag = pitch_vector.magnitude(); // things!
     }
 
-    const IWire* wire_by_index(int index) {
+    IWire::pointer wire_by_index(int index) {
 	if (index < 0 || index >= wires.size()) {
 	    return 0;
 	}
@@ -65,17 +65,16 @@ struct WireSummary::WireSummaryCache {
     BoundingBox bb;
     WirePlaneCache *plane_cache[3];
 
-    WireSummaryCache(wire_iterator begin, wire_iterator end)
-	: wires(begin, end)
+    WireSummaryCache(IWire::iterator_range wr)
+	: wires(boost::begin(wr), boost::end(wr))
    {
-       for (auto it = begin; it != end; ++it) {
-	   const IWire& wire = **it;
-	   bb(wire.ray());
+       for (auto it : wr) {
+	   bb(it->ray());
        }
 
-       plane_cache[0] = new WirePlaneCache(kUwire, begin, end);
-       plane_cache[1] = new WirePlaneCache(kVwire, begin, end);
-       plane_cache[2] = new WirePlaneCache(kWwire, begin, end);
+       plane_cache[0] = new WirePlaneCache(kUwire, wr);
+       plane_cache[1] = new WirePlaneCache(kVwire, wr);
+       plane_cache[2] = new WirePlaneCache(kWwire, wr);
    }
 
     ~WireSummaryCache() {
@@ -94,31 +93,31 @@ struct WireSummary::WireSummaryCache {
     
 };
 
-typedef IteratorAdapter< IWireVector::const_iterator, WireCell::wire_base_iterator > adapted_iterator;
+//typedef IteratorAdapter< IWireVector::const_iterator, WireCell::wire_base_iterator > adapted_iterator;
 
 
-void WireSummary::sink(wire_iterator begin, wire_iterator end)
+void WireSummary::sink(IWire::iterator_range wires)
 {
     if (m_cache) delete m_cache;
-    m_cache = new WireSummaryCache(begin, end);    
+    m_cache = new WireSummaryCache(wires);    
 }
 
 static IWireVector dummy_vector;
 
-wire_iterator WireSummary::wires_begin() const
+IWireSequence::wire_iterator WireSummary::wires_begin() const
 {
     if (!m_cache) {
-	return adapted_iterator(dummy_vector.end());
+	return wire_iterator(adapt(dummy_vector.end()));
     }
-    return adapted_iterator(m_cache->wires.begin());
+    return wire_iterator(adapt(m_cache->wires.begin()));
 }
 
-wire_iterator WireSummary::wires_end() const
+IWireSequence::wire_iterator WireSummary::wires_end() const
 {
     if (!m_cache) {
-	return adapted_iterator(dummy_vector.end());
+	return wire_iterator(adapt(dummy_vector.end()));
     }
-    return adapted_iterator(m_cache->wires.end());	
+    return wire_iterator(adapt(m_cache->wires.end()));	
 }
 
 const BoundingBox& WireSummary::box() const
@@ -130,7 +129,7 @@ const BoundingBox& WireSummary::box() const
     return m_cache->bb;
 }
 
-const IWire* WireSummary::closest(const Point& point, WirePlaneType_t plane) const
+IWire::pointer WireSummary::closest(const Point& point, WirePlaneType_t plane) const
 {
     if (!m_cache) {
 	return 0;
@@ -154,7 +153,7 @@ IWirePair WireSummary::bounding_wires(const Point& point, WirePlaneType_t plane)
 	return IWirePair();
     }
 
-    const IWire* wire = closest(point, plane);
+    IWire::pointer wire = closest(point, plane);
     if (!wire) return IWirePair();
 
     int index = wire->index();
@@ -166,12 +165,12 @@ IWirePair WireSummary::bounding_wires(const Point& point, WirePlaneType_t plane)
 	other_index = index + 1;
     }
 
-    const IWire* other_wire = wpc->wire_by_index(other_index);
+    IWire::pointer other_wire = wpc->wire_by_index(other_index);
 
     if (index < other_index) {
-	return IWirePair(wire, other_wire);
+	return IWirePair(IWire::pointer(wire), IWire::pointer(other_wire));
     }
-    return IWirePair(other_wire, wire);
+    return IWirePair(IWire::pointer(other_wire), IWire::pointer(wire));
 }
 
 double WireSummary::pitch_distance(const Point& point, WirePlaneType_t plane) const

@@ -33,11 +33,11 @@ void Tiling::clear()
 }
 
 // fixme: actually implement some day....
-void Tiling::sink(cell_iterator begin, cell_iterator end) {}
-wire_range Tiling::wires(const ICell& cell) const {}
-cell_range Tiling::cells(const IWire& wire) const {}
-cell_range Tiling::cell(const std::vector<const IWire*>& wires) const {}
-cell_range Tiling::neighbors(const ICell& cell) const {}
+void Tiling::sink(const ICell::iterator_range& cells) {}
+IWire::iterator_range Tiling::wires(const ICell::pointer& cell) const {}
+ICell::iterator_range Tiling::cells(const IWire::pointer& wire) const {}
+ICell::iterator_range Tiling::cell(const IWire::iterator_range& wires) const {}
+ICell::iterator_range Tiling::neighbors(const ICell::pointer& cell) const {}
 
 
 

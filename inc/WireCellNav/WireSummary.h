@@ -14,11 +14,11 @@ namespace WireCell {
 	virtual ~WireSummary() {}
 
 	/// Set the wires to use. (IWireSink)
-	virtual void sink(wire_iterator begin, wire_iterator end);
+	virtual void sink(IWire::iterator_range wires);
 
 	/// Access the sequence of wires. (IWireSequence)
 	virtual wire_iterator wires_begin() const;
-	virtual  wire_iterator wires_end() const;
+	virtual wire_iterator wires_end() const;
 
 	/// Return the bounding box of the wire planes.
 	virtual const WireCell::BoundingBox& box() const;
@@ -26,7 +26,7 @@ namespace WireCell {
 	/// Return the closest wire along the pitch direction to the
 	/// given point in the given wire plane.  It is assumed the
 	/// point is in the (Y-Z) bounding box of the wire plane.
-	virtual const WireCell::IWire* closest(const Point& point, WirePlaneType_t plane) const;
+	virtual IWire::pointer closest(const Point& point, WirePlaneType_t plane) const;
 	
 	/// Return a pair of adjacent wires from the given plane which
 	/// bound the given point along the pitch direction.  The pair

@@ -6,9 +6,6 @@
 
 namespace WireCell {
 
-    // internal
-    class BoundCell;
-
     /** A provider of cells using the bounded wire algorithm. */
     class BoundCells :
 	public IWireSink,
@@ -21,18 +18,18 @@ namespace WireCell {
 	virtual ~BoundCells();
 
 	/// Generate my cells (IWireSink interface).
-	void sink(wire_iterator begin, wire_iterator end);
+	void sink(const IWire::iterator_range& wires);
 
 	/// Return iterator to first cell provided.
-	cell_iterator cells_begin() const;
+	cell_iterator cells_begin();
 
 	/// Return iterator to one past last cell provided.
-	cell_iterator cells_end() const;
+	cell_iterator cells_end();
 
 	size_t cells_size() const { return m_store.size(); }
 
     private:
-	typedef std::vector<BoundCell*> BoundCellStore;
+	typedef std::vector<ICell::pointer> BoundCellStore;
 	BoundCellStore m_store;
     };
 }

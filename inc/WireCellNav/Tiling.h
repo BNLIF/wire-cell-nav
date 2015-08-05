@@ -20,22 +20,22 @@ namespace WireCell {
 	virtual ~Tiling();
 
 	/// Load the underling cell data.
-	virtual void sink(cell_iterator begin, cell_iterator end);
+	virtual void sink(const ICell::iterator_range& cells);
 
 
 	/// Return a sequence of wires which are associated with the
 	/// given cell.
-	virtual wire_range wires(const ICell& cell) const;
+	virtual IWire::iterator_range wires(const ICell::pointer& cell) const;
 	
 	/// Return a sequence of cells associated with the given wire.
-	virtual cell_range cells(const IWire& wire) const;
+	virtual ICell::iterator_range cells(const IWire::pointer& wire) const;
 
 	/// Return the cells associated with the collection of wires.
 	/// Typically this is expected to be one wire from each plane.
-	virtual cell_range cell(const std::vector<const IWire*>& wires) const;
+	virtual ICell::iterator_range cell(const IWire::iterator_range& wires) const;
 
 	/// Return collection of nearest neighbor cells.
-	virtual cell_range neighbors(const ICell& cell) const;
+	virtual ICell::iterator_range neighbors(const ICell::pointer& cell) const;
 
 
 

@@ -18,9 +18,7 @@ namespace WireCell {
      * perpendicular to the drift direction.
      */
 
-    class ParamWires :
-	public IWireGenerator,
-	public IWireSequence {
+    class ParamWires :	public IWireGenerator,	public IWireSequence {
     public:
 	ParamWires();
 	virtual ~ParamWires();
@@ -28,8 +26,8 @@ namespace WireCell {
 	void generate(const WireCell::IWireParameters& params);
 
 	/// Access the wires
-	wire_iterator wires_begin() const;
-	wire_iterator wires_end() const;
+	wire_iterator wires_begin();
+	wire_iterator wires_end();
 	size_t wires_size() const { return m_wire_store.size(); }
 
     private:
@@ -39,7 +37,7 @@ namespace WireCell {
 	void make_one_plane(WirePlaneType_t plane, const Ray& bounds, const Ray& step);
 
 
-	typedef std::vector<ParamWire*> ParamWireStore;
+	typedef std::vector<IWire::pointer> ParamWireStore;
 	ParamWireStore m_wire_store;
 
     };

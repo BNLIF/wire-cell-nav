@@ -124,7 +124,7 @@ void ParamWires::make_one_plane(WirePlaneType_t plane, const Ray& bounds, const 
 	ParamWire* pwire = these_wires[ind];
 	pwire->set_index(ind);
 	pwire->set_plane(plane);
-	m_wire_store.push_back(pwire);
+	m_wire_store.push_back(IWire::pointer(pwire));
 
 	//cerr << plane << "/#" << ind << pwire->ray().first << " --> " << pwire->ray().second << endl;
     }
@@ -148,15 +148,13 @@ void ParamWires::generate(const IWireParameters& params)
 }
 
 
-typedef IteratorAdapter< std::vector<ParamWire*>::const_iterator, WireCell::wire_base_iterator > pw_iterator;
-
-WireCell::wire_iterator ParamWires::wires_begin() const
+IWireSequence::wire_iterator ParamWires::wires_begin() 
 {
-    return pw_iterator(m_wire_store.begin());
+    return wire_iterator(adapt(m_wire_store.cbegin()));
 }
-WireCell::wire_iterator ParamWires::wires_end() const
+IWireSequence::wire_iterator ParamWires::wires_end() 
 {
-    return pw_iterator(m_wire_store.end());
+    return wire_iterator(adapt(m_wire_store.cend()));
 }
 
 void ParamWires::clear() {
@@ -171,5 +169,3 @@ ParamWires::~ParamWires()
 {
     this->clear();
 }
-
-
