@@ -75,7 +75,13 @@ int GenerativeFDS::jump(int frame_number)
 	const Point& pt = hits[ind].first;
 	float charge = hits[ind].second;
 	int tbin = int((pt.x-xmm.second)/bin_drift_distance);
-	int offset = timeoffsets[ind];
+	int offset;
+	//std::cout << timeoffsets.size() << std::endl;
+	if (timeoffsets.size()==0){
+	  offset = 0;
+	}else{
+	  offset = timeoffsets[ind];
+	}
 	//	std::cout << tbin << " " << pt.x/units::cm << std::endl;
 
 	// adding in the diffusion

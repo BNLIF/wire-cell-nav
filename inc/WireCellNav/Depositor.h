@@ -2,6 +2,7 @@
 #define WIRECELLNAV_DEPOSITOR
 
 #include "WireCellData/Point.h"
+#include <vector>
 
 namespace WireCell {
 
@@ -33,6 +34,9 @@ namespace WireCell {
 	 */
 	virtual const PointValueVector& depositions(int frame_number) const = 0;
 	virtual const std::vector<int>& timeoffset() const;
+
+    protected:
+	const std::vector<int> timeo;
     };
 
 }
