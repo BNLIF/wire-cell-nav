@@ -4,3 +4,7 @@ WireCell::Depositor::~Depositor()
 {
 }
  
+const std::vector<int>& WireCell::Depositor::timeoffset() const
+{
+  
+}

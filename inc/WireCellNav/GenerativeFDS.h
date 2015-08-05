@@ -53,11 +53,11 @@ namespace WireCell {
 
 	virtual SimTruthSelection truth() const; 
 
-
+	
     private:    
 	const Depositor& dep;
 	const GeomDataSource& gds;
-
+	
 	int  max_frames;
 	float bin_drift_distance;
 

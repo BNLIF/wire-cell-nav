@@ -58,6 +58,8 @@ int GenerativeFDS::jump(int frame_number)
     simtruth.clear();
 
     const PointValueVector& hits = dep.depositions(frame_number);
+    const std::vector<int>& timeoffsets = dep.timeoffset();
+    
     size_t nhits = hits.size();
     if (!nhits) {
 	frame.index = frame_number; 
@@ -73,7 +75,7 @@ int GenerativeFDS::jump(int frame_number)
 	const Point& pt = hits[ind].first;
 	float charge = hits[ind].second;
 	int tbin = int((pt.x-xmm.second)/bin_drift_distance);
-	
+	int offset = timeoffsets[ind];
 	//	std::cout << tbin << " " << pt.x/units::cm << std::endl;
 
 	// adding in the diffusion
@@ -178,7 +180,7 @@ int GenerativeFDS::jump(int frame_number)
 	      float sum_charge = 0;
 	      for (int qt = 0; qt!= long_tbin.size(); qt++){
 		for (int qw = 0; qw!= trans_wires.size(); qw++){
-		  alltime.push_back(long_tbin.at(qt));
+		  alltime.push_back(long_tbin.at(qt) + offset);
 		  allwires.push_back(trans_wires.at(qw));
 		  float tcharge = charge * long_integral.at(qt) * 
 		    trans_integral.at(qw);
@@ -200,26 +202,29 @@ int GenerativeFDS::jump(int frame_number)
 		const GeomWire* wire3 = allwires.at(qx);
 		int chid3 = wire3->channel();
 		int tbin3 = alltime.at(qx);
-		float charge3 = allcharge.at(qx)/sum_charge*charge;
 		
-		TraceIndexMap::iterator it = tim.find(chid3);
-		int trace_index = frame.traces.size(); // if new
-		if (it == tim.end()) {
-		  Trace t;
-		  t.chid = chid3;
-		  t.tbin = 0;
-		  t.charge.resize(bins_per_frame, 0.0);
-		  tim[chid3] = frame.traces.size();
-		  frame.traces.push_back(t);
-		}else {		// already seen
-		  trace_index = it->second;
+		if (tbin3 >=0 && tbin3 < bins_per_frame){
+
+		  float charge3 = allcharge.at(qx)/sum_charge*charge;
+		  
+		  TraceIndexMap::iterator it = tim.find(chid3);
+		  int trace_index = frame.traces.size(); // if new
+		  if (it == tim.end()) {
+		    Trace t;
+		    t.chid = chid3;
+		    t.tbin = 0;
+		    t.charge.resize(bins_per_frame, 0.0);
+		    tim[chid3] = frame.traces.size();
+		    frame.traces.push_back(t);
+		  }else {		// already seen
+		    trace_index = it->second;
+		  }
+		  Trace& trace = frame.traces[trace_index];
+		  
+		  // finally
+		  trace.charge[tbin3] += charge3;
 		}
-		Trace& trace = frame.traces[trace_index];
-		
-		// finally
-		trace.charge[tbin3] += charge3;
 	      }
-	      
 	      
 	      // TraceIndexMap::iterator it = tim.find(chid);
 	      // int trace_index = frame.traces.size(); // if new
