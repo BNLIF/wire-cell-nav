@@ -53,6 +53,7 @@ namespace WireCell {
 
 	virtual SimTruthSelection truth() const; 
 
+	void clear(){frame.clear();simtruth.clear();};
 	
     private:    
 	const Depositor& dep;

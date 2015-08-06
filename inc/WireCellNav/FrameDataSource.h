@@ -20,6 +20,8 @@ namespace WireCell {
 	FrameDataSource();
 	virtual ~FrameDataSource();
 	
+	void clear(){frame.clear();};
+
 	/// Return the number of frames this data source knows about.  Return -1 if unlimited.
 	virtual int size() const = 0;
 	
