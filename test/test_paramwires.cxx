@@ -47,10 +47,10 @@ void test3D(bool interactive)
 
     int colors[3] = {2, 4, 1};
 
-    std::vector<const IWire*> wires(pw.wires_begin(), pw.wires_end());
+    std::vector<IWire::pointer> wires(pw.wires_begin(), pw.wires_end());
     AssertMsg(wires.size(), "Got no wires");
 
-    vector<const IWire*> u_wires, v_wires, w_wires;
+    vector<IWire::pointer> u_wires, v_wires, w_wires;
     copy_if(wires.begin(), wires.end(), back_inserter(u_wires), select_u_wires);
     copy_if(wires.begin(), wires.end(), back_inserter(v_wires), select_v_wires);
     copy_if(wires.begin(), wires.end(), back_inserter(w_wires), select_w_wires);
@@ -62,14 +62,14 @@ void test3D(bool interactive)
 
     double max_width = 5;
     for (auto wit = wires.begin(); wit != wires.end(); ++wit) {
-	const IWire& wire = **wit;
-	int iplane = wire.plane();
-	int index = wire.index();
+	IWire::pointer wire = *wit;
+	int iplane = wire->plane();
+	int index = wire->index();
 
 	AssertMsg(n_wires[iplane], "Empty plane");
 	double width = 1.0+ (((index+1)*max_width)/n_wires[iplane]);
 
-	const Ray ray = wire.ray();
+	const Ray ray = wire->ray();
 
 	TArrow* a_wire = new TArrow(ray.first.z(), ray.first.y(),
 				    ray.second.z(), ray.second.y(), 0.01, "|>");

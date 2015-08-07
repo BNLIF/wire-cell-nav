@@ -14,7 +14,7 @@ Drifter::Drifter(double location,
 		 double drift_velocity)
     : m_location(location)
     , m_drift_velocity(drift_velocity)
-    , m_buffer(IDepoPtrDriftCompare(drift_velocity))
+    , m_buffer(IDepoDriftCompare(drift_velocity))
 {
 }
 
@@ -23,14 +23,14 @@ void Drifter::connect(const DepoFeeder& feed)
     m_feed.connect(feed);
 }
 
-double Drifter::proper_time(IDepo::const_ptr depo) {
+double Drifter::proper_time(IDepo::pointer depo) {
     return depo->time() + depo->pos().x()/m_drift_velocity;
 }
 
 bool Drifter::buffer()
 {
     if (!m_buffer.size()) {	// empty buffer, prime.
-	IDepo::const_ptr depo = *m_feed();
+	IDepo::pointer depo = *m_feed();
 	if (!depo) {
 	    return false;	// no buffer, no input, done.
 	}
@@ -39,7 +39,7 @@ bool Drifter::buffer()
 
     while (true) {
 	double tau = proper_time(top());
-	IDepo::const_ptr latest = bot();
+	IDepo::pointer latest = bot();
 	if (latest->time() >= tau) {
 	    return true;
 	}
@@ -54,28 +54,28 @@ bool Drifter::buffer()
 }
 
 // return value and increment
-IDepo::const_ptr Drifter::operator()()
+IDepo::pointer Drifter::operator()()
 {
     if ( !buffer() ) {
 	return 0;
     }
-    IDepo::const_ptr before = pop();
-    IDepo::const_ptr ret(new TransportedDepo(before, m_location, m_drift_velocity));
+    IDepo::pointer before = pop();
+    IDepo::pointer ret(new TransportedDepo(before, m_location, m_drift_velocity));
     return ret;
 }
 
-IDepo::const_ptr Drifter::pop()
+IDepo::pointer Drifter::pop()
 {
-    IDepo::const_ptr ret = top();
+    IDepo::pointer ret = top();
     m_buffer.erase(ret);
     return ret;
 }
 
-IDepo::const_ptr Drifter::top()
+IDepo::pointer Drifter::top()
 {
     return *m_buffer.begin();
 }
-IDepo::const_ptr Drifter::bot()
+IDepo::pointer Drifter::bot()
 {
     return *m_buffer.rbegin();
 }

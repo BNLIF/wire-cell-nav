@@ -9,7 +9,7 @@
 namespace WireCell {
 
     class Drifter {
-	typedef boost::signals2::signal<IDepo::const_ptr ()> DepoFeed;
+	typedef boost::signals2::signal<IDepo::pointer ()> DepoFeed;
     public:
 
 	/// A slot which feeds the drifter depositions.  Each time it
@@ -31,7 +31,7 @@ namespace WireCell {
 
 	/// Produce the next drifted deposition.  Can be used as a
 	/// DepoFeeder to connect to another DepoFeed.
-	IDepo::const_ptr operator()();
+	IDepo::pointer operator()();
 
 
     private:
@@ -40,13 +40,13 @@ namespace WireCell {
 	DepoTauSortedSet m_buffer;
 	DepoFeed m_feed;
 
-	double proper_time(IDepo::const_ptr depo);
+	double proper_time(IDepo::pointer depo);
 
 	// buffer management
 	bool buffer();
-	IDepo::const_ptr top();
-	IDepo::const_ptr bot();
-	IDepo::const_ptr pop();
+	IDepo::pointer top();
+	IDepo::pointer bot();
+	IDepo::pointer pop();
 
     };
 

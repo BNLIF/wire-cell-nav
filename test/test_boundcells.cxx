@@ -28,15 +28,15 @@ void draw_wires(ParamWires& pw)
 {
     int colors[3] = {2, 4, 1};
 
-    vector<const IWire*> wires(pw.wires_begin(), pw.wires_end());
+    vector<IWire::pointer> wires(pw.wires_begin(), pw.wires_end());
     int nwires = wires.size();
     cerr << "nwires = " << nwires << endl;
     for (int wind=0; wind < nwires; ++wind) {
-	const IWire& wire = *wires[wind];
-	int iplane = wire.plane();
-	int index = wire.index();
+	IWire::pointer wire = wires[wind];
+	int iplane = wire->plane();
+	int index = wire->index();
 
-	const Ray ray = wire.ray();
+	const Ray ray = wire->ray();
 	TLine* a_wire = new TLine(ray.first.z(), ray.first.y(),
 				  ray.second.z(), ray.second.y());
 	a_wire->SetLineColor(colors[iplane]);
@@ -50,16 +50,16 @@ void draw_cells(BoundCells& bc)
     const int ncolors= 4;
     int colors[ncolors] = {2, 4, 6, 8};
 
-    vector<const ICell*> cells(bc.cells_begin(), bc.cells_end());
+    vector<ICell::pointer> cells(bc.cells_begin(), bc.cells_end());
 
     const double reduce = 0.8;
     int ncells = cells.size();
     cerr << "ncells = " << ncells << endl;
     for (int cind = 0; cind < ncells; ++cind) {
-	const ICell& cell = *cells[cind];
+	ICell::pointer cell = cells[cind];
 
-        WireCell::PointVector corners = cell.corners();
-	const Point center = cell.center();
+        WireCell::PointVector corners = cell->corners();
+	const Point center = cell->center();
 	//cerr << cind << ": " << center<< endl;
 
 	size_t ncorners = corners.size();
@@ -122,7 +122,7 @@ int main(int argc, char** argv)
     cout << tk("generated wires") << endl;
 
     BoundCells bc;
-    bc.sink(pw.wires_begin(), pw.wires_end());
+    bc.sink(pw.wires_range());
 
     cout << tk("generated cells") << endl;
 

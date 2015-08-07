@@ -15,7 +15,7 @@ using namespace std;
 
 typedef std::pair<double, double> tpair;
 typedef std::pair<double, double> xpair;
-typedef std::vector<IDepo::const_ptr> Track;
+typedef std::vector<IDepo::pointer> Track;
 
 const double drift_velocity = 1.0;
 
@@ -31,12 +31,12 @@ void make_track(Track& track, const tpair& t, const xpair& x,
 
     for (double now = t.first; now <= t.second; now += tstep) {
 	double frac = (t.second-now)/deltat;
-	IDepo::const_ptr p(new MyDepo(now, Point(x.first + frac*deltax, 0, 0), charge));
+	IDepo::pointer p(new MyDepo(now, Point(x.first + frac*deltax, 0, 0), charge));
 	track.push_back(p);
     }
 }
 
-std::string dump(const IDepo::const_ptr& p)
+std::string dump(const IDepo::pointer& p)
 {
     stringstream ss;
     double x = p->pos().x(), t = p->time(), tau = t+x/drift_velocity;
@@ -45,7 +45,7 @@ std::string dump(const IDepo::const_ptr& p)
 }
 
 struct ByTime {
-    bool operator()(const IDepo::const_ptr& lhs, const IDepo::const_ptr& rhs) {
+    bool operator()(const IDepo::pointer& lhs, const IDepo::pointer& rhs) {
 	if (lhs->time() == rhs->time()) {
 	    return &lhs < &rhs;
 	}
@@ -73,7 +73,7 @@ int test_feed(Track& activity)
 {
     int count=0, norig = activity.size();
     RangeFeed<Track::iterator> feed(activity.begin(), activity.end());
-    IDepo::const_ptr p;
+    IDepo::pointer p;
     while ((p=feed())) {
 	cout << "feed: #" << count << " " << dump(p) << endl;
 	++count;
@@ -88,7 +88,7 @@ int test_drifted(Track& activity)
     Drifter drifter(0, drift_velocity);
     drifter.connect(feed);
 
-    IDepo::const_ptr p;
+    IDepo::pointer p;
     while ((p=drifter())) {
 	cout << "drift: #" << count << " " << dump(p) << endl;
 	++count;

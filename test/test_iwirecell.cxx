@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
     AssertMsg(pw_seq, "Failed to get IWireSequence from default ParamWires");
     cout << "Got ParamWires IWireSequence interface @ " << pw_seq << endl;
 
-    std::vector<const IWire*> wires(pw_seq->wires_begin(), pw_seq->wires_end());
+    std::vector<IWire::pointer> wires(pw_seq->wires_begin(), pw_seq->wires_end());
     int nwires = wires.size();
     cout << "Got " << nwires << " wires" << endl;
     //Assert(747 == nwires);
@@ -77,14 +77,14 @@ int main(int argc, char* argv[])
     auto bc_sink = WireCell::Factory::lookup<IWireSink>("BoundCells");
     AssertMsg(bc_sink, "Failed to get IWireSink from default BoundCells");
     cout << "Got BoundCells IWireSink interface @ " << bc_sink << endl;
-    bc_sink->sink(pw_seq->wires_begin(), pw_seq->wires_end());
+    bc_sink->sink(pw_seq->wires_range());
     cout << tk("BoundCells generated") << endl;
 
     auto bc_seq = WireCell::Factory::lookup<ICellSequence>("BoundCells");
     AssertMsg(bc_seq, "Failed to get ICellSequence from default BoundCells");
     cout << "Got BoundCells ICellSequence interface @ " << bc_seq << endl;
 
-    std::vector<const ICell*> cells(bc_seq->cells_begin(),
+    std::vector<ICell::pointer> cells(bc_seq->cells_begin(),
 				    bc_seq->cells_end() );
     int ncells = cells.size();
     cout << "Got " << ncells << " cells" << endl;
@@ -115,10 +115,10 @@ int main(int argc, char* argv[])
     cout << tk("Started TCanvas") << endl;
 
     for (int cind = 0; cind < cells.size(); ++cind) {
-	const ICell& cell = *cells[cind];
+	ICell::pointer cell = cells[cind];
 
 	TPolyLine *pl = new TPolyLine; // Hi and welcome to Leak City.
-	PointVector corners = cell.corners();
+	PointVector corners = cell->corners();
 	for (int corner_ind=0; corner_ind < corners.size(); ++corner_ind) {
 	    const Point& corner = corners[corner_ind];
 	    pl->SetPoint(corner_ind, corner.z(), corner.y());

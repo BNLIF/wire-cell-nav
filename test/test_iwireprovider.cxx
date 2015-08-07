@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     AssertMsg(pw_seq, "Failed to get IWireSequence from default ParamWires");
     cout << "Got ParamWires IWireSequence interface @ " << pw_seq << endl;
 
-    std::vector<const IWire*> wires(pw_seq->wires_begin(), pw_seq->wires_end());
+    std::vector<IWire::pointer> wires(pw_seq->wires_begin(), pw_seq->wires_end());
     int nwires = wires.size();
     cout << "Got " << nwires << " wires" << endl;
     //Assert(1103 == nwires);
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 
     cout << tk("Made bounding box") << endl;
 
-    vector<const IWire*> u_wires, v_wires, w_wires;
+    vector<IWire::pointer> u_wires, v_wires, w_wires;
     copy_if(wires.begin(), wires.end(), back_inserter(u_wires), select_u_wires);
     copy_if(wires.begin(), wires.end(), back_inserter(v_wires), select_v_wires);
     copy_if(wires.begin(), wires.end(), back_inserter(w_wires), select_w_wires);
@@ -127,18 +127,18 @@ int main(int argc, char* argv[])
     frame->SetXTitle("Z transverse direction");
     frame->SetYTitle("Y transverse direction");
     for (auto wit = wires.begin(); wit != wires.end(); ++wit) {
-	const IWire& wire = **wit;
+	IWire::pointer wire = *wit;
 
-	Ray wray = wire.ray();
+	Ray wray = wire->ray();
 
-	int iplane = wire.plane();
-	int index = wire.index();
+	int iplane = wire->plane();
+	int index = wire->index();
 	double width = ((index+1)*max_width)/n_wires[iplane];
 
 	l.SetLineColor(colors[iplane]);
 	l.SetLineWidth(width);
 	l.DrawLine(wray.first.z(), wray.first.y(), wray.second.z(), wray.second.y());
-	Point cent = wire.center();
+	Point cent = wire->center();
 	m.SetMarkerColor(colors[iplane]);
 	m.DrawMarker(cent.z(), cent.y());
     }
