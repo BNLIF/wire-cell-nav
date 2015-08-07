@@ -13,11 +13,12 @@ double integral(double sigma, double z0, double z1, double z2){
 
 GenerativeFDS::GenerativeFDS(const Depositor& dep, const GeomDataSource& gds, 
 			     int bins_per_frame1, int nframes_total,
-			     float bin_drift_distance)
+			     float bin_drift_distance, float unit_dis)
     : dep(dep)
     , gds(gds)
     , max_frames(nframes_total)
     , bin_drift_distance(bin_drift_distance)
+    , unit_dis(unit_dis)
 {
   bins_per_frame = bins_per_frame1;
 }
@@ -86,7 +87,7 @@ int GenerativeFDS::jump(int frame_number)
 
 	// adding in the diffusion
 	// assuming the velocity is 1.6 mm/us
-	float drift_time = (pt.x-xmm.second)/(1.6*units::millimeter); // us
+	float drift_time = (pt.x-xmm.second)/(unit_dis*units::millimeter); // us
 	float DL = 5.3; //cm^2/s
 	float DT = 12.8; //cm^2/s
 	float sigmaL = sqrt(2.*DL*drift_time*1e-6) * units::cm;
