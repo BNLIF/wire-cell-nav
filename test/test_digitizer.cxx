@@ -32,10 +32,10 @@ std::string dump(IFrame::pointer frame)
 int main() {
     TimeKeeper tk("test_digitizer");
     Track activity;
-    make_track(activity, tpair(10,11), xpair(10,11), 1);
-    make_track(activity, tpair(12,13), xpair(1,2), 2);// close but late
-    make_track(activity, tpair(9,10), xpair(13,11), 3);// far but early
-    make_track(activity, tpair(9.5,11.5), xpair(10.5,11.5), 4);// overlapping
+    make_track_4d(activity, tpair(10,11), Ray(Point(10,0,0), Point(10,10,10)), 1);
+    make_track_4d(activity, tpair(12,13), Ray(Point( 1,0,0), Point( 2,-10,0)), 2);
+    make_track_4d(activity, tpair( 9,10), Ray(Point(13,5,5), Point(11, -5,-3)), 3);
+
     cout << tk("make tracks") << endl;
     sort(activity.begin(), activity.end(), ByTime());
     cout << tk("sorted tracks") << endl;
