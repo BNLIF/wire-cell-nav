@@ -96,7 +96,7 @@ struct WireSummary::WireSummaryCache {
 //typedef IteratorAdapter< IWireVector::const_iterator, WireCell::wire_base_iterator > adapted_iterator;
 
 
-void WireSummary::sink(IWire::iterator_range wires)
+void WireSummary::sink(const IWire::iterator_range& wires)
 {
     if (m_cache) delete m_cache;
     m_cache = new WireSummaryCache(wires);    
@@ -104,7 +104,7 @@ void WireSummary::sink(IWire::iterator_range wires)
 
 static IWireVector dummy_vector;
 
-IWireSequence::wire_iterator WireSummary::wires_begin() const
+IWireSequence::wire_iterator WireSummary::wires_begin() 
 {
     if (!m_cache) {
 	return wire_iterator(adapt(dummy_vector.end()));
@@ -112,7 +112,7 @@ IWireSequence::wire_iterator WireSummary::wires_begin() const
     return wire_iterator(adapt(m_cache->wires.begin()));
 }
 
-IWireSequence::wire_iterator WireSummary::wires_end() const
+IWireSequence::wire_iterator WireSummary::wires_end() 
 {
     if (!m_cache) {
 	return wire_iterator(adapt(dummy_vector.end()));

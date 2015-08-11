@@ -4,37 +4,18 @@
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/TimeKeeper.h"
 
-#include "MyDepo.h"
+#include "MyDrifter.h"
 
-#include <map>
 #include <iostream>
 #include <sstream>
 
 using namespace WireCell;
 using namespace std;
 
-typedef std::pair<double, double> tpair;
-typedef std::pair<double, double> xpair;
-typedef std::vector<IDepo::pointer> Track;
-
 const double drift_velocity = 1.0;
 
 
 
-void make_track(Track& track, const tpair& t, const xpair& x,
-		double charge=0.0)
-{
-    const double tstep = 0.01;
-
-    const double deltat = t.second-t.first;
-    const double deltax = x.second-x.first;
-
-    for (double now = t.first; now <= t.second; now += tstep) {
-	double frac = (t.second-now)/deltat;
-	IDepo::pointer p(new MyDepo(now, Point(x.first + frac*deltax, 0, 0), charge));
-	track.push_back(p);
-    }
-}
 
 std::string dump(const IDepo::pointer& p)
 {
@@ -43,15 +24,6 @@ std::string dump(const IDepo::pointer& p)
     ss << "<IDepo tau:" << tau << " t:" << t << " x:" << x << " q:" << p->charge() << ">";
     return ss.str();
 }
-
-struct ByTime {
-    bool operator()(const IDepo::pointer& lhs, const IDepo::pointer& rhs) {
-	if (lhs->time() == rhs->time()) {
-	    return &lhs < &rhs;
-	}
-	return lhs->time() < rhs->time();
-    }
-};
 
 int test_sort(Track& activity)
 {
@@ -98,7 +70,7 @@ int test_drifted(Track& activity)
 
 int main()
 {
-    TimeKeeper tk("test_depotransport");
+    TimeKeeper tk("test_drifter");
     Track activity;
     make_track(activity, tpair(10,11), xpair(10,11), 1);
     make_track(activity, tpair(12,13), xpair(1,2), 2);// close but late

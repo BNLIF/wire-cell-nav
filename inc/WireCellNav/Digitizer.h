@@ -5,6 +5,7 @@
 #include "WireCellIface/IDepo.h"
 #include "WireCellIface/IFrame.h"
 #include "WireCellUtil/Units.h"
+#include "WireCellUtil/Signal.h"
 
 
 namespace WireCell {
@@ -21,9 +22,7 @@ namespace WireCell {
      * - the drifting charge is directly turned into signal (no response function, no deconvolution)
      * - only the closest wire is "hit" (even for induction planes)
      */
-    class Digitizer : public IWireSummaryClient {
-	typedef boost::signals2::signal<IDepo::pointer ()> DepoFeed;
-	DepoFeed m_feed;
+    class Digitizer : public Signal<IDepo>, public IWireSummaryClient {
 	const int m_maxticks;
 	const double m_tick;
 	double m_time;
@@ -31,10 +30,6 @@ namespace WireCell {
 	int m_frame_count;
 
     public:
-	/// A slot which feeds the drifter depositions.  Each time it
-	/// is called it should return the next available deposition
-	/// in strict time order.
-	typedef DepoFeed::slot_type DepoFeeder;
 
 	/// Make a simple digitizer for the given wire plane and
 	/// digitization tick.  The traces in the resulting frames
@@ -43,11 +38,6 @@ namespace WireCell {
 		  double tick = 0.5*units::microsecond,
 		  double start_time = 0*units::second);
 	// fixme: configurable
-
-	/// Connect a feed of depositions at the wire plane.  This
-	/// digitizer assumes depositions are provided already drifted
-	/// to the wire plane.
-	void connect(const DepoFeeder& feed);
 
 	/// Produce a frame.
 	IFrame::pointer operator()();

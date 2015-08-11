@@ -14,11 +14,11 @@ namespace WireCell {
 	virtual ~WireSummary() {}
 
 	/// Set the wires to use. (IWireSink)
-	virtual void sink(IWire::iterator_range wires);
+	virtual void sink(const IWire::iterator_range& wires);
 
 	/// Access the sequence of wires. (IWireSequence)
-	virtual wire_iterator wires_begin() const;
-	virtual wire_iterator wires_end() const;
+	virtual wire_iterator wires_begin();
+	virtual wire_iterator wires_end();
 
 	/// Return the bounding box of the wire planes.
 	virtual const WireCell::BoundingBox& box() const;

@@ -2,10 +2,14 @@
 
 #include <map>
 
+#include <iostream>
+
 using namespace WireCell;
+using namespace std;
 
 Digitizer::Digitizer(int maxticks, double tick, double start_time)
-    : m_maxticks(maxticks)
+    : Signal<IDepo>()
+    , m_maxticks(maxticks)
     , m_tick(tick)
     , m_time(start_time)
     , m_depo(0)
@@ -45,9 +49,14 @@ class SimpleFrame : public IFrame {
 public:
     SimpleFrame(int ident, double time, const std::vector<DigitizedTrace*>& traces)
 	: m_ident(ident), m_time(time) {
+	cerr << "SimpleFrame(" << ident << "," << time << "," << traces.size() << ")" << endl;
+
 	for (auto dt : traces) {
 	    m_traces.push_back(ITrace::pointer(dt));
 	}
+    }
+    ~SimpleFrame() {
+	cerr << "~SimpleFrame(" << m_ident << "," << m_time << "," << m_traces.size() << ")" << endl;
     }
     virtual int ident() const { return m_ident; }
     virtual double time() const { return m_time; }
@@ -83,11 +92,11 @@ public:
 	    int chid = wire->channel();
 
 	    TraceIndexMap::iterator it = tim.find(chid);
-	    int trace_index = traces.size(); // if new
-
 	    DigitizedTrace* trace = 0;
 	    if (it == tim.end()) {
 		trace = new DigitizedTrace(chid, nbins);
+		tim[chid] = traces.size();
+		traces.push_back(trace);
 	    }
 	    else {
 		trace = traces[it->second];
@@ -99,7 +108,8 @@ public:
     }
     IFrame* make_frame(int ident, double tmin) {
 	IFrame* ret = new SimpleFrame(ident, tmin, traces);
-	traces.clear();	
+	traces.clear();
+	return ret;
     }
 };
 
@@ -107,7 +117,7 @@ public:
 IFrame::pointer Digitizer::operator()()
 {
     // prime
-    if (!m_depo) { m_depo = *m_feed(); }
+    if (!m_depo) { m_depo = fire(); }
     if (!m_depo) { return 0; }	// empty
 
     const double tmin = m_time;
@@ -119,18 +129,17 @@ IFrame::pointer Digitizer::operator()()
 	if (!m_depo || m_depo->time() > tmax) {
 	    IFrame* ret = tm.make_frame(m_frame_count, tmin);
 	    ++m_frame_count;
-	    return IFrame::pointer(ret);
+	    cerr << "Making frame" << endl;
+	    IFrame::pointer result(ret);
+	    return result;
 	}
 	
 	int tbin = (m_depo->time() - tmin)/m_tick;
 	tm.add_depo(m_depo->pos(), tbin, m_depo->charge());
-	m_depo = *m_feed();	// set up for next
+
+	m_depo = fire();	// set up for next
     }
 }
 
 
 
-void Digitizer::connect(const DepoFeeder& feed)
-{
-    m_feed.connect(feed);
-}
