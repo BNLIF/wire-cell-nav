@@ -1,8 +1,11 @@
 #include "WireCellNav/Digitizer.h"
+#include "WireCellNav/ZSEndedTrace.h"
+#include "WireCellNav/SimpleFrame.h"
 
 #include <map>
+#include <vector>
 
-#include <iostream>
+//#include <iostream>
 
 using namespace WireCell;
 using namespace std;
@@ -18,88 +21,38 @@ Digitizer::Digitizer(int maxticks, double tick, double start_time)
     
 }
 
-
-class DigitizedTrace : public ITrace {
-    int m_chid;
-    ChargeSequence m_charge;
-public:
-    DigitizedTrace(int chid, int nbins)
-	: m_chid(chid)
-	, m_charge(nbins,0)
-    {
-    }
-
-    void operator()(int bin, float charge) {
-	m_charge[bin] += charge;
-    }
-
-    virtual int channel() const { return m_chid; }
-
-    virtual int tbin() const { return 0; }
-
-    virtual const ChargeSequence& charge() const { return m_charge; };
-};
-
-
-
-class SimpleFrame : public IFrame {
-    int m_ident;
-    double m_time;
-    std::vector<ITrace::pointer> m_traces;
-public:
-    SimpleFrame(int ident, double time, const std::vector<DigitizedTrace*>& traces)
-	: m_ident(ident), m_time(time) {
-	cerr << "SimpleFrame(" << ident << "," << time << "," << traces.size() << ")" << endl;
-
-	for (auto dt : traces) {
-	    m_traces.push_back(ITrace::pointer(dt));
-	}
-    }
-    ~SimpleFrame() {
-	cerr << "~SimpleFrame(" << m_ident << "," << m_time << "," << m_traces.size() << ")" << endl;
-    }
-    virtual int ident() const { return m_ident; }
-    virtual double time() const { return m_time; }
-    
-    virtual iterator begin() { return adapt(m_traces.begin()); }
-    virtual iterator end() { return adapt(m_traces.end()); }
-};
-
+// a little helper class which produces ZSEndedTraces held in SimpleFrames
 class TraceBuilder {
 
-    std::vector<DigitizedTrace*> traces;
+    std::vector<ZSEndedTrace*> m_traces;
     typedef std::map<int, int> TraceIndexMap; // channel->index into traces
-    TraceIndexMap tim;
+    TraceIndexMap m_tim;
 
-    IWireSummary::pointer ws;
-    int nbins;
-    int nframes;
+    IWireSummary::pointer m_ws;
+    int m_nbins;
+
 public:
     TraceBuilder(IWireSummary::pointer ws, int nbins)
-	: ws(ws), nbins(nbins), nframes(0) {}
-    ~TraceBuilder() {
-	for (auto t : traces) {
-	    delete t;
-	}
-    }
+	: m_ws(ws), m_nbins(nbins){}
+    ~TraceBuilder() { }
 
     void add_depo(const Point& pos, int tbin, double charge) {
 	for (int iplane=0; iplane<3; ++iplane) {
 	    WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane);
-	    IWire::pointer wire = ws->closest(pos, plane);
+	    IWire::pointer wire = m_ws->closest(pos, plane);
 	    if (!wire) { continue; }
 
 	    int chid = wire->channel();
 
-	    TraceIndexMap::iterator it = tim.find(chid);
-	    DigitizedTrace* trace = 0;
-	    if (it == tim.end()) {
-		trace = new DigitizedTrace(chid, nbins);
-		tim[chid] = traces.size();
-		traces.push_back(trace);
+	    TraceIndexMap::iterator it = m_tim.find(chid);
+	    ZSEndedTrace* trace = 0;
+	    if (it == m_tim.end()) {
+		trace = new ZSEndedTrace(chid, m_nbins);
+		m_tim[chid] = m_traces.size();
+		m_traces.push_back(trace);
 	    }
 	    else {
-		trace = traces[it->second];
+		trace = m_traces[it->second];
 	    }
 
 	    (*trace)(tbin, charge);
@@ -107,8 +60,10 @@ public:
 	}
     }
     IFrame* make_frame(int ident, double tmin) {
-	IFrame* ret = new SimpleFrame(ident, tmin, traces);
-	traces.clear();
+	std::vector<ITrace::pointer> exported(m_traces.begin(), m_traces.end());
+	m_traces.clear();
+	SequenceAdapter<ITrace> adapted(exported.begin(), exported.end());
+	IFrame* ret = new SimpleFrame(ident, tmin, adapted);
 	return ret;
     }
 };
@@ -129,13 +84,17 @@ IFrame::pointer Digitizer::operator()()
 	if (!m_depo || m_depo->time() > tmax) {
 	    IFrame* ret = tm.make_frame(m_frame_count, tmin);
 	    ++m_frame_count;
-	    cerr << "Making frame" << endl;
+	    //cerr << "Making frame" << endl;
 	    IFrame::pointer result(ret);
 	    return result;
 	}
 	
-	int tbin = (m_depo->time() - tmin)/m_tick;
-	tm.add_depo(m_depo->pos(), tbin, m_depo->charge());
+	if (m_depo->charge() > 0.0) {
+	    int tbin = (m_depo->time() - tmin)/m_tick;
+	    //cerr << "Add depo: t=" << m_depo->time() << " tmin=" << tmin
+	    //     << " tick=" << m_tick << " tbin=" << tbin << endl;
+	    tm.add_depo(m_depo->pos(), tbin, m_depo->charge());
+	}
 
 	m_depo = fire();	// set up for next
     }

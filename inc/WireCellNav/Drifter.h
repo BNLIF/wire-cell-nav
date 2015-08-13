@@ -9,16 +9,22 @@
 
 namespace WireCell {
 
+    /** A Drifter object depositions from the connected slot and
+     * produces new depositions drifted to a given location.  It
+     * properly manages the time/distance ordering by reading ahead
+     * from its input stream just far enough to resolve time/distance
+     * ordering.
+     */
     class Drifter : public Signal<IDepo> {
     public:
 	/// Create a drifter that will drift charge to a given
 	/// location at a given drift velocity.
-	Drifter(double location=0*units::meter,
+	
+	Drifter(double x_location=0*units::meter,
 		double drift_velocity = 1.6*units::mm/units::microsecond);
 	// fixme: make configureable
 
-	/// Produce the next drifted deposition.  Can be used as a
-	/// DepoFeeder to connect to another DepoFeed.
+	/// Produce the next drifted deposition. 
 	IDepo::pointer operator()();
 
 

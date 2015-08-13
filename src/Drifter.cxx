@@ -3,7 +3,6 @@
 
 #include <boost/range.hpp>
 
-#include <iostream>
 #include <sstream>
 
 using namespace std;
@@ -57,7 +56,7 @@ IDepo::pointer Drifter::operator()()
     }
     IDepo::pointer before = pop();
     IDepo::pointer ret(new TransportedDepo(before, m_location, m_drift_velocity));
-    return ret;
+   return ret;
 }
 
 IDepo::pointer Drifter::pop()

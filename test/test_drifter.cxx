@@ -1,6 +1,5 @@
 #include "WireCellNav/Drifter.h"
 
-#include "WireCellUtil/RangeFeed.h"
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/TimeKeeper.h"
 #include "WireCellUtil/BoundingBox.h"
@@ -14,6 +13,7 @@
 #include "TView.h"
 #include "TPolyLine3D.h"
 #include "TPolyMarker3D.h"
+#include "TColor.h"
 
 
 #include <iostream>
@@ -22,70 +22,18 @@
 using namespace WireCell;
 using namespace std;
 
-const double drift_velocity = 1.0;
-
-
-
-
-std::string dump(const IDepo::pointer& p)
-{
-    stringstream ss;
-    double x = p->pos().x(), t = p->time(), tau = t+x/drift_velocity;
-    ss << "<IDepo tau:" << tau << " t:" << t << " x:" << x << " q:" << p->charge() << ">";
-    return ss.str();
-}
-
-int test_sort(Track& activity)
-{
-    int norig = activity.size();
-    cout << "Starting with " << norig << " depositions" << endl;
-
-    sort(activity.begin(), activity.end(), ByTime());
-    AssertMsg (norig == activity.size(), "Sort lost depos");
-
-    int nsorted = 0;
-    for (auto tit = activity.begin(); tit != activity.end(); ++tit) {
-    	//cout << "sorted: #" << nsorted << " " << dump(*tit) << endl;
-	++nsorted;
-    }
-    return nsorted;
-}
-
-int test_feed(Track& activity)
-{
-    int count=0, norig = activity.size();
-    RangeFeed<Track::iterator> feed(activity.begin(), activity.end());
-    IDepo::pointer p;
-    while ((p=feed())) {
-	//cout << "feed: #" << count << " " << dump(p) << endl;
-	++count;
-    }
-    AssertMsg(count == norig , "Lost some points from feed"); 
-
-}
-int test_drifted(Track& activity, Track& result)
-{
-    int count=0, norig = activity.size();
-    RangeFeed<Track::iterator> feed(activity.begin(), activity.end());
-    Drifter drifter(0, drift_velocity);
-    drifter.connect(feed);
-
-    IDepo::pointer p;
-    while ((p=drifter())) {
-	//cout << "drift: #" << count << " " << dump(p) << endl;
-	result.push_back(p);
-	++count;
-    }
-    AssertMsg(count == norig , "Lost some points drifting"); 
-}
 
 int main(int argc, char* argv[])
 {
     TimeKeeper tk("test_drifter");
     Track activity;
-    make_track_4d(activity, tpair(10,11), Ray(Point(10,0,0), Point(10,10,10)), 1);
-    make_track_4d(activity, tpair(12,13), Ray(Point( 1,0,0), Point( 2,-10,0)), 2);
-    make_track_4d(activity, tpair( 9,10), Ray(Point(13,5,5), Point(11, -5,-3)), 3);
+    // make_track_4d(activity, tpair(10,11), Ray(Point(10,0,0), Point(10,10,10)), 1);
+    // make_track_4d(activity, tpair(12,13), Ray(Point( 1,0,0), Point( 2,-10,0)), 2);
+    // make_track_4d(activity, tpair( 9,10), Ray(Point(13,5,5), Point(11, -5,-3)), 3);
+    make_track_4d(activity, 10, Ray(Point(10,0,0), Point(100,10,10)), 1);
+    make_track_4d(activity, 120, Ray(Point( 1,0,0), Point( 2,-100,0)), 2);
+    make_track_4d(activity, 99, Ray(Point(130,50,50), Point(11, -50,-30)), 3);
+
     cout << tk("make tracks") << endl;
     
 
@@ -120,7 +68,7 @@ int main(int argc, char* argv[])
 
 
     // draw raw activity
-    TPolyMarker3D orig(activity.size(), 1);
+    TPolyMarker3D orig(activity.size(), 6);
     orig.SetMarkerColor(2);
     int indx=0;
     for (auto depo : activity) {
@@ -130,14 +78,29 @@ int main(int argc, char* argv[])
     orig.Draw();
 
     // draw drifted
-    TPolyMarker3D drifm(drifted.size(), 1);
-    orig.SetMarkerColor(4);
-    indx=0;
+    double tmin=-1, tmax=-1;
     for (auto depo : drifted) {
-	const Point& p = depo->pos();
-	drifm.SetPoint(indx++, p.x(), p.y(), p.z());
+	if (tmin<0 && tmax<0) {
+	    tmin = tmax = depo->time();
+	    continue;
+	}
+	tmin = min(tmin, depo->time());
+	tmax = max(tmax, depo->time());
     }
-    drifm.Draw();
+    cerr << "Time bounds: " << tmin << " < " << tmax << endl;
+
+    for (auto depo : drifted) {
+
+	TPolyMarker3D* pm = new TPolyMarker3D(1,8);
+	const Point& p = depo->pos();
+	pm->SetPoint(0, p.x(), p.y(), p.z());
+
+	double rel = depo->time()/(tmax-tmin);
+	int col = TColor::GetColorPalette( int(rel*TColor::GetNumberOfColors()) );
+	pm->SetMarkerColor(col);
+
+	pm->Draw();
+    }
 
     if (theApp) {
 	theApp->Run();
