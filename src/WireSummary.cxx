@@ -1,10 +1,19 @@
 #include "WireCellNav/WireSummary.h"
 #include "WireCellIface/IWireSelectors.h"
 
+#include "WireCellUtil/NamedFactory.h"
+
 #include <iterator>
 
 using namespace WireCell;
 using namespace std;
+
+
+WIRECELL_NAMEDFACTORY(WireSummary);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(WireSummary, IWireSummary);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(WireSummary, IWireSink);
+WIRECELL_NAMEDFACTORY_ASSOCIATE(WireSummary, IWireSequence);
+
 
 WireSummary::WireSummary()
     : m_cache(0)

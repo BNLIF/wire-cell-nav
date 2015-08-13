@@ -2,9 +2,11 @@
 #include "WireCellIface/IWire.h"
 #include "WireCellIface/IWireGenerator.h"
 #include "WireCellIface/IWireSelectors.h"
+#include "WireCellIface/IWireSummary.h"
 
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/TimeKeeper.h"
+#include "WireCellUtil/MemUsage.h"
 #include "WireCellUtil/BoundingBox.h"
 #include "WireCellUtil/Point.h"
 
@@ -26,13 +28,16 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     TimeKeeper tk("test wires");
+    MemUsage mu("test wires");
 
-    // These are here to force the linker to give us the symbols
+    // These are here to force the linker to give us the symbols.  We
+    // do not compile against this code!
     WIRECELL_NAMEDFACTORY_USE(WireParams);
     WIRECELL_NAMEDFACTORY_USE(ParamWires);
-//    WIRECELL_NAMEDFACTORY_USE(WireDatabase);
+    WIRECELL_NAMEDFACTORY_USE(WireSummary);
 
     cout << tk("factories made") << endl;
+    cout << mu("factories made") << endl;
 
     // fixme: this C++ dance to wire up the interfaces may eventually
     // be done inside a workflow engine.
@@ -53,6 +58,7 @@ int main(int argc, char* argv[])
     cout << "Got WireParams IWireParameters interface @ " << wp_wps << endl;
     
     cout << tk("Configured WireParams") << endl;
+    cout << mu("Configured WireParams") << endl;
 
     cout << "Wire Parameters:\n"
 	 << "Bounds: " << wp_wps->bounds() << "\n"
@@ -68,6 +74,7 @@ int main(int argc, char* argv[])
     pw_gen->generate(*wp_wps);
 
     cout << tk("Generated ParamWires") << endl;
+    cout << mu("Generated ParamWires") << endl;
 
     auto pw_seq = WireCell::Factory::lookup<IWireSequence>("ParamWires");
     AssertMsg(pw_seq, "Failed to get IWireSequence from default ParamWires");
@@ -79,13 +86,17 @@ int main(int argc, char* argv[])
     //Assert(1103 == nwires);
 
     cout << tk("Made local wire collection") << endl;
+    cout << mu("Made local wire collection") << endl;
 
-    // auto wdb = WireCell::Factory::lookup<IWireDatabase>("WireDatabase");
-    // AssertMsg(wdb, "Failed to get IWireDatabase from default WireDatabase");
-    // cout << "Got WireDatabase IWireDatabase interface @ " << wdb << endl;
-    // wdb->load(wires);
 
-    // Ray bbox = wdb->bounding_box();
+    auto ws_sink = WireCell::Factory::lookup<IWireSink>("WireSummary");
+    ws_sink->sink(pw_seq->wires_range());
+
+    auto ws_ws = WireCell::Factory::lookup<IWireSummary>("WireSummary");
+    WireCell::BoundingBox bb2 = ws_ws->box();
+
+    cout << tk("Made wire summary") << endl;
+    cout << mu("Made wire summary") << endl;
 
     WireCell::BoundingBox boundingbox;
     for (int ind = 0; ind < wires.size(); ++ind) {
@@ -94,6 +105,7 @@ int main(int argc, char* argv[])
     const Ray& bbox = boundingbox.bounds();
 
     cout << tk("Made bounding box") << endl;
+    cout << mu("Made bounding box") << endl;
 
     vector<IWire::pointer> u_wires, v_wires, w_wires;
     copy_if(wires.begin(), wires.end(), back_inserter(u_wires), select_u_wires);
@@ -120,6 +132,7 @@ int main(int argc, char* argv[])
     double max_width = 5.0;
 
     cout << tk("Made TCanvas") << endl;
+    cout << mu("Made TCanvas") << endl;
 
     TH1F* frame = c.DrawFrame(bbox.first.z(), bbox.first.y(),
 			      bbox.second.z(), bbox.second.y());
@@ -143,6 +156,7 @@ int main(int argc, char* argv[])
 	m.DrawMarker(cent.z(), cent.y());
     }
     cout << tk("Canvas drawn") << endl;
+    cout << mu("Canvas drawn") << endl;
 
     if (theApp) {
 	theApp->Run();
@@ -152,6 +166,7 @@ int main(int argc, char* argv[])
     }
 
     cout << "Timing summary:\n" << tk.summary() << endl;
+    cout << "Memory summary:\n" << mu.summary() << endl;
 
     return 0;
 }
