@@ -133,9 +133,10 @@ int main(int argc, char* argv[]) {
     cout << tk.summary() << endl;
 
 
-    WireParams wp;
+    WireParams* wp = new WireParams;
     ParamWires pw;
-    pw.generate(wp);
+    IWireParameters::pointer iwp(wp);
+    pw.generate(iwp);
     IWireSummary::pointer ws(new WireSummary);
     AssertMsg(ws, "Null wire summary");
 
@@ -148,7 +149,7 @@ int main(int argc, char* argv[]) {
     drifter.connect(feed);
 
     Digitizer digitizer(1000, tick_time);
-    digitizer.set_wiresummary(ws);
+    digitizer.set(ws);
     digitizer.connect(drifter);
 
     TApplication* theApp = 0;

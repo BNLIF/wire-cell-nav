@@ -19,9 +19,10 @@ using namespace std;
 
 void test1()
 {
-    WireParams params;
+    WireParams *params = new WireParams;
     ParamWires pw;
-    pw.generate(params);
+    IWireParameters::pointer iwp(params);
+    pw.generate(iwp);
 
     std::vector<IWire::pointer> wires(pw.wires_begin(), pw.wires_end());
 
@@ -52,14 +53,15 @@ void test2()
     double pitches[] = {10.0, 5.0, 3.0, -1};
     int want[] = {371, 747, 1243, 0};
     for (int ind=0; pitches[ind] > 0.0; ++ind) {
-	WireParams params;
-	Configuration cfg = params.default_configuration();
+	WireParams *params = new WireParams;
+	Configuration cfg = params->default_configuration();
 	cfg.put("pitch_mm.u", pitches[ind]);
 	cfg.put("pitch_mm.v", pitches[ind]);
 	cfg.put("pitch_mm.w", pitches[ind]);
-	params.configure(cfg);
+	params->configure(cfg);
 	ParamWires pw;
-	pw.generate(params);
+	IWireParameters::pointer iwp(params);
+	pw.generate(iwp);
 	std::vector<IWire::pointer> wires(pw.wires_begin(), pw.wires_end());
 	int nwires = wires.size();
 	cout << ind << ": pitch=" << pitches[ind] << " nwires=" << nwires << " (want=" << want[ind] << ")" << endl;
@@ -70,11 +72,12 @@ void test2()
 
 void test3D(bool interactive)
 {
-    WireParams params;
+    WireParams* params = new WireParams;
     ParamWires pw;
-    pw.generate(params);
+    IWireParameters::pointer iwp(params);
+    pw.generate(iwp);
 
-    const Ray& bbox = params.bounds();
+    const Ray& bbox = params->bounds();
 
     TApplication* theApp = 0;
     if (interactive) {

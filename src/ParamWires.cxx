@@ -137,14 +137,14 @@ void ParamWires::make_one_plane(WirePlaneType_t plane, const Ray& bounds, const 
 }
 
 
-void ParamWires::generate(const IWireParameters& params)
+void ParamWires::generate(IWireParameters::pointer params)
 
 {
     this->clear();
 
-    make_one_plane(kUwire, params.bounds(), params.pitchU());
-    make_one_plane(kVwire, params.bounds(), params.pitchV());
-    make_one_plane(kWwire, params.bounds(), params.pitchW());
+    make_one_plane(kUwire, params->bounds(), params->pitchU());
+    make_one_plane(kVwire, params->bounds(), params->pitchV());
+    make_one_plane(kWwire, params->bounds(), params->pitchW());
 }
 
 

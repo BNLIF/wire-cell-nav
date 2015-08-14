@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     auto pw_gen = WireCell::Factory::lookup<IWireGenerator>("ParamWires");
     AssertMsg(pw_gen, "Failed to get IWireGenerator from default ParamWires");
     cout << "Got ParamWires IWireGenerator interface @ " << pw_gen << endl;
-    pw_gen->generate(*wp_wps);
+    pw_gen->generate(wp_wps);
 
     cout << tk("Generated ParamWires") << endl;
     cout << mu("Generated ParamWires") << endl;

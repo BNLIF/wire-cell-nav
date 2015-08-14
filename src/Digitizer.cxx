@@ -17,6 +17,7 @@ Digitizer::Digitizer(int maxticks, double tick, double start_time)
     , m_time(start_time)
     , m_depo(0)
     , m_frame_count(0)
+    , m_wiresummary(0)
 {
     
 }

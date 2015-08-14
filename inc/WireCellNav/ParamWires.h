@@ -23,7 +23,7 @@ namespace WireCell {
 	ParamWires();
 	virtual ~ParamWires();
 
-	void generate(const WireCell::IWireParameters& params);
+	void generate(WireCell::IWireParameters::pointer params);
 
 	/// Access the wires
 	wire_iterator wires_begin();

@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 
     TimeKeeper tk("test bound cells");
 
-    WireParams params;
+    WireParams* params = new WireParams;
 
     /* Some timing numbers for default 1m x 1m:
      * p(mm), #w, #c, t(ms)
@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     double pitch = 50.0*units::mm; // leave it large so the results can actually be seen
     double angle_deg = 60.0;
     double full_width = 1.0*units::meter;
-    auto cfg = params.default_configuration();
+    auto cfg = params->default_configuration();
     cfg.put("pitch_mm.u", pitch);
     cfg.put("pitch_mm.v", pitch);
     cfg.put("pitch_mm.w", pitch);
@@ -115,10 +115,11 @@ int main(int argc, char** argv)
     cfg.put("angle_deg.v", -angle_deg);
     cfg.put("size_mm.y", full_width);
     cfg.put("size_mm.z", full_width);
-    params.configure(cfg);
+    params->configure(cfg);
 
     ParamWires pw;
-    pw.generate(params);
+    IWireParameters::pointer iparams(params);
+    pw.generate(iparams);
     cout << tk("generated wires") << endl;
 
     BoundCells bc;
@@ -126,7 +127,7 @@ int main(int argc, char** argv)
 
     cout << tk("generated cells") << endl;
 
-    const Ray& bbox = params.bounds();
+    const Ray& bbox = params->bounds();
 
     TApplication* theApp = 0;
     if (interactive) {

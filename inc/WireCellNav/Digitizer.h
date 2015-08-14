@@ -28,6 +28,7 @@ namespace WireCell {
 	double m_time;
 	IDepo::pointer m_depo;
 	int m_frame_count;
+	IWireSummary::pointer m_wiresummary;
 
     public:
 
@@ -42,6 +43,7 @@ namespace WireCell {
 	/// Produce a frame.
 	IFrame::pointer operator()();
 
+	virtual void set(IWireSummary::pointer ws) { m_wiresummary = ws; }
     };
 
 }

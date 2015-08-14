@@ -20,18 +20,19 @@ using namespace std;
 
 void test3D(bool interactive)
 {
-    WireParams params;
+    WireParams* params = new WireParams;
     double pitch = 10.0;
-    auto cfg = params.default_configuration();
+    auto cfg = params->default_configuration();
     cfg.put("pitch_mm.u", pitch);
     cfg.put("pitch_mm.v", pitch);
     cfg.put("pitch_mm.w", pitch);
-    params.configure(cfg);
+    params->configure(cfg);
 
     ParamWires pw;
-    pw.generate(params);
+    IWireParameters::pointer iwp(params);
+    pw.generate(iwp);
 
-    const Ray& bbox = params.bounds();
+    const Ray& bbox = params->bounds();
 
     TApplication* theApp = 0;
     if (interactive) {
