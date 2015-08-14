@@ -35,17 +35,17 @@ namespace WireCell {
 
 	/// Return a sequence of wires which are associated with the
 	/// given cell.
-	virtual IWireVector wires(const ICell::pointer& cell) const;
+	virtual IWireVector wires(ICell::pointer cell) const;
 	
 	/// Return a sequence of cells associated with the given wire.
-	virtual ICellVector cells(const IWire::pointer& wire) const;
+	virtual ICellVector cells(IWire::pointer wire) const;
 
-	/// Return the cells associated with the collection of wires.
-	/// Typically this is expected to be one wire from each plane.
-	virtual ICellVector cell(const IWireVector& wires) const;
+	/// Return the cell associated with the collection of wires,
+	/// if any.
+	virtual ICell::pointer cell(const IWireVector& wires) const;
 
 	/// Return collection of nearest neighbor cells.
-	virtual ICellVector neighbors(const ICell::pointer& cell) const;
+	virtual ICellVector neighbors(ICell::pointer cell) const;
 
 
 	/// Explicitly generate the graph.  This is triggered lazily

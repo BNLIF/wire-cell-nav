@@ -131,6 +131,7 @@ static WireCell::TilingGraph::Point2D threetotwo(const WireCell::Point& p3)
 void WireCell::TilingGraph::record(WireCell::ICell::pointer thecell) 
 {
     using namespace WireCell;
+    using namespace std;
 
     Property cell_prop = cell_property(thecell);
     Vertex cv = boost::add_vertex(cell_prop, m_graph);
@@ -139,6 +140,9 @@ void WireCell::TilingGraph::record(WireCell::ICell::pointer thecell)
 
     // wire vertices and wire-cell edges
     const IWireVector uvw_wires = three_wires(m_ws, thecell);
+    if (uvw_wires.size() != 3) {
+	cerr << "Found " << uvw_wires.size() << " wires " << thecell->center() << endl;
+    }
     for (int ind=0; ind<uvw_wires.size(); ++ind) {
 	Property wire_prop = wire_property(uvw_wires[ind]);
 	Vertex w = boost::add_vertex(wire_prop, m_graph);
@@ -167,6 +171,7 @@ void WireCell::TilingGraph::record(WireCell::ICell::pointer thecell)
     }
     
     // done except nearest neighbors
+
 
 }
 

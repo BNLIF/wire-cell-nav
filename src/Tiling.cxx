@@ -4,6 +4,7 @@
 #include "TilingGraph.h"
 
 #include <vector>
+#include <iostream>
 
 using namespace WireCell;
 
@@ -27,28 +28,56 @@ Tiling::~Tiling()
     }
 }
 
+
+
 bool Tiling::make_graph() const
 {
-    if (m_graph) return true;
-    if (!m_ws) return false;
-    if (m_cells.begin() == m_cells.end()) return false;
+    if (m_graph) {
+	return true;
+    }
+    if (!m_ws) {
+	std::cerr << "Tiling: not wire summary set" << std::endl;
+	return false;
+    }
+    if (m_cells.begin() == m_cells.end()) {
+	std::cerr << "Tiling: no cells set" << std::endl;
+	return false;
+    }
 
     m_graph = new TilingGraph(m_ws);
     for (auto cp : m_cells) {
 	m_graph->record(cp);
     }
+    return true;
 }
 
 
-IWireVector Tiling::wires(const ICell::pointer& cell) const {
+
+IWireVector Tiling::wires(ICell::pointer cell) const 
+{
     if (!make_graph()) {
-	return IWireVector();
+	IWireVector v;
+	return v;
     }
     return m_graph->wires(cell);
 }
-ICellVector Tiling::cells(const IWire::pointer& wire) const {}
-ICellVector Tiling::cell(const IWireVector& wires) const {}
-ICellVector Tiling::neighbors(const ICell::pointer& cell) const {}
+ICellVector Tiling::cells(IWire::pointer wire) const 
+{
+    if (!make_graph()) {
+	ICellVector c;
+	return c;
+    }
+    return m_graph->cells(wire);
+}
+ICell::pointer Tiling::cell(const IWireVector& wires) const 
+{
+    return 0;
+}
+ICellVector Tiling::neighbors(ICell::pointer cell) const 
+{
+    ICellVector v;
+    return v;
+}
 
 
 
