@@ -71,7 +71,7 @@ ICellVector Tiling::cells(IWire::pointer wire) const
 }
 ICell::pointer Tiling::cell(const IWireVector& wires) const 
 {
-    return 0;
+    return m_graph->cell(wires);
 }
 ICellVector Tiling::neighbors(ICell::pointer cell) const 
 {

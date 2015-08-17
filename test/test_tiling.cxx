@@ -153,15 +153,20 @@ int main()
 
 	canvas->Write();
 
+	cerr << "Cell #" << cell->ident() << " with " << assoc_wires.size() << " wires:" ;
+	for (auto w : assoc_wires) {
+	    cerr << " " << w->ident();
+	}
+	cerr << " cell at " << cell->center();
+	cerr <<  endl;
 
-	////fixme; note yet implemented
-	// auto samecell = til.cell(assoc_wires);
-	// AssertMsg(samecell, "Failed to get get a round trip cell->wires->cell pointer");
-	// AssertMsg(samecell->ident() == cell->ident(), "Cell->wires->cell round trip failed.");
+	auto samecell = til.cell(assoc_wires);
+	AssertMsg(samecell, "Failed to get get a round trip cell->wires->cell pointer");
+	AssertMsg(samecell->ident() == cell->ident(), "Cell->wires->cell round trip failed.");
 
-	// if (cell->ident() > 100) {
-	//     break;
-	// }
+	if (cell->ident() > 100) {
+	    break;
+	}
 
     }
 
