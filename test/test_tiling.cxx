@@ -73,8 +73,6 @@ int main()
 
     Tiling til;
     til.sink(bc.cells_range());
-    IWireSummary::pointer iws(ws);
-    til.set(iws);
 
     TFile* tfile = TFile::Open("test_tiling.root","RECREATE");
 
@@ -82,6 +80,7 @@ int main()
 
     for (auto cell : bc.cells_range() ) {
 	AssertMsg(cell, "Got null cell.");
+	//cerr << "Checking cell #" << cell->ident() << " center=" << cell->center() << endl;
 	auto assoc_wires = til.wires(cell);
 	if (3 != assoc_wires.size()) {
 	    cerr << "Cell #" << cell->ident() << " with " << assoc_wires.size() << " wires:" ;
@@ -93,22 +92,24 @@ int main()
 	}
 	AssertMsg(3 == assoc_wires.size(), "Got wrong number of wires");
 	
+	auto samecell = til.cell(assoc_wires);
+	AssertMsg(samecell, "Failed to get get a round trip cell->wires->cell pointer");
+	AssertMsg(samecell->ident() == cell->ident(), "Cell->wires->cell round trip failed.");
+
 
 	BoundingBox bb(cell->center());
 	auto corners = cell->corners();
 	for (auto corner : corners) {
 	    bb(corner);
 	}
-
-	for (auto w: assoc_wires) {
-	    auto w2 = ws->closest(cell->center(), w->plane());
-	    AssertMsg(w2, "FAiled to get closest wires");
-	    AssertMsg(w2->ident() == w->ident(), "Failed to round trip closest wire");
-	    bb(w->ray());
+	for (auto wire : assoc_wires) {
+	    bb(wire->ray());
 	}
 
 	// prescale what we bother drawing
-	if (cell->ident() % 100 != 1) { continue; }
+	if (cell->ident() % 100 != 1) {
+	    continue;
+	}
 
 	std::string pad_name = Form("cell%d", cell->ident());
 	TDirectory* dir = tfile->mkdir(pad_name.c_str());
@@ -159,14 +160,6 @@ int main()
 	}
 	cerr << " cell at " << cell->center();
 	cerr <<  endl;
-
-	auto samecell = til.cell(assoc_wires);
-	AssertMsg(samecell, "Failed to get get a round trip cell->wires->cell pointer");
-	AssertMsg(samecell->ident() == cell->ident(), "Cell->wires->cell round trip failed.");
-
-	if (cell->ident() > 100) {
-	    break;
-	}
 
     }
 

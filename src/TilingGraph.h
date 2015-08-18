@@ -4,7 +4,6 @@
 #define WIRECELL_TILINGGRAPH
 
 #include "WireCellIface/IWire.h"
-#include "WireCellIface/IWireSummary.h"
 #include "WireCellIface/ICell.h"
 #include "WireCellUtil/IndexedSet.h"
 
@@ -55,7 +54,7 @@ namespace WireCell {
 
 	typedef std::pair<float,float> Point2D;
 
-	TilingGraph(IWireSummary::pointer ws) : m_ws(ws) {}
+	TilingGraph() {}
 
 	/// BGL does not appear to support lookups by property, so DI. 
 	Vertex cell_vertex(ICell::pointer cell);
@@ -84,12 +83,18 @@ namespace WireCell {
 	void record(ICell::pointer thecell);
 
 	/// ITiling helpers
+
+	// return wires associated with cell.  This should be
+	// identical to cell->wires() but does query the graph.
 	IWireVector wires(ICell::pointer cell);
+
+	/// Return cells associated with the wires.
 	ICellVector cells(IWire::pointer wire);
+
+	/// Return a single cell if it is associated with all wires.
 	ICell::pointer cell(const IWireVector& wires);
     private:
 	BoostTilingGraph m_graph;
-	IWireSummary::pointer m_ws;
 	mutable std::map<Property, Vertex> m_cellVertex, m_wireVertex, m_pointVertex;
 
 

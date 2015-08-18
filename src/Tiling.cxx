@@ -10,13 +10,11 @@ using namespace WireCell;
 
 WIRECELL_NAMEDFACTORY(Tiling);
 WIRECELL_NAMEDFACTORY_ASSOCIATE(Tiling, ICellSink);
-WIRECELL_NAMEDFACTORY_ASSOCIATE(Tiling, IWireSummaryClient);
 WIRECELL_NAMEDFACTORY_ASSOCIATE(Tiling, ITiling);
 
 
 Tiling::Tiling()
     : m_graph(0)
-    , m_cells()
 {
 }
 
@@ -29,41 +27,34 @@ Tiling::~Tiling()
 }
 
 
-
-bool Tiling::make_graph() const
+void Tiling::sink(const ICell::iterator_range& cells)
 {
     if (m_graph) {
-	return true;
-    }
-    if (!m_ws) {
-	std::cerr << "Tiling: not wire summary set" << std::endl;
-	return false;
-    }
-    if (m_cells.begin() == m_cells.end()) {
-	std::cerr << "Tiling: no cells set" << std::endl;
-	return false;
+	delete m_graph;
+	m_graph = 0;
     }
 
-    m_graph = new TilingGraph(m_ws);
-    for (auto cp : m_cells) {
+    if (cells.begin() == cells.end()) {
+	std::cerr << "Tiling: no cells set" << std::endl;
+	return;
+    }
+
+    m_graph = new TilingGraph;
+    for (auto cp : cells) {
 	m_graph->record(cp);
     }
-    return true;
 }
 
 
 
 IWireVector Tiling::wires(ICell::pointer cell) const 
 {
-    if (!make_graph()) {
-	IWireVector v;
-	return v;
-    }
-    return m_graph->wires(cell);
+    // freebie
+    return cell->wires();
 }
 ICellVector Tiling::cells(IWire::pointer wire) const 
 {
-    if (!make_graph()) {
+    if (!m_graph) {
 	ICellVector c;
 	return c;
     }
@@ -71,6 +62,9 @@ ICellVector Tiling::cells(IWire::pointer wire) const
 }
 ICell::pointer Tiling::cell(const IWireVector& wires) const 
 {
+    if (!m_graph) {
+	return 0;
+    }
     return m_graph->cell(wires);
 }
 ICellVector Tiling::neighbors(ICell::pointer cell) const 

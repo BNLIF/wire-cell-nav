@@ -41,10 +41,10 @@ namespace WireCell {
     
 	int m_ident;
 	PointVector m_corners;	// this is likely a source of a lot of memory usage
-	const std::vector<IWire::pointer> m_wires;
+	const IWireVector m_wires;
 
     public:
-	BoundCell(int id, const PointVector& pcell, const std::vector<IWire::pointer>& wires)
+	BoundCell(int id, const PointVector& pcell, const IWireVector& wires)
 	    : m_ident(id), m_corners(pcell), m_wires(wires) {
 	    std::sort(m_corners.begin(), m_corners.end(), AngularSort(center()));
 	}
@@ -71,9 +71,9 @@ namespace WireCell {
 	    return m_corners;
 	}
 
-//    virtual WireCell::WireVector wires() const {
-//	return m_wires;
-//    }
+	virtual WireCell::IWireVector wires() const {
+	    return m_wires;
+	}
     };
 } // namespace WireCell;
 

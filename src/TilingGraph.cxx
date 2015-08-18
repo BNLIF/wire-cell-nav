@@ -4,23 +4,6 @@
 using namespace std;
 using namespace WireCell;
 
-static WireCell::IWireVector three_wires(WireCell::IWireSummary::pointer ws,
-					 WireCell::ICell::pointer cell)
-{
-    using namespace WireCell;
-
-    const Point center = cell->center();
-    IWireVector thewires;
-    WirePlaneType_t planes[3] = { kUwire, kVwire, kWwire };
-    for (int ind=0; ind<3; ++ind) {
-	IWire::pointer w = ws->closest(center, planes[ind]);
-	if (ws) { 
-	    thewires.push_back(w);
-	}
-    }
-    return thewires;
-}
-					 
 static WireCell::TilingGraph::Point2D threetotwo(const WireCell::Point& p3)
 {
     return WireCell::TilingGraph::Point2D(p3.z(), p3.y());
@@ -65,20 +48,17 @@ WireCell::TilingGraph::Vertex WireCell::TilingGraph::point_vertex(const TilingGr
 void WireCell::TilingGraph::record(WireCell::ICell::pointer thecell) 
 {
     Vertex cv = cell_vertex(thecell);
-    cerr << "Recording cell: " << thecell->ident() << " ("<<cv<<") with wires: " << endl;;
+    //cerr << "Recording cell: " << thecell->ident() << " ("<<cv<<") with wires: " << endl;;
 
     // wire vertices and wire-cell edges
-    const IWireVector uvw_wires = three_wires(m_ws, thecell);
-    if (uvw_wires.size() != 3) {
-	cerr << "Found " << uvw_wires.size() << " wires " << thecell->center() << endl;
-    }
+    const IWireVector uvw_wires = thecell->wires();
     for (auto wire : uvw_wires) {
 	Vertex wv = wire_vertex(wire);
 	auto the_edge = boost::add_edge(cv, wv, m_graph);
-	cerr << "\tedge " << the_edge.first << " ok? " << the_edge.second
-	     <<  " to wire id=" << wire->ident()
-	     << " graphind=" << wv
-	     << endl;
+	// cerr << "\tedge " << the_edge.first << " ok? " << the_edge.second
+	//      <<  " to wire id=" << wire->ident()
+	//      << " graphind=" << wv
+	//      << endl;
     }
 
     // corners
@@ -153,37 +133,21 @@ WireCell::ICell::pointer WireCell::TilingGraph::cell(const IWireVector& given)
 
     WireCell::ICellVector thecells = this->cells(first_wire);
 
-    cerr << "Wire " << first_wire->ident()
-	 << " with " << thecells.size() << " cells" << endl;
-
     if (!thecells.size()) {
         return 0;
     }
 
+    IWireSet wanted(given.begin(), given.end());
+
     for (auto thecell : thecells) {
-	IWireVector missing, found = this->wires(thecell);
+	IWireVector got = thecell->wires();
+	IWireSet found(got.begin(), got.end()); // for sort
 
-
-	// Fill <missing> with wires from <given> that are not in
-	// <found>.
-        std::set_difference(given.begin(), given.end(),
+	// Fill <missing> with <wanted> wires not in <found>.
+	IWireVector missing;
+        std::set_difference(wanted.begin(), wanted.end(),
                             found.begin(), found.end(),
                             std::back_inserter(missing));
-                            
-	cerr << "\tWire #" << first_wire->ident()
-	     << " cell #" << thecell->ident()
-	     << " finds missing: " << missing.size()
-	     << " out of " << found.size()
-	     << endl;
-	cerr << "\t\tgiven: ";
-	for (auto w : given) { cerr << w->ident() << " ";}
-	cerr << endl;
-	cerr << "\t\tfound: ";
-	for (auto w : found) { cerr << w->ident() << " ";}
-	cerr << endl;
-	cerr << "\t\tmissing: ";
-	for (auto w : missing) { cerr << w->ident() << " ";}
-	cerr << endl;
 
         if (0 == missing.size()) {
             return thecell;

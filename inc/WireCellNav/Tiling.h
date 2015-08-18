@@ -2,7 +2,6 @@
 #define WIRECELLNAV_WIRECELL_H
 
 #include "WireCellIface/ICell.h"
-#include "WireCellIface/IWireSummary.h"
 #include "WireCellIface/ITiling.h"
 
 
@@ -15,21 +14,14 @@ namespace WireCell {
     /** A default implementation of WireCell::ITiling.
      *
      */
-    class Tiling : public ICellSink, public IWireSummaryClient, public ITiling
+    class Tiling : public ICellSink, public ITiling
     {
     public:
 	Tiling();
 	virtual ~Tiling();
 
 	/// Provide access to the collection of cells. (ICellSink)
-	virtual void sink(const ICell::iterator_range& cells) {
-	    m_cells = cells;
-	};
-
-	/// Get a wire summary. (IWireSummaryClient)
-	virtual void set(IWireSummary::pointer ws) {
-	    m_ws = ws;
-	};
+	virtual void sink(const ICell::iterator_range& cells);
 
 	/// The rest are ITiling interface methods.
 
@@ -48,17 +40,9 @@ namespace WireCell {
 	virtual ICellVector neighbors(ICell::pointer cell) const;
 
 
-	/// Explicitly generate the graph.  This is triggered lazily
-	/// by the ITiling interface methods and requires that cells
-	/// and wire summary have been obtained.
-	bool make_graph() const; // lazy
-
     private:
-
-	IWireSummary::pointer m_ws;
-	ICell::iterator_range m_cells;
-
-	mutable TilingGraph* m_graph; // lazy
+	
+	mutable TilingGraph* m_graph;
     };
 
 } // namespace WireCell
