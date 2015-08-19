@@ -9,6 +9,31 @@ static WireCell::TilingGraph::Point2D threetotwo(const WireCell::Point& p3)
     return WireCell::TilingGraph::Point2D(p3.z(), p3.y());
 }
 
+TilingGraph::Property WireCell::TilingGraph::point_property(const Point2D& point)
+{
+    return Property(Property::point, point_index(point));
+}
+
+TilingGraph::Property WireCell::TilingGraph::cell_property(ICell::pointer cell)
+{
+    return Property(Property::cell, cell_index(cell));
+}
+
+TilingGraph::Property WireCell::TilingGraph::wire_property(IWire::pointer wire)
+{
+    return Property(Property::wire, wire_index(wire));
+}
+
+/*
+
+  Make graph store wire/cell info by ident.
+
+  Make TilingGraphCell/Wire.
+
+ */
+
+
+
 WireCell::TilingGraph::Vertex WireCell::TilingGraph::cell_vertex(ICell::pointer cell)
 {
     Property prop = cell_property(cell);

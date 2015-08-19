@@ -36,8 +36,8 @@ ParamGeometry::ParamGeometry()
     wire_sink->sink(m_wires->wires_range());
     m_wiresummary = WireCell::Factory::lookup<IWireSummary>("WireSummary");
     
-    auto tiling = WireCell::Factory::lookup<IWireSummaryClient>("Tiling");
-    tiling->set(m_wiresummary);
+    auto tiling = WireCell::Factory::lookup<ICellSink>("Tiling");
+    tiling->sink(m_cells->cells_range());
     m_tiling = WireCell::Factory::lookup<ITiling>("Tiling");
 }
 ParamGeometry::~ParamGeometry()

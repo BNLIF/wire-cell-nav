@@ -56,7 +56,9 @@ namespace WireCell {
 
 	TilingGraph() {}
 
-	/// BGL does not appear to support lookups by property, so DI. 
+	/// BGL does not appear to support lookups by property, so
+	/// DIY.  Note, these are actually TilingGraphCell and
+	/// TilingGraphWire
 	Vertex cell_vertex(ICell::pointer cell);
 	Vertex wire_vertex(IWire::pointer wire);
 	Vertex point_vertex(const Point2D& p2d);
@@ -69,15 +71,9 @@ namespace WireCell {
 	WireCell::IndexedSet<ICell::pointer> cell_index;
 	WireCell::IndexedSet<IWire::pointer> wire_index;
     
-	Property point_property(const Point2D& point)  {
-	    return Property(Property::point, point_index(point));
-	}
-	Property cell_property(ICell::pointer cell)  {
-	    return Property(Property::cell, cell_index(cell));
-	}
-	Property wire_property(IWire::pointer wire)  {
-	    return Property(Property::wire, wire_index(wire));
-	}
+	Property point_property(const Point2D& point);
+	Property cell_property(ICell::pointer cell);
+	Property wire_property(IWire::pointer wire);
 
 
 	void record(ICell::pointer thecell);
@@ -100,14 +96,8 @@ namespace WireCell {
 
     };
     
+
 } // namespace WireCell
-
-
-
-// WireCell::IWireVector WireCell::TilingGraph::wires(WireCell::ICell::pointer cell)
-// {
-// }
-
 
 
 #endif
