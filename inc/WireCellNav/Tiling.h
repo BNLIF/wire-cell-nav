@@ -18,30 +18,13 @@ namespace WireCell {
      *
      */
     class Tiling : public ICellSink, public ITiling
-		 , public IWireSequence, public ICellSequence
     {
     public:
 	Tiling();
 	virtual ~Tiling();
 
-	/// Provide cells used to build the tiling.  Note, these cells
-	/// are not retained by the tiling.  See the iterator methods
-	/// below.
+	/// Provide cells used to build the tiling. 
 	virtual void sink(const ICell::iterator_range& cells);
-
-	/// Provide access to a new family of cells corresponding to
-	/// but differing from the input cells.  They are defined in a
-	/// way to minimize memory usage but depend on this Tiling
-	/// object being alive.
-	virtual cell_iterator cells_begin();
-	virtual cell_iterator cells_end();
-
-	/// Provide access to the family of wires associated to the
-	/// family of cells from the above iterators.  These
-	/// correspond to but are different from the wires associated
-	/// with the original "sunk" cells.
-	virtual wire_iterator wires_begin();
-	virtual wire_iterator wires_end();
 
 
 	/// The rest are ITiling interface methods.

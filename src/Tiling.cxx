@@ -73,23 +73,3 @@ ICellVector Tiling::neighbors(ICell::pointer cell) const
     return v;
 }
 
-
-
-    
-IWireSequence::wire_iterator wires_begin()
-{
-    m_graph->wire_index.collection.begin();
-}
-IWireSequence::wire_iterator wires_end()
-{
-    m_graph->wire_index.collection.end();
-}
-
-ICellSequence::cell_iterator cells_begin()
-{
-    m_graph->cell_index.collection.begin();
-}
-ICellSequence::cell_iterator cells_end()
-{
-    m_graph->cell_index.collection.end();
-}
