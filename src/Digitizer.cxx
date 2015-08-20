@@ -10,6 +10,9 @@
 using namespace WireCell;
 using namespace std;
 
+
+
+
 Digitizer::Digitizer(int maxticks, double tick, double start_time)
     : Signal<IDepo>()
     , m_maxticks(maxticks)
@@ -80,10 +83,10 @@ IFrame::pointer Digitizer::operator()()
     const double tmax = m_time + m_maxticks*m_tick;
     m_time += tmax;		// next start time
 
-    TraceBuilder tm(m_wiresummary, m_maxticks);
+    TraceBuilder tb(m_wiresummary, m_maxticks);
     while (true) {
 	if (!m_depo || m_depo->time() > tmax) {
-	    IFrame* ret = tm.make_frame(m_frame_count, tmin);
+	    IFrame* ret = tb.make_frame(m_frame_count, tmin);
 	    ++m_frame_count;
 	    //cerr << "Making frame" << endl;
 	    IFrame::pointer result(ret);
@@ -94,7 +97,7 @@ IFrame::pointer Digitizer::operator()()
 	    int tbin = (m_depo->time() - tmin)/m_tick;
 	    //cerr << "Add depo: t=" << m_depo->time() << " tmin=" << tmin
 	    //     << " tick=" << m_tick << " tbin=" << tbin << endl;
-	    tm.add_depo(m_depo->pos(), tbin, m_depo->charge());
+	    tb.add_depo(m_depo->pos(), tbin, m_depo->charge());
 	}
 
 	m_depo = fire();	// set up for next

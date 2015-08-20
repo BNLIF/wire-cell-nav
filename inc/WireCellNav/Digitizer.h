@@ -7,13 +7,12 @@
 #include "WireCellUtil/Units.h"
 #include "WireCellUtil/Signal.h"
 
-
 namespace WireCell {
+
 
     /** A simple digitizer of charge drifting past wire planes.
      *
-     * Each call produces an IFrame which spans a given number of
-     * ticks each of a given size.
+     * Each call produces an ISlice.
      *
      * This digitizer is simple in that it:
      *

@@ -11,8 +11,8 @@ namespace WireCell {
 /** This concrete trace is filled by time bin and charge.
  * 
  * It provides the results of the filling such that the ChargeSequence
- * is trivially zero suppressed but only at the ends.  Any zeros
- * bounded by non-zero charge are kept.
+ * is trivially (exactly) zero suppressed but only at the ends.  Any
+ * zeros bounded by non-zero charge are kept.
  */
 class ZSEndedTrace : public ITrace {
     int m_chid, m_nbins;
