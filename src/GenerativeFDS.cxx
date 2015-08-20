@@ -5,7 +5,7 @@ using namespace WireCell;
 using namespace std;
 
 double integral(double sigma, double z0, double z1, double z2){
-  double result;
+  double result=0;
   result += 0.5 * TMath::Erf((z2-z0)/sqrt(2.)/sigma) 
     - 0.5 *TMath::Erf((z1-z0)/sqrt(2.)/sigma);
   return result;

@@ -454,6 +454,21 @@ bool GeomDataSource::crossing_point(double dis1, double dis2,
     else{
 	result.z = (dis1 * b2 - dis2 * b1)/(a1*b2 - a2 * b1);
     }
+
+
+    std::pair<double, double> mm;
+
+    mm = minmax(1);		// y
+    if (result.y < mm.first || mm.second < result.y) { 
+	return false;
+    }
+
+    mm = minmax(2);		// z
+    if (result.z < mm.first || mm.second < result.z) { 
+	return false;
+    }
+
+
     return okay;
 }
 
