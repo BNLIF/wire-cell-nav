@@ -6,38 +6,52 @@
 #include "WireCellUtil/Units.h"
 #include "WireCellIface/IDepo.h"
 
+#include <vector>
+
 namespace WireCell {
 
 
-    /** Model diffusion of drifting charge.
+    /** Model diffusion of drifted charge.
      *
-     * Every point deposition given is diffused along the directions
-     * transverse and longitudinal to the drift direction (assumed to
-     * be -X).  The amount of diffusion depends on the drift time from
-     * the initial deposition point to the given reference plane
-     * (determined by the pitch ray).  The diffusion is characterized
-     * by a longitudinal and transverse constant D.  The Gaussian
-     * width in time sigma = sqrt(2*D*t)/v with v the drift velocity
-     * and t the drift time.
+     * Each point deposition is spread out in the longitudinal (X,
+     * drift) and transverse (Y, wire pitch) directions.
+     * 
+     * The spread in either direction is taken to be independent and
+     * Gaussian but truncated to the number of sigma.  
+     *
+     * The spread is placed on to a BufferedHistogram2D. 
+     *
+     * Charge is conserved unless it underflows the histogram.
+     *
+     * Note: caller must take care to sync the BufferedHistogram2D
+     * with the depositions and to select suitable binning of the
+     * BufferedHistogram2D.
      */
 
     class Diffuser { 		// fixme: make interface?
-	BufferedHistogram2D& m_hist;
-	const Ray m_pitch;
-	const Vector m_pitch_unit;
-	const double m_drift_velocity;
-	const double m_pitch_dist;
-	const double m_DL;
-	const double m_DT;
     public:
-	Diffuser(BufferedHistogram2D& hist, Ray pitch,
-		 double drift_velocity = 1.6*units::meter/units::millisecond,
-		 double DL = 5.3*units::centimeter2/units::second,
-		 double DT = 12.8*units::centimeter2/units::second);
+
+
+	/// Create a diffuser on the given buffered histogram (as
+	/// described above).  Truncate the diffusion at the given
+	/// number of sigma.
+	Diffuser(BufferedHistogram2D& hist, int nsigma);
 	~Diffuser();
 	
-	double diffuse(IDepo::pointer depo);
+	/// Diffuse the deposition onto the buffered histogram, return
+	/// the low-X bound of the diffusion patch.
+	double diffuse(double x, double y, double sigma_x, double sigma_y,
+		       double charge = 1.0);
 
+	/// Internal function, return a 1D distribution of mean/sigma
+	/// binned with zeroth bin at origin and given binsize.
+	std::vector<double> oned(double mean, double sigma,
+				 double origin, double binsize) const;
+
+
+    private:
+	BufferedHistogram2D& m_hist;
+	const int m_nsigma;
     };
 
 }

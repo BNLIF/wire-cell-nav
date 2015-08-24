@@ -9,11 +9,10 @@
 
 namespace WireCell {
 
-    /** A Drifter object depositions from the connected slot and
+    /** A Drifter takes depositions from the connected slot and
      * produces new depositions drifted to a given location.  It
      * properly manages the time/distance ordering by reading ahead
-     * from its input stream just far enough to resolve time/distance
-     * ordering.
+     * from its input stream just far enough in space and time.
      */
     class Drifter : public Signal<IDepo> {
     public:
