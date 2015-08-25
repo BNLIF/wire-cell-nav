@@ -100,6 +100,9 @@ int test_drifted(Track& activity, Track& result)
 
     WireCell::IDepo::pointer p;
     while ((p=drifter())) {
+	WireCell::IDepoVector vec = depo_chain(p);
+	AssertMsg(vec.size() > 1, "The history of the drifted deposition is truncated.");
+
 	result.push_back(p);
 	++count;
     }

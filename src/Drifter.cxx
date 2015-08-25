@@ -4,6 +4,7 @@
 #include <boost/range.hpp>
 
 #include <sstream>
+#include <iostream>
 
 using namespace std;
 using namespace WireCell;
@@ -56,7 +57,8 @@ IDepo::pointer Drifter::operator()()
     }
     IDepo::pointer before = pop();
     IDepo::pointer ret(new TransportedDepo(before, m_location, m_drift_velocity));
-   return ret;
+    //cerr << "Drifter: buffered: " << m_buffer.size() << endl;
+    return ret;
 }
 
 IDepo::pointer Drifter::pop()

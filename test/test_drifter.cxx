@@ -80,6 +80,9 @@ int main(int argc, char* argv[])
     // draw drifted
     double tmin=-1, tmax=-1;
     for (auto depo : drifted) {
+	auto history = depo_chain(depo);
+	Assert(history.size() > 1);
+
 	if (tmin<0 && tmax<0) {
 	    tmin = tmax = depo->time();
 	    continue;

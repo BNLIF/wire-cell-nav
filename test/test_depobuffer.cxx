@@ -16,7 +16,7 @@ public:
     virtual const Point& pos() const { return std::move(Point()); }
     virtual double time() const { return m_time; }
     virtual double charge() const { return 0; }
-
+    virtual WireCell::IDepo::pointer prior() const { return 0; } // primordial
 };
 
 struct DepoGen {

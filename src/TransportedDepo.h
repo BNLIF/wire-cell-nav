@@ -20,7 +20,7 @@ public:
     virtual const WireCell::Point& pos() const { return m_pos; }
     virtual double time() const { return m_time; }
     virtual double charge() const { return m_from->charge(); }
-    virtual WireCell::IDepo::pointer original() { return m_from; }
+    virtual WireCell::IDepo::pointer prior() const { return m_from; }
 };
 
 

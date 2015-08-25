@@ -13,6 +13,7 @@ public:
     virtual const WireCell::Point& pos() const { return m_pos; }
     virtual double time() const { return m_time; }
     virtual double charge() const { return m_charge; }
+    virtual WireCell::IDepo::pointer prior() const { return 0; } // primordial
 
 private:
     double m_time, m_charge;
