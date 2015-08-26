@@ -101,9 +101,9 @@ int main()
     TrackDepos td;
 
     const double cm = units::cm;
-//    td.add_track(1.0*units::microsecond, Ray(Point(plane_x+1*cm, 0, 0),       Point(plane_x+3*cm,0,0)));
-//    td.add_track(2.0*units::microsecond, Ray(Point(plane_x+2*cm,-1*cm,-1*cm), Point(plane_x+2*cm,cm,cm)));
-//    td.add_track(5.0*units::microsecond, Ray(Point(plane_x+20*cm,-10*cm,-10*cm), Point(plane_x+10*cm,10*cm,10*cm)));
+    td.add_track(1.0*units::microsecond, Ray(Point(plane_x+1*cm, 0, 0),       Point(plane_x+3*cm,0,0)));
+    td.add_track(2.0*units::microsecond, Ray(Point(plane_x+2*cm,-1*cm,-1*cm), Point(plane_x+2*cm,cm,cm)));
+    td.add_track(5.0*units::microsecond, Ray(Point(plane_x+20*cm,-10*cm,-10*cm), Point(plane_x+10*cm,10*cm,10*cm)));
     td.add_track(10.0*units::microsecond, Ray(Point(plane_x+10*cm,-10*cm,-10*cm), Point(plane_x+10*cm,10*cm,10*cm)));
     cerr << "TrackDepos loaded with " << td.left() << " depositions" << endl;
 
