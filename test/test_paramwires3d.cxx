@@ -32,7 +32,7 @@ void test1()
     int last_index = -1;
     for (auto wit = wires.begin(); wit != wires.end(); ++wit) {
 	IWire::pointer wire = *wit;
-	int iplane = wire->plane() - kFirstPlane;
+	int iplane = wire->planeid().index();
 	int ident = (1+iplane)*100000 + wire->index();
 	Assert(ident == wire->ident());
 
@@ -109,7 +109,7 @@ void test3D(bool interactive)
     double max_width = 5;
     for (auto wit = wires.begin(); wit != wires.end(); ++wit) {
 	IWire::pointer wire = *wit;
-	int iplane = wire->plane();
+	int iplane = wire->planeid().index();
 	int index = wire->index();
 
 	AssertMsg(n_wires[iplane], "Empty plane");

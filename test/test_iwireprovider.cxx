@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
 
 	Ray wray = wire->ray();
 
-	int iplane = wire->plane();
+	int iplane = wire->planeid().index();
 	int index = wire->index();
 	double width = ((index+1)*max_width)/n_wires[iplane];
 

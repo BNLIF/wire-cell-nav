@@ -33,7 +33,7 @@ void draw_wires(ParamWires& pw)
     cerr << "nwires = " << nwires << endl;
     for (int wind=0; wind < nwires; ++wind) {
 	IWire::pointer wire = wires[wind];
-	int iplane = wire->plane();
+	int iplane = wire->planeid().index();
 	int index = wire->index();
 
 	const Ray ray = wire->ray();

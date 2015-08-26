@@ -108,10 +108,10 @@ static Vector axis(const std::vector<IWire::pointer>& wires)
 
 struct WireByIndex {
     bool operator() (IWire::pointer lhs, IWire::pointer rhs) const {
-	if (lhs->plane() == rhs->plane()) {
+	if (lhs->planeid() == rhs->planeid()) {
 	    return lhs->index() < rhs->index();
 	}
-	return lhs->plane() < lhs->plane();
+	return lhs->planeid() < lhs->planeid();
     }
 };
 

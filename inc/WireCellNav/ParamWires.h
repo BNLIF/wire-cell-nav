@@ -34,7 +34,7 @@ namespace WireCell {
 
 	void clear();
 
-	void make_one_plane(WirePlaneType_t plane, const Ray& bounds, const Ray& step);
+	void make_one_plane(WirePlaneId wpid, const Ray& bounds, const Ray& step);
 
 
 	typedef std::vector<IWire::pointer> ParamWireStore;

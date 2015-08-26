@@ -37,18 +37,17 @@ static Ray pitch2(const IWireVector& wires)
 }
 
 struct WirePlaneCache {
-    WirePlaneType_t plane;
-    int iplane;
+    WirePlaneId wpid;
     IWireVector wires;
     Ray pitch_ray;
     Vector pitch_vector;
     Vector pitch_unit;
     double pitch_mag;
 
-    WirePlaneCache(WirePlaneType_t plane, IWire::iterator_range wr)
-	: plane(plane), iplane(int(plane))
+    WirePlaneCache(WirePlaneId wpid, IWire::iterator_range wr)
+	: wpid(wpid)		// maybe one day support more then one face/apa
     {
-	copy_if(boost::begin(wr), boost::end(wr), back_inserter(wires), select_uvw_wires[iplane]);
+	copy_if(boost::begin(wr), boost::end(wr), back_inserter(wires), select_uvw_wires[wpid.index()]);
 	pitch_ray = pitch2(wires);
 	pitch_vector = ray_vector(pitch_ray); // cache
 	pitch_unit = pitch_vector.norm();     // the
@@ -81,9 +80,9 @@ struct WireSummary::WireSummaryCache {
 	   bb(it->ray());
        }
 
-       plane_cache[0] = new WirePlaneCache(kUwire, wr);
-       plane_cache[1] = new WirePlaneCache(kVwire, wr);
-       plane_cache[2] = new WirePlaneCache(kWwire, wr);
+       plane_cache[0] = new WirePlaneCache(WirePlaneId(kUlayer), wr);
+       plane_cache[1] = new WirePlaneCache(WirePlaneId(kVlayer), wr);
+       plane_cache[2] = new WirePlaneCache(WirePlaneId(kWlayer), wr);
    }
 
     ~WireSummaryCache() {
@@ -92,12 +91,12 @@ struct WireSummary::WireSummaryCache {
 	}
     }
 
-    WirePlaneCache* plane(WirePlaneType_t p) {
-	return plane(int(p));
+    WirePlaneCache* plane(WirePlaneId wpid) {
+	return plane(wpid.index());
     }
-    WirePlaneCache* plane(int iplane) {
-	if (iplane<0 ||iplane>2) return 0;
-	return plane_cache[iplane];
+    WirePlaneCache* plane(int index) {
+	if (index<0 ||index>2) return 0;
+	return plane_cache[index];
     }
     
 };
@@ -138,12 +137,12 @@ const BoundingBox& WireSummary::box() const
     return m_cache->bb;
 }
 
-IWire::pointer WireSummary::closest(const Point& point, WirePlaneType_t plane) const
+IWire::pointer WireSummary::closest(const Point& point, WirePlaneId wpid) const
 {
     if (!m_cache) {
 	return 0;
     }
-    WirePlaneCache* wpc = m_cache->plane(plane);
+    WirePlaneCache* wpc = m_cache->plane(wpid);
     if (!wpc) {
 	return 0;
     }
@@ -152,17 +151,17 @@ IWire::pointer WireSummary::closest(const Point& point, WirePlaneType_t plane) c
     return wpc->wire_by_index(dist/wpc->pitch_mag);
 }
 	
-IWirePair WireSummary::bounding_wires(const Point& point, WirePlaneType_t plane) const
+IWirePair WireSummary::bounding_wires(const Point& point, WirePlaneId wpid) const
 {
     if (!m_cache) {
 	return IWirePair();
     }
-    WirePlaneCache* wpc = m_cache->plane(plane);
+    WirePlaneCache* wpc = m_cache->plane(wpid);
     if (!wpc) {
 	return IWirePair();
     }
 
-    IWire::pointer wire = closest(point, plane);
+    IWire::pointer wire = closest(point, wpid);
     if (!wire) return IWirePair();
 
     int index = wire->index();
@@ -182,25 +181,25 @@ IWirePair WireSummary::bounding_wires(const Point& point, WirePlaneType_t plane)
     return IWirePair(IWire::pointer(other_wire), IWire::pointer(wire));
 }
 
-double WireSummary::pitch_distance(const Point& point, WirePlaneType_t plane) const
+double WireSummary::pitch_distance(const Point& point, WirePlaneId wpid) const
 {
     if (!m_cache) {
 	return 0;
     }
-    WirePlaneCache* wpc = m_cache->plane(plane);
+    WirePlaneCache* wpc = m_cache->plane(wpid);
     if (!wpc) {
 	return 0;
     }
     return wpc->pitch_distance(point);
 }
 
-const Vector& WireSummary::pitch_direction(WirePlaneType_t plane) const
+const Vector& WireSummary::pitch_direction(WirePlaneId wpid) const
 {
     static Vector dummy;
     if (!m_cache) {
 	return dummy;
     }
-    WirePlaneCache* wpc = m_cache->plane(plane);
+    WirePlaneCache* wpc = m_cache->plane(wpid);
     if (!wpc) {
 	return dummy;
     }

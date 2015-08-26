@@ -17,13 +17,13 @@ static int number_of_wires = 0;
 
 namespace WireCell {
 class ParamWire : public IWire {
-    WirePlaneType_t m_plane;
+    WirePlaneId m_wpid;
     int m_index;
     Ray m_ray;
 
 public:
-    ParamWire(WirePlaneType_t plane, int index, const Ray& ray)
-	: m_plane(plane), m_index(index), m_ray(ray)
+    ParamWire(WirePlaneId wpid, int index, const Ray& ray)
+	: m_wpid(wpid), m_index(index), m_ray(ray)
     {
 	++number_of_wires;
     }
@@ -33,12 +33,12 @@ public:
     }
 
     int ident() const {
-	int iplane = m_plane - kFirstPlane;
+	int iplane = m_wpid.index();
 	++iplane;
 	return iplane*100000 + m_index;
     }
 
-    WirePlaneType_t plane() const { return m_plane; }
+    WirePlaneId planeid() const { return m_wpid; }
 	
     int index() const { return m_index; }
 
@@ -52,7 +52,7 @@ public:
     int apa() const {return 0;}
 
     void set_index(int ind) { m_index = ind; }
-    void set_plane(WirePlaneType_t plane) { m_plane = plane; }
+    void set_planeid(WirePlaneId wpid) { m_wpid = wpid; }
 
 };
 }
@@ -74,7 +74,7 @@ static ParamWire* make_wire(int index, const Point& point,
     if (hits.first.y() > hits.second.y()) {
 	hits = Ray(hits.second, hits.first);
     }
-    return new ParamWire(kUnknownWirePlaneType, index, hits);
+    return new ParamWire(WirePlaneId(kUnknownLayer), index, hits);
 }
 
 struct SortByIndex {
@@ -84,15 +84,13 @@ struct SortByIndex {
 };    
 
 
-void ParamWires::make_one_plane(WirePlaneType_t plane, const Ray& bounds, const Ray& step)
+void ParamWires::make_one_plane(WirePlaneId wpid, const Ray& bounds, const Ray& step)
 {
     const Vector xaxis(1,0,0);
     const Point starting_point = step.first;
     const Vector pitch = step.second - starting_point;
     const Vector proto = pitch.cross(xaxis).norm();
     
-    //cerr << plane << " pitch=" << pitch << " proto=" << proto << " start=" << starting_point << endl;
-
     std::vector<ParamWire*> these_wires;
 
     int pos_index = 0;
@@ -123,13 +121,9 @@ void ParamWires::make_one_plane(WirePlaneType_t plane, const Ray& bounds, const 
     for (int ind=0; ind<these_wires.size(); ++ind) {
 	ParamWire* pwire = these_wires[ind];
 	pwire->set_index(ind);
-	pwire->set_plane(plane);
+	pwire->set_planeid(wpid);
 	m_wire_store.push_back(IWire::pointer(pwire));
-
-	//cerr << plane << "/#" << ind << pwire->ray().first << " --> " << pwire->ray().second << endl;
     }
-	
-
 
     //std::cerr << "Made "<<store.size()<<" wires for plane " << plane << std::endl;
     //std::cerr << "step = " << step << std::endl;
@@ -142,9 +136,9 @@ void ParamWires::generate(IWireParameters::pointer params)
 {
     this->clear();
 
-    make_one_plane(kUwire, params->bounds(), params->pitchU());
-    make_one_plane(kVwire, params->bounds(), params->pitchV());
-    make_one_plane(kWwire, params->bounds(), params->pitchW());
+    make_one_plane(WirePlaneId(kUlayer), params->bounds(), params->pitchU());
+    make_one_plane(WirePlaneId(kVlayer), params->bounds(), params->pitchV());
+    make_one_plane(WirePlaneId(kWlayer), params->bounds(), params->pitchW());
 }
 
 

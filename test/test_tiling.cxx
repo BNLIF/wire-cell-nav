@@ -138,7 +138,7 @@ int main()
 	int nwires = 0;
 	for (auto w: assoc_wires) {
 	    draw_wire(w, colors[nwires]);
-	    IWireVector& plane_wires = *uvw_wires[int(w->plane())];
+	    IWireVector& plane_wires = *uvw_wires[w->planeid().index()];
 
 	    int wire_index = w->index();
 
