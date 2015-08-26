@@ -1,7 +1,10 @@
 /**
-   The PlaneDuctor (plane-inductor/plane-conductor) produces digitized
-   signals on its plane of wires from depositions that have been
-   drifted near by.
+   The PlaneDuctor ("ductor" = either an inductor or a conductor)
+   produces digitized charge signals on its plane of wires from
+   depositions that have been drifted to the plane.  It handles the
+   buffering required for diffusion to be applied, as well as actually
+   applying it.  There is one PlaneDuctor per plane.  See also
+   WireCell::Digitizer.
  */
 
 #ifndef WIRECELL_PLANEDUCTOR
@@ -9,6 +12,7 @@
 
 #include "WireCellUtil/Signal.h"
 #include "WireCellIface/IDepo.h"
+#include "WireCellIface/IPlaneSlice.h"
 
 namespace WireCell {
 
@@ -19,7 +23,8 @@ namespace WireCell {
     public:
 
 
-	PlaneDuctor(const Ray& pitch, /// location, pitch and angle of wires
+	PlaneDuctor(WirePlaneId wpid, // the plane ID to stamp on the slices
+		    const Ray& pitch, /// location, pitch and angle of wires
 		    double tick = 0.5*units::microsecond, /// digitized time bin size
 		    double tstart = 0.0*units::microsecond, /// absolute time of first tick
 		    double drift_velocity = 1.6*units::millimeter/units::microsecond, 
@@ -32,16 +37,23 @@ namespace WireCell {
 
 	~PlaneDuctor();
 
-	/// Return the current buffer depth.  When zero, there is no more data.
+
+	/// Return the next plane slice.
+	IPlaneSlice::pointer operator()();
+
+
+	// internal methods below.
+
+	// Return the current buffer depth.  When zero, there is no more data.
 	int buffer_size();
 
-	/// Return the time of the internal clock.  Calling latch()
-	/// will advance this internal clock.
+	// Return the time of the internal clock.  Calling latch()
+	// will advance this internal clock.
 	double clock();
 	
-	/// Return a vector filled with per wire (segment) charge
-	/// indexed by wire index.  Trailing wires with zero charge are
-	/// suppressed.  This advances the internal clock.
+	// Return a vector filled with per wire (segment) charge
+	// indexed by wire index.  Trailing wires with zero charge are
+	// suppressed.  This advances the internal clock.
 	std::vector<double> latch();
 
 	// Internal method for calculating the "proper time" of an
@@ -57,6 +69,7 @@ namespace WireCell {
 	double pitch_dist(const Point& p);
 
     private:
+	WirePlaneId m_wpid;
 	const Vector m_pitch_origin;
 	const Vector m_pitch_direction;
 	const double m_drift_velocity;

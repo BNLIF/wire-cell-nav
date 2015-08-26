@@ -11,7 +11,8 @@ using namespace WireCell;
 // fixme: this big constructor is kind of a mess.  In any case, this
 // class needs to implement a "plane ductor" interface and be an
 // configurable.
-PlaneDuctor::PlaneDuctor(const Ray& pitch,
+PlaneDuctor::PlaneDuctor(WirePlaneId wpid, 
+			 const Ray& pitch,
 			 double tick,
 			 double tstart,
 			 double drift_velocity,
@@ -19,7 +20,8 @@ PlaneDuctor::PlaneDuctor(const Ray& pitch,
 			 double DL,
 			 double DT,
 			 int nsigma)
-    : m_pitch_origin(pitch.first)
+    : m_wpid(wpid)
+    , m_pitch_origin(pitch.first)
     , m_pitch_direction(ray_unit(pitch))
     , m_drift_velocity(drift_velocity)
     , m_tbuffer(tbuffer)
@@ -98,6 +100,66 @@ void PlaneDuctor::buffer()
 
 }
 
+
+class PDPS : public IPlaneSlice {
+    WirePlaneId m_wpid;
+    double m_time;
+    ChargeGrouping m_charge;
+
+public:
+    PDPS(WirePlaneId wpid, double time, const std::vector<double>& charge)
+	: m_wpid(wpid), m_time(time)
+    {
+	if (!charge.size()) { return; }
+	//cerr << "PDPS(" << wpid << "," << time << "," << charge.size() << ")" << endl;
+
+	int group_ind = -1;
+	std::vector<double> group;
+	for (int ind=0; ind < charge.size(); ++ind) {
+	    double q = charge[ind];
+	    if (group_ind < 0) { // we were out of a group
+		if (q > 0.0) {	// we just entered a group
+		    group.push_back(q);
+		    group_ind = ind;
+		    continue;
+		}
+		continue;
+	    }
+
+	    // we were in a group		
+	    if (q > 0.0) {	// we stay in the group
+		group.push_back(q);
+		continue;
+	    }
+
+	    // we just left a group, save.
+	    m_charge[group_ind] = group;
+	    group.clear();
+	    group_ind = -1;
+	}
+	if (group.size()) {	// last group
+	    m_charge[group_ind] = group;
+	}
+    }
+	
+
+    virtual WirePlaneId planeid() const { return m_wpid; }
+
+    virtual double time() const { return m_time; }
+
+    virtual ChargeGrouping charge_groups() const { return m_charge; }
+};
+
+
+IPlaneSlice::pointer PlaneDuctor::operator()()
+{
+    if (!buffer_size()) {
+	return nullptr;
+    }
+    double t = clock();		// call first
+    return IPlaneSlice::pointer(new PDPS(m_wpid, t, latch()));
+
+}
 
 double PlaneDuctor::clock()
 {
