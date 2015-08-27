@@ -10,7 +10,6 @@
 #ifndef WIRECELL_PLANEDUCTOR
 #define WIRECELL_PLANEDUCTOR
 
-#include "WireCellUtil/Signal.h"
 #include "WireCellIface/IDepo.h"
 #include "WireCellIface/IPlaneSlice.h"
 
@@ -19,27 +18,29 @@ namespace WireCell {
     class BufferedHistogram2D;
     class Diffuser;
 
-    class PlaneDuctor : public Signal<IDepo> { // fixme make into interface
+    class PlaneDuctor  { // fixme make into interface
     public:
 
 
 	PlaneDuctor(WirePlaneId wpid, // the plane ID to stamp on the slices
 		    const Ray& pitch, /// location, pitch and angle of wires
 		    double tick = 0.5*units::microsecond, /// digitized time bin size
-		    double tstart = 0.0*units::microsecond, /// absolute time of first tick
+		    double tstart = 0.0, /// absolute time of first tick
+		    double toffset = 0.0, /// arbitrary time offset added to deposition time
 		    double drift_velocity = 1.6*units::millimeter/units::microsecond, 
-		    double tbuffer = 5.0*units::microsecond, /// how long into the past to buffer 
+		    double tbuffer = 5.0*units::microsecond, /// buffer long enough to get leading diffusion
 		    double DL=5.3*units::centimeter2/units::second, /// long. diffusion coefficient
 		    double DT=12.8*units::centimeter2/units::second, /// trans. diffusion coefficient
 		    int nsigma=3); /// number of sigma of diffusion to keep
-	
-
 
 	~PlaneDuctor();
 
 
 	/// Return the next plane slice.
 	IPlaneSlice::pointer operator()();
+
+
+	void connect(const IDepo::source_slot& s) { m_input.connect(s); }
 
 
 	// internal methods below.
@@ -72,6 +73,7 @@ namespace WireCell {
 	WirePlaneId m_wpid;
 	const Vector m_pitch_origin;
 	const Vector m_pitch_direction;
+	const double m_toffset;
 	const double m_drift_velocity;
 	const double m_tbuffer;
 	const double m_DL;
@@ -80,6 +82,8 @@ namespace WireCell {
 	BufferedHistogram2D* m_hist;
 	Diffuser* m_diff;
 	double m_high_water_tau;
+
+	IDepo::source_signal m_input;
 
 	// read-ahead enough depositions to surpass the <tbuffer> time from the current "now".
 	void buffer();

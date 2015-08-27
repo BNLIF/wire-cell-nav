@@ -15,6 +15,7 @@ PlaneDuctor::PlaneDuctor(WirePlaneId wpid,
 			 const Ray& pitch,
 			 double tick,
 			 double tstart,
+			 double toffset,
 			 double drift_velocity,
 			 double tbuffer,
 			 double DL,
@@ -23,13 +24,14 @@ PlaneDuctor::PlaneDuctor(WirePlaneId wpid,
     : m_wpid(wpid)
     , m_pitch_origin(pitch.first)
     , m_pitch_direction(ray_unit(pitch))
+    , m_toffset(toffset)
     , m_drift_velocity(drift_velocity)
     , m_tbuffer(tbuffer)
     , m_DL(DL)
     , m_DT(DT)
     , m_hist(new BufferedHistogram2D(tick, ray_length(pitch), tstart, 0))
     , m_diff(new Diffuser(*m_hist, nsigma))
-    ,  m_high_water_tau(tstart)
+    , m_high_water_tau(tstart)
 
 {
     // The histogram's X direction is in units of "proper time" (tau)
@@ -67,7 +69,7 @@ void PlaneDuctor::buffer()
 
     // consume depositions until tbuffer amount of time past "now".
     while (m_high_water_tau < clock() + m_tbuffer) {
-	IDepo::pointer depo = fire();
+	IDepo::pointer depo = *m_input();
 	if (!depo) {
 	    return;
 	}
@@ -77,6 +79,8 @@ void PlaneDuctor::buffer()
 
 	// the time it will show up
 	double tau = proper_tau(depo->time(), depo->pos().x());
+	// allow for any arbitrary offset 
+	tau += m_toffset;
 
 	// how long the center will have drifted for calculating diffusion sigmas.
 	IDepo::pointer initial_depo = *depo_chain(depo).rbegin();
@@ -86,18 +90,11 @@ void PlaneDuctor::buffer()
 	double sigmaT = sqrt(2*m_DT*drift_time/units::centimeter2)*units::centimeter2;
 	double trans = pitch_dist(depo->pos());
 	m_diff->diffuse(tau, trans, sigmaL, sigmaT, depo->charge());
-	// cerr << "Diffuse tau="<<tau << " +/- "<<sigmaL<<" trans=" << trans << " +/- " << sigmaT << endl;
 
 	if (tau > m_high_water_tau) {
 	    m_high_water_tau = tau;
 	}
     }
-    // if (count) {
-    // 	cerr << "PlaneDuctor: buffered q=" << charge_buffered
-    // 	     << " in " << count << " deposits at t=" << clock()
-    // 	     << " up to tau=" << m_high_water_tau << endl;
-    // }
-
 }
 
 

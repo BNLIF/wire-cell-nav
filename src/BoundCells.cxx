@@ -106,14 +106,14 @@ static Vector axis(const std::vector<IWire::pointer>& wires)
     return ray_vector(wires[ind]->ray()).norm();
 }
 
-struct WireByIndex {
-    bool operator() (IWire::pointer lhs, IWire::pointer rhs) const {
-	if (lhs->planeid() == rhs->planeid()) {
-	    return lhs->index() < rhs->index();
-	}
-	return lhs->planeid() < lhs->planeid();
-    }
-};
+// struct WireByIndex {
+//     bool operator() (IWire::pointer lhs, IWire::pointer rhs) const {
+// 	if (lhs->planeid() == rhs->planeid()) {
+// 	    return lhs->index() < rhs->index();
+// 	}
+// 	return lhs->planeid() < lhs->planeid();
+//     }
+// };
 
 Vector origin_cross(const std::vector<IWire::pointer>& ones,
 		    const std::vector<IWire::pointer>& twos)
@@ -179,10 +179,10 @@ void BoundCells::sink(const IWire::iterator_range& wr)
     copy_if(boost::begin(wr), boost::end(wr), back_inserter(v_wires), select_v_wires);
     copy_if(boost::begin(wr), boost::end(wr), back_inserter(w_wires), select_w_wires);
 
-    WireByIndex wbi_sorter;
-    std::sort(u_wires.begin(), u_wires.end(), wbi_sorter);
-    std::sort(v_wires.begin(), v_wires.end(), wbi_sorter);
-    std::sort(w_wires.begin(), w_wires.end(), wbi_sorter);
+    //WireByIndex wbi_sorter;
+    std::sort(u_wires.begin(), u_wires.end(), ascending_index);
+    std::sort(v_wires.begin(), v_wires.end(), ascending_index);
+    std::sort(w_wires.begin(), w_wires.end(), ascending_index);
 
     // cerr << "#wires: "
     // 	 << u_wires.size() << ", "

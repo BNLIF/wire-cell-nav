@@ -3,7 +3,6 @@
 
 #include "WireCellIface/IDepo.h"
 #include "WireCellUtil/Units.h"
-#include "WireCellUtil/Signal.h"
 
 #include <boost/signals2.hpp>
 
@@ -14,7 +13,7 @@ namespace WireCell {
      * properly manages the time/distance ordering by reading ahead
      * from its input stream just far enough in space and time.
      */
-    class Drifter : public Signal<IDepo> {
+    class Drifter {
     public:
 	/// Create a drifter that will drift charge to a given
 	/// location at a given drift velocity.
@@ -26,11 +25,13 @@ namespace WireCell {
 	/// Produce the next drifted deposition. 
 	IDepo::pointer operator()();
 
+	void connect(const IDepo::source_slot& s) { m_input.connect(s); }
 
     private:
 	double m_location, m_drift_velocity;
-
 	DepoTauSortedSet m_buffer;
+	IDepo::source_signal m_input;
+
 
 	double proper_time(IDepo::pointer depo);
 

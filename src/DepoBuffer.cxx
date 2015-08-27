@@ -22,7 +22,7 @@ IDepoVector DepoBuffer::advance(double deltat)
 
     // push new
     while (m_depos.empty() || m_depos.back()->time() < tmax) {
-	IDepo::pointer depo = fire();
+	IDepo::pointer depo = *m_input();
 	if (!depo) { break; }
 	cerr << "Adding " << depo->time() << " in [" << tmin << "," << tmax << "]"<< endl;
 	add(depo);

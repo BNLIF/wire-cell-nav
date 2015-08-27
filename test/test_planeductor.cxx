@@ -1,9 +1,11 @@
 #include "WireCellNav/PlaneDuctor.h"
 #include "WireCellNav/Drifter.h"
+#include "WireCellNav/TrackDepos.h"
+
+#include "WireCellIface/WirePlaneId.h"
+
 #include "WireCellUtil/Point.h"
 #include "WireCellUtil/Testing.h"
-
-#include "MyDepo.h"
 
 #include <iostream>
 #include <algorithm> 
@@ -40,13 +42,13 @@ int main()
     td.add_track(2.0*units::microsecond, Ray(Point(plane_x+2*cm,-1*cm,-1*cm), Point(plane_x+2*cm,cm,cm)));
     td.add_track(5.0*units::microsecond, Ray(Point(plane_x+20*cm,-10*cm,-10*cm), Point(plane_x+10*cm,10*cm,10*cm)));
     td.add_track(10.0*units::microsecond, Ray(Point(plane_x+10*cm,-10*cm,-10*cm), Point(plane_x+10*cm,10*cm,10*cm)));
-    cerr << "TrackDepos loaded with " << td.left() << " depositions" << endl;
 
 
     double now = 0.0*units::microsecond;
     PlaneDuctor pd(WirePlaneId(kUnknownLayer), pitch, tick, now, drift_velocity);
 
-    for (auto depo : td.depositions()) {
+    
+    for (auto depo : *td.depositions()) {
 	double tau = pd.proper_tau(depo->time(), depo->pos().x());
 	double pdist = pd.pitch_dist(depo->pos());
 	//cerr << "Depp: pos=" << depo->pos() << " time=" << depo->time() << " tau=" << tau << " pdist=" << pdist << endl;
@@ -54,10 +56,10 @@ int main()
     }
 
     WireCell::Drifter drifter(plane_x, drift_velocity);
-    drifter.connect(td);	// copies td
+    drifter.connect(td);
 
 
-    pd.connect(drifter);	//copies drifter
+    pd.connect(boost::ref(drifter));
 
     while (now < 10*units::microsecond) {
 	IPlaneSlice::pointer ps = pd();

@@ -1,10 +1,10 @@
 #include "WireCellNav/Drifter.h"
+#include "WireCellNav/TrackDepos.h"
 
 #include "WireCellUtil/Testing.h"
 #include "WireCellUtil/TimeKeeper.h"
 #include "WireCellUtil/BoundingBox.h"
-
-#include "MyDrifter.h"
+#include "WireCellUtil/RangeFeed.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -22,38 +22,100 @@
 using namespace WireCell;
 using namespace std;
 
+TrackDepos make_tracks() {
+    TrackDepos td;
+    td.add_track(10, Ray(Point(10,0,0), Point(100,10,10)));
+    td.add_track(120, Ray(Point( 1,0,0), Point( 2,-100,0)));
+    td.add_track(99, Ray(Point(130,50,50), Point(11, -50,-30)));
+    return td;
+}
 
-int main(int argc, char* argv[])
+IDepoVector get_depos()
 {
-    TimeKeeper tk("test_drifter");
-    Track activity;
-    // make_track_4d(activity, tpair(10,11), Ray(Point(10,0,0), Point(10,10,10)), 1);
-    // make_track_4d(activity, tpair(12,13), Ray(Point( 1,0,0), Point( 2,-10,0)), 2);
-    // make_track_4d(activity, tpair( 9,10), Ray(Point(13,5,5), Point(11, -5,-3)), 3);
-    make_track_4d(activity, 10, Ray(Point(10,0,0), Point(100,10,10)), 1);
-    make_track_4d(activity, 120, Ray(Point( 1,0,0), Point( 2,-100,0)), 2);
-    make_track_4d(activity, 99, Ray(Point(130,50,50), Point(11, -50,-30)), 3);
+    TrackDepos td = make_tracks();
+    shared_ptr<IDepoVector> sdepov = td.depositions();
+    IDepoVector copy = *sdepov.get();
+    return std::move(copy);
+}
 
-    cout << tk("make tracks") << endl;
-    
-
+Ray make_bbox()
+{
     BoundingBox bbox(Ray(Point(-1,-1,-1), Point(1,1,1)));
-    for (auto depo : activity) {
+    for (auto depo : get_depos()) {
 	bbox(depo->pos());
     }
     Ray bb = bbox.bounds();
     cout << "Bounds: " << bb.first << " --> " << bb.second << endl;
+    return bb;
+}
 
-    test_sort(activity);	// side effects needed by all tests
+
+void test_sort()
+{
+    IDepoVector activity = get_depos();
+    int norig = activity.size();
+
+    sort(activity.begin(), activity.end(), ascending_time);
+    AssertMsg (norig == activity.size(), "Sort lost depos");
+
+    int nsorted = 0;
+    int last_time = -1;
+    for (auto depo : activity) {
+	Assert(depo->time() >= last_time);
+	last_time = depo->time();
+	++nsorted;
+    }
+    Assert(nsorted);
+}
+
+void test_feed()
+{
+    IDepoVector activity = get_depos();
+    int count=0, norig = activity.size();
+    WireCell::RangeFeed<IDepoVector::iterator> feed(activity.begin(), activity.end());
+    WireCell::IDepo::pointer p;
+    while ((p=feed())) {
+	++count;
+    }
+    AssertMsg(count == norig , "Lost some points from feed"); 
+}
+
+IDepoVector test_drifted()
+{
+    IDepoVector activity = get_depos(), result;
+    int count=0, norig = activity.size();
+    WireCell::RangeFeed<IDepoVector::iterator> feed(activity.begin(), activity.end());
+    WireCell::Drifter drifter;
+    drifter.connect(feed);
+
+    WireCell::IDepo::pointer p;
+    while ((p=drifter())) {
+	WireCell::IDepoVector vec = depo_chain(p);
+	AssertMsg(vec.size() > 1, "The history of the drifted deposition is truncated.");
+
+	result.push_back(p);
+	++count;
+    }
+    AssertMsg(count == norig , "Lost some points drifting"); 
+    return result;
+}
+
+
+int main(int argc, char* argv[])
+{
+    TimeKeeper tk("test_drifter");
+
+    test_sort();
     cout << tk("sorted") << endl;
-    test_feed(activity);
-    cout << tk("collection") << endl;
-    Track drifted;
-    test_drifted(activity, drifted);
+    test_feed();
+    cout << tk("range feed") << endl;
+    IDepoVector drifted = test_drifted();
     cout << tk("transport") << endl;
     cout << tk.summary() << endl;
 
     
+    Ray bb = make_bbox();
+
     TApplication* theApp = 0;
     if (argc > 1) {
 	theApp = new TApplication ("test_drifter",0,0);
@@ -68,6 +130,7 @@ int main(int argc, char* argv[])
 
 
     // draw raw activity
+    IDepoVector activity = get_depos();
     TPolyMarker3D orig(activity.size(), 6);
     orig.SetMarkerColor(2);
     int indx=0;

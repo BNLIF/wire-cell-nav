@@ -2,7 +2,6 @@
 #define WIRECELL_DEPOBUFFER
 
 #include "WireCellIface/IDepo.h"
-#include "WireCellUtil/Signal.h"
 #include <boost/range.hpp>
 
 #include <deque>
@@ -12,7 +11,7 @@ namespace WireCell {
     // Maintain a buffer of depositions which span a window of time
     // centered on "now".
 
-    class DepoBuffer : public Signal<IDepo> {
+    class DepoBuffer {
 	std::deque<IDepo::pointer> m_depos;
 	const double m_window;
 	double m_now;
@@ -34,10 +33,13 @@ namespace WireCell {
 	 */
 	iterator_range operator()();
 
+	void connect(const IDepo::source_slot& s) { m_input.connect(s); }
+
     private:
 	// add to deque
 	void add(IDepo::pointer depo);
 
+	IDepo::source_signal m_input;
     };
 
 }

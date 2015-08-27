@@ -12,8 +12,7 @@ using namespace WireCell;
 
 Drifter::Drifter(double location,
 		 double drift_velocity)
-    : Signal<IDepo>()
-    , m_location(location)
+    : m_location(location)
     , m_drift_velocity(drift_velocity)
     , m_buffer(IDepoDriftCompare(drift_velocity))
 {
@@ -26,7 +25,7 @@ double Drifter::proper_time(IDepo::pointer depo) {
 bool Drifter::buffer()
 {
     if (!m_buffer.size()) {	// empty buffer, prime.
-	IDepo::pointer depo = fire();
+	IDepo::pointer depo = *m_input();
 	if (!depo) {
 	    return false;	// no buffer, no input, done.
 	}
@@ -39,7 +38,7 @@ bool Drifter::buffer()
 	if (latest->time() >= tau) {
 	    return true;
 	}
-	latest = fire();
+	latest = *m_input();
 	if (!latest) {
 	    break;
 	}
