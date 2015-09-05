@@ -38,7 +38,7 @@ namespace WireCell {
 	const GeomWire* by_planeindex(const WirePlaneIndex planeindex) const;
 
 	/// Return wire pitch (perpendicular distance between wires, in System of Units) 
-	double pitch(WirePlaneType_t plane) const;
+	double pitch(WirePlaneType_t plane, int flag = 0) const;
 
 	/// Return a Vector which points along the pitch and has unit length.
 	WireCell::Vector pitch_unit_vector(WirePlaneType_t plane) const;

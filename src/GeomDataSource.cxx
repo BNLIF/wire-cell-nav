@@ -185,7 +185,7 @@ const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) 
     return wires[index];
 }
 
-double GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
+double GeomDataSource::pitch(WireCell::WirePlaneType_t plane, int flag) const
 {
   // fill_pitch_cache();
   // return pitch_cache[int(plane)];
@@ -195,18 +195,32 @@ double GeomDataSource::pitch(WireCell::WirePlaneType_t plane) const
   
   const GeomWire& wire0 = *this->by_planeindex(plane, num_wire);
   const GeomWire& wire1 = *this->by_planeindex(plane, num_wire+1);
-  
-  double d = (wire0.point2().z - wire0.point1().z);
-  if (d == 0) {		// y wires
-    return std::abs(wire0.point1().z - wire1.point1().z);
+
+  if (flag == 0 ){
+    return std::abs(wire_dist(wire0)-wire_dist(wire1));
+  }else{
+    return wire_dist(wire1)-wire_dist(wire0);
   }
+
+  // double d = (wire0.point2().z - wire0.point1().z);
+  // if (d == 0) {		// y wires
+  //   if (flag == 0 ){
+  //     return std::abs(wire0.point1().z - wire1.point1().z);
+  //   }else{
+  //     return (wire1.point1().z - wire0.point1().z);
+  //   }
+  // }
   
-  double n = (wire0.point2().y - wire0.point1().y);
-  double m = n/d;
-  double b0 = (wire0.point1().y - m * wire0.point1().z);
-  double b1 = (wire1.point1().y - m * wire1.point1().z);
+  // double n = (wire0.point2().y - wire0.point1().y);
+  // double m = n/d;
+  // double b0 = (wire0.point1().y - m * wire0.point1().z);
+  // double b1 = (wire1.point1().y - m * wire1.point1().z);
   
-  return std::abs(b0-b1) / sqrt(m*m + 1);
+  // if (flag == 0){
+  //   return std::abs(b0-b1) / sqrt(m*m + 1);
+  // }else{
+  //   return (b1-b0) / sqrt(m*m + 1);
+  // }
 }
 
 
@@ -485,7 +499,8 @@ GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) 
     const GeomWire *wire0 = by_planeindex(plane,0);
     double dist0 = wire_dist(*wire0);
 
-    double find = (dist-dist0)/pitch(plane);
+    double find = (dist-dist0)/pitch(plane,1);
+
     int central_wiren;
     if (find <0 ){
       central_wiren = 0;
@@ -497,7 +512,7 @@ GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) 
     const GeomWire *central_wire = by_planeindex(plane,central_wiren);
     float central_dist = wire_dist(*central_wire);
     
-    find = central_wiren + (dist - central_dist)/pitch(plane);
+    find = central_wiren + (dist - central_dist)/pitch(plane,1);
 
     if (find < 0) {
     	return GeomWirePair(0, wip[0]);

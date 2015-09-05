@@ -123,13 +123,15 @@ int GenerativeFDS::jump(int frame_number)
 
 
 	if (tbin >= bins_per_frame) {
-	    //cerr << "GenerativeFDS: drop: tbin=" << tbin << " >= " << bins_per_frame << endl;
+	  //cerr << "GenerativeFDS: drop: tbin=" << tbin << " >= " << bins_per_frame << endl;
 	    continue;
 	}
 
 	if (!gds.contained_yz(pt)) {
-	    //cerr << "GenerativeFDS: drop: point not contained: " << pt << endl;
+	  //std::cout << "GenerativeFDS: drop: point not contained: " << pt.x/units::cm << " " << pt.y/units::cm  << " " << pt.z/units::cm << std::endl;
 	    continue;
+	}else{
+	  // std::cout << "GenerativeFDS: drop: point contained: " << pt.x/units::cm << " " << pt.y/units::cm  << " " << pt.z/units::cm << std::endl;
 	}
 	  
 	WireCell::SimTruth st(pt.x, pt.y, pt.z, charge, tbin, simtruth.size());
@@ -140,10 +142,15 @@ int GenerativeFDS::jump(int frame_number)
 	for (int iplane=0; iplane < 3; ++iplane) {
 	    WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
 	    const GeomWire* wire = gds.closest(pt, plane);
+
+	    
+
 	    if (wire!=0){
 	      int chid = wire->channel();
 	      int windex = wire->index();
-	      
+	    
+	      //   std::cout << iplane << " " << chid << " " << windex << std::endl;
+  
 	      // start to do the transverse diffusion here ...
 	      double pitch = gds.pitch(plane);
 	      int nwbin = sigmaT*3/pitch + 1; // +- ntinb 3sigma
@@ -252,6 +259,9 @@ int GenerativeFDS::jump(int frame_number)
 	    }
 	}	
     }
+
+    
+
     
     frame.index = frame_number; 
     return frame.index;
