@@ -83,7 +83,7 @@ int GenerativeFDS::jump(int frame_number)
 	}else{
 	  offset = timeoffsets[ind];
 	}
-	//	std::cout << tbin << " " << pt.x/units::cm << std::endl;
+	//std::cout << tbin << " " << pt.x/units::cm << " " << xmm.second/units::cm << " " << offset << std::endl;
 
 	// adding in the diffusion
 	// assuming the velocity is 1.6 mm/us
