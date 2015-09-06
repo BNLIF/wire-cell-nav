@@ -72,6 +72,8 @@ int GenerativeFDS::jump(int frame_number)
 
     std::pair<double, double> xmm = gds.minmax(0);
     
+    //std::cout << nhits << std::endl;
+
     for (size_t ind=0; ind<nhits; ++ind) {
 	const Point& pt = hits[ind].first;
 	float charge = hits[ind].second;
@@ -88,6 +90,10 @@ int GenerativeFDS::jump(int frame_number)
 	// adding in the diffusion
 	// assuming the velocity is 1.6 mm/us
 	float drift_time = (pt.x-xmm.second)/(unit_dis*units::millimeter); // us
+	
+	// can not handle negative drift time yet .... 
+	if (drift_time < 0) continue; 
+	
 	float DL = 5.3; //cm^2/s
 	float DT = 12.8; //cm^2/s
 	float sigmaL = sqrt(2.*DL*drift_time*1e-6) * units::cm;
@@ -100,6 +106,9 @@ int GenerativeFDS::jump(int frame_number)
 	//push middle bin first
 	long_tbin.push_back(tbin);
 	long_integral.push_back(integral(sigmaL,(pt.x-xmm.second),tbin*bin_drift_distance,(tbin+1)*bin_drift_distance));
+
+	//	std::cout << ind << " " << drift_time << " " << ntbin << std::endl;
+
 	for (int kk =0; kk!=ntbin;kk++){
 	  int tt = tbin - kk - 1;
 	  if (tt >0){
@@ -261,7 +270,7 @@ int GenerativeFDS::jump(int frame_number)
     }
 
     
-
+    // std::cout << "End!" << std::endl;
     
     frame.index = frame_number; 
     return frame.index;
