@@ -54,19 +54,27 @@ namespace WireCell {
 	 */
     	WrappedGDS(const Vector& minbound, const Vector& maxbound, 
 		   double angle, double pitch);
+	WrappedGDS(const Vector& minbound, const Vector& maxbound,
+		   double angleU, double angleV, double pitch,
+		   short cryo, short apa);
     	virtual ~WrappedGDS();
+
+	const Vector get_minbound() const {return m_minbound;}
+	const Vector get_maxbound() const {return m_maxbound;}
+	const short cryo() const {return _cryo;}
+	const short apa() const {return _apa;}
 
     private:
 
     	Vector m_minbound, m_maxbound;
-
+	short _cryo;
+	short _apa;
 
 	void uvw_wire_mesh(double angle, double uvpitch);
-
+	void uv_wire_mesh(double angle, double pitch, bool is_u);
+	void w_wire_mesh(double pitch);
     };
     
-
-
 
 }
 
