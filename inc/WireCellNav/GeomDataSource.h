@@ -5,6 +5,7 @@
 #include "WireCellData/Vector.h"
 
 #include <map>
+#include "TMath.h"
 
 namespace WireCell {
 
@@ -25,7 +26,8 @@ namespace WireCell {
 	/// Return a selection of wires in the given plane/direction
 	/// or all of them if no direction is specified.
 	const GeomWireSelection& wires_in_plane(WirePlaneType_t plane = kUnknownWirePlaneType) const;
-
+	const GeomWireSelection& wires_in_plane(int face, WirePlaneType_t plane) const;
+	
 	/// Look up a wire by it's identifier
 	const GeomWire* by_ident(int ident) const;
 
@@ -80,6 +82,10 @@ namespace WireCell {
 	/// measured in the direction of the pitch of the wire's
 	/// plane.
 	double wire_dist(const GeomWire& wire) const;
+
+	// Return the distance from a given point to a given wire
+	// projected on y-z plane
+	double wire_dist(const Vector& point, const GeomWire* wire) const;
 	
 	/// Given two wires, calculate their crossing point projected
 	/// to the y-z plane.  Only y and z values of result are modified.
@@ -105,12 +111,19 @@ namespace WireCell {
 	GeomWirePair bounds(const Vector& point, 
 			    WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
+	GeomWirePair bounds(const Vector& point,
+			    WirePlaneType_t plane, int face) const;
+
 	/// Return closest wire in the plane to the given point along
 	/// the direction perpendicular to the wires of the given
 	/// plane.  This implementation assumes wires are of uniform
 	/// pitch and angle.
 	const GeomWire* closest(const Vector& point, 
-				WirePlaneType_t plane = kUnknownWirePlaneType) const;
+				WirePlaneType_t plane = kUnknownWirePlaneType,
+				int face = -999) const;
+	//const GeomWire* closest(const Vector& point,
+	//			WirePlaneType_t plane = kUnknownWirePlaneType,
+	//			int face = 0) const;
 	
 	/// Xin, document me.
 	void avoid_gap(Vector& point) const;

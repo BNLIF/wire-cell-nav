@@ -63,7 +63,7 @@ namespace WireCell {
 	const Vector get_maxbound() const {return m_maxbound;}
 	const short cryo() const {return _cryo;}
 	const short apa() const {return _apa;}
-
+	
     private:
 
     	Vector m_minbound, m_maxbound;

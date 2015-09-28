@@ -2,6 +2,7 @@
 #define WIRECELLNAV_DETECTORDATASOURCE_H
 
 #include "WireCellNav/WrappedGDS.h"
+#include "WireCellNav/GeomDataSource.h"
 
 #include "TMath.h"
 
@@ -12,7 +13,7 @@
 
 namespace WireCell {
 
-  class DetectorGDS : public WireCell::GeomDataSource {
+  class DetectorGDS {// : public WireCell::GeomDataSource {
     
   public:
     DetectorGDS();
@@ -26,11 +27,17 @@ namespace WireCell {
     void set_boundries(std::vector<std::vector<Vector> > center, std::vector<std::vector<Vector> > halves);
     void buildGDS();
 
-    const WrappedGDS* get_apaGDS(short cryo, short apa) const {return _APAgds.at(cryo).at(apa);}
+    WrappedGDS* get_apaGDS(short cryo, short apa) const;
     
     short ncryos() const {return _ncryos;}
     short napa(short cryo) const {return _napas.at(cryo);}
 
+    short in_which_apa(const Vector& point) const;
+    short in_which_cryo(const Vector& point) const;
+    
+    double get_angle(short cryo, WirePlaneType_t plane) const;
+    double get_pitch(short cryo) const {return _pitch.at(cryo);}
+    
     /*
     bool contained(const Vector& point) const;
     bool contained_yz(const Vector& point) const;

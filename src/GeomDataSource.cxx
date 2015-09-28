@@ -78,12 +78,11 @@ bool GeomDataSource::fill_cache() const
 	ident2wire[wire.ident()] = &wire;
 	channel2wire[wire.channel()].push_back(&wire);
 	WirePlaneIndex wpi = wire.plane_index();
-	pi2wire[wpi.first].resize(wpi.second+1,0);
+	pi2wire[wpi.first].resize(wpi.second+1,0);	
 	pi2wire[wpi.first][wpi.second] = &wire;
     }
 
     fill_nwires_cache();
-    
 
     // angle
     for (int iplane=0; iplane<3; ++iplane) {
@@ -92,18 +91,18 @@ bool GeomDataSource::fill_cache() const
 	    angle_cache[iplane] = -999;
 	    continue;
 	}
-	int nwire = (nwires_cache[int(iplane)]-1)/2.+1;
-	const GeomWire& w = *wip[nwire]; // the first wire might be biased .. use the 100th wire for now
+	int nwire = (nwires_cache[int(iplane)]-1)/4.+1;
+	const GeomWire& w = *wip.at(nwire); // the first wire might be biased .. use the 100th wire for now
 	double dz = w.point2().z - w.point1().z;
 	double dy = w.point2().y - w.point1().y;
 	double angle = std::atan2(dz, dy);
-	if (angle>3.1415926/2.) angle -= 3.1415926;
+	if (w.face()) angle = angle*-1.;
+	if (angle>TMath::Pi()/2.) angle -= TMath::Pi();
+	if (angle<-TMath::Pi()/2.) angle += TMath::Pi();
 	angle_cache[iplane] = angle*units::radian;
     }
     
-   
-  
-  return true;
+    return true;
 }
 
 
@@ -133,6 +132,32 @@ const GeomWireSelection& GeomDataSource::wires_in_plane(WirePlaneType_t plane) c
     for (wit=wires.begin(); wit != done; ++wit) {
 	const GeomWire& wire = *wit;
 	if (plane == kUnknownWirePlaneType || wire.plane() == plane) {
+	    ws.push_back(&wire);
+	}
+    }
+
+    //cerr << "Generated " << ws.size() << " wires for plane " << plane << endl;
+
+    return ws;
+}
+
+const GeomWireSelection& GeomDataSource::wires_in_plane(int face, WirePlaneType_t plane) const
+{
+    if (mm_gwsel.find(plane) == mm_gwsel.end()) {
+        GeomWireSelection ws;
+	mm_gwsel[plane] = ws;
+    }
+    GeomWireSelection& ws = mm_gwsel[plane];
+    ws.clear();
+    //if (ws.size()) {
+    //    return ws;
+    //}
+
+    GeomWireSet::const_iterator wit, done = wires.end();
+
+    for (wit=wires.begin(); wit != done; ++wit) {
+	const GeomWire& wire = *wit;
+	if (wire.plane() == plane && wire.face() == face) {
 	    ws.push_back(&wire);
 	}
     }
@@ -182,7 +207,8 @@ const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) 
     if (index >= wires.size()) {
 	return 0;
     }
-    return wires[index];
+    //return wires[index];
+    return wires.at(index);
 }
 
 double GeomDataSource::pitch(WireCell::WirePlaneType_t plane, int flag) const
@@ -191,7 +217,8 @@ double GeomDataSource::pitch(WireCell::WirePlaneType_t plane, int flag) const
   // return pitch_cache[int(plane)];
 
   fill_nwires_cache();
-  int num_wire = (nwires_cache[int(plane)]-1)/2;
+  //int num_wire = (nwires_cache[int(plane)]-1)/2;
+  int num_wire = (nwires_cache[int(plane)]-1)/4;
   
   const GeomWire& wire0 = *this->by_planeindex(plane, num_wire);
   const GeomWire& wire1 = *this->by_planeindex(plane, num_wire+1);
@@ -239,7 +266,8 @@ double GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
     return -999;
   }
   fill_cache();
-  return angle_cache[plane];
+
+  return angle_cache[plane];  
 }
 
 
@@ -407,6 +435,16 @@ double GeomDataSource::wire_dist(const GeomWire& wire) const
     // return dis;
 }
 
+double GeomDataSource::wire_dist(const Vector& pt, const GeomWire* wire) const
+{
+  Point pt1 = wire->point1();
+  Point pt2 = wire->point2();
+  double num = TMath::Abs((pt2.y-pt1.y)*pt.z-(pt2.z-pt1.z)*pt.y+pt2.z*pt1.y-pt2.y*pt1.z);
+  double den = TMath::Sqrt((pt2.y-pt1.y)*(pt2.y-pt1.y)+(pt2.z-pt1.z)*(pt2.z-pt1.z));
+  if (num<1.0e-6) return 0.0;
+  else return num/den;
+}
+
 bool GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2, 
 				    Vector& result) const
 {
@@ -539,10 +577,45 @@ GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) 
     }
 }
 
-const GeomWire* GeomDataSource::closest(const Vector& point, WirePlaneType_t plane) const
+GeomWirePair GeomDataSource::GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane, int face) const
+{
+    if (plane != (WirePlaneType_t)(0) &&
+	plane != (WirePlaneType_t)(1) &&
+	plane != (WirePlaneType_t)(2)) {
+        plane = kUnknownWirePlaneType;
+    }
+    const GeomWireSelection& wip = wires_in_plane(face, plane);
+    int nwires = wip.size();
+
+    GeomWireSelection::const_iterator wit, done = wip.end();
+    double dist[]={9999.,9999.}; //dist[0]: shortest distance; dist[1]: second shortest distance
+    //GeomWirePair pr(wip.at(0),wip.at(1));
+    GeomWirePair pr;
+    for (wit = wip.begin(); wit != done; ++wit) {
+      double tmp_dist = wire_dist(point, *wit);
+      if (dist[1]>tmp_dist) {
+	if (dist[0] > tmp_dist) {
+	  dist[0] = tmp_dist;
+	  pr.first = *wit;
+	} else {
+	  dist[1] = tmp_dist;
+	  pr.second = *wit;
+	}
+      }
+    }
+    return pr;
+}
+
+
+const GeomWire* GeomDataSource::closest(const Vector& point, WirePlaneType_t plane, int face) const
 {
   float dis = wire_dist(point,plane);
-  GeomWirePair p1 = bounds(point,plane);
+  GeomWirePair p1;
+  if (face == -999) {
+      p1 = bounds(point, plane);
+  } else {
+      p1 = bounds(point, plane, face);
+  }
   float dis1,dis2;
   if (p1.first !=0){
     dis1 = wire_dist(*p1.first);
@@ -562,7 +635,6 @@ const GeomWire* GeomDataSource::closest(const Vector& point, WirePlaneType_t pla
   }
   return p1.second;
 }
-
 
 void GeomDataSource::avoid_gap(Vector& p) const{
     

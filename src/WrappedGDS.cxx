@@ -40,6 +40,11 @@ namespace {
         //return (top_ind+1) +                   (uvw+1)*10000 + (face+1)*100000;
         return (top_ind+1) + (uvw+1)*1000 + (face+1)*10000 + (apa+1)*100000 + (cryo+1)*10000000;
     }
+
+  //static int make_index(int face, int top_ind, int uvw, int segment)
+  //{
+  //    return (top_ind+1) + (segment+1)*1000 + (uvw+1)*10000 + (face+1)*100000;
+  //}
 }
 
 void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
@@ -47,7 +52,7 @@ void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
     const Vector drift(-1,0,0);
 
     // distance along wire between two consecutive u/v crossings
-    const double stride = pitch / sin(2*angle);
+    const double stride = (pitch / sin(2*angle))*units::cm;
 
     // Vectors pointing in the unit direction of a U/V wire.  Both
     // point in the +Y direction.  U in the -Z and V in the +Z.
@@ -63,19 +68,19 @@ void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
 
     // integral number of horizontal/vertical steps that fit in each
     // direction of the bounding box.
-    int n_horz_steps = int((m_maxbound.z - m_minbound.z)/horz_step_mag);
-    int n_vert_steps = int((m_maxbound.y - m_minbound.y)/vert_step_mag);
+    int n_horz_steps = int((m_maxbound.z - m_minbound.z)*units::cm/horz_step_mag);
+    int n_vert_steps = int((m_maxbound.y - m_minbound.y)*units::cm/vert_step_mag);
 
     //cerr << n_horz_steps << " horizontal steps" << endl;
     //cerr << n_vert_steps << " vertical steps" << endl;
     
     // calculate new bounds
     const Vector center_bb = 0.5*(m_maxbound+ m_minbound);
-    const double x_delta = (m_maxbound.x - m_minbound.x) / 8.0;
+    const double x_delta = (m_maxbound.x - m_minbound.x)*units::cm / 8.0;
 
-    const double y_min = center_bb.y - 0.5*n_vert_steps*vert_step_mag;
+    const double y_min = center_bb.y*units::cm - 0.5*n_vert_steps*vert_step_mag;
     const double y_max = y_min + n_vert_steps*vert_step_mag;
-    const double z_min = center_bb.z - 0.5*n_horz_steps*horz_step_mag;
+    const double z_min = center_bb.z*units::cm - 0.5*n_horz_steps*horz_step_mag;
     const double z_max = z_min + n_horz_steps*horz_step_mag;
 
     // fill attachment points along left and right hand sides
@@ -170,7 +175,7 @@ void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
 
 		    int ident = make_ident(this_face, top_ind, this_face_uv, segment, 0, 0);
 		    int chan = make_chan(this_face, top_ind, this_face_uv, 0, 0);
-		    
+		    //int index = make_index(this_face, top_ind, this_face_uv, segment);
 
 		    Point p1(*(points[ipt+0].get()));
 		    Point p2(*(points[ipt+1].get()));
@@ -179,6 +184,7 @@ void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
 		    GeomWire gw(ident,
 				WirePlaneType_t((((starting_uv + ipt)%2) + this_face)%2),
 				pair2ind[VectorPtrPair(points[ipt],points[ipt+1])],
+				//index,
 				chan,
 				p1, p2,
 				segment, this_face, 0, 0);
@@ -221,10 +227,10 @@ void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
 void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
 {
     //const Vector drift(-1,0,0);
-    std::cout<<"wire angle is "<<angle<<"; wire pitch is "<<pitch<<std::endl;
+    //std::cout<<"wire angle is "<<angle<<"; wire pitch is "<<pitch<<std::endl;
     // distance along wire between two consecutive u/v crossings
     double angle_in_radian = angle * TMath::Pi() / 180.;
-    const double stride = pitch / sin(2*angle_in_radian);
+    const double stride = (pitch / sin(2*angle_in_radian))*units::cm;
 
     // Vectors pointing in the unit direction of a U/V wire.  Both
     // point in the +Y direction.  U in the -Z and V in the +Z.
@@ -240,19 +246,19 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
 
     // integral number of horizontal/vertical steps that fit in each
     // direction of the bounding box.
-    int n_horz_steps = int((m_maxbound.z - m_minbound.z)/horz_step_mag);
-    int n_vert_steps = int((m_maxbound.y - m_minbound.y)/vert_step_mag);
+    int n_horz_steps = int((m_maxbound.z - m_minbound.z)*units::cm/horz_step_mag);
+    int n_vert_steps = int((m_maxbound.y - m_minbound.y)*units::cm/vert_step_mag);
 
     //cerr << n_horz_steps << " horizontal steps" << endl;
     //cerr << n_vert_steps << " vertical steps" << endl;
     
     // calculate new bounds
     const Vector center_bb = 0.5*(m_maxbound + m_minbound);
-    const double x_delta = (m_maxbound.x - m_minbound.x) / 8.0;
+    const double x_delta = (m_maxbound.x - m_minbound.x)*units::cm / 8.0;
 
-    const double y_min = center_bb.y - 0.5*n_vert_steps*vert_step_mag;
+    const double y_min = center_bb.y*units::cm - 0.5*n_vert_steps*vert_step_mag;
     const double y_max = y_min + n_vert_steps*vert_step_mag;
-    const double z_min = center_bb.z - 0.5*n_horz_steps*horz_step_mag;
+    const double z_min = center_bb.z*units::cm - 0.5*n_horz_steps*horz_step_mag;
     const double z_max = z_min + n_horz_steps*horz_step_mag;
 
     // fill attachment points along left and right hand sides
@@ -351,7 +357,7 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
 
 		    int ident = make_ident(this_face, top_ind, this_face_uv, segment, _apa, _cryo);
 		    int chan = make_chan(this_face, top_ind, this_face_uv, _apa, _cryo);
-		    
+		    //int index = make_index(this_face, top_ind, this_face_uv, segment);
 
 		    Point p1(*(points[ipt+0].get()));
 		    Point p2(*(points[ipt+1].get()));
@@ -361,6 +367,7 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
 				//WirePlaneType_t((((starting_uv + ipt)%2) + this_face)%2),
 				WirePlaneType_t(this_face_uv),
 				pair2ind[VectorPtrPair(points[ipt],points[ipt+1])],
+				//index,
 				chan,
 				p1, p2,
 				segment, this_face, _apa, _cryo);
@@ -377,14 +384,14 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
 void WireCell::WrappedGDS::w_wire_mesh(double pitch)
 {
 
-    const double horz_step_mag = pitch;
-    int n_horz_steps = int((m_maxbound.z - m_minbound.z)/horz_step_mag);
+    const double horz_step_mag = pitch*units::cm;
+    int n_horz_steps = int((m_maxbound.z - m_minbound.z)*units::cm/horz_step_mag);
 
     // calculate new bounds
     const Vector center_bb = 0.5*(m_maxbound+ m_minbound);
-    const double x_delta = (m_maxbound.x - m_minbound.x) / 8.0;
+    const double x_delta = (m_maxbound.x - m_minbound.x)*units::cm / 8.0;
 
-    const double z_min = center_bb.z - 0.5*n_horz_steps*horz_step_mag;
+    const double z_min = center_bb.z*units::cm - 0.5*n_horz_steps*horz_step_mag;
     const double z_max = z_min + n_horz_steps*horz_step_mag;
 
     // fill attachment points along top and bottom
