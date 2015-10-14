@@ -57,8 +57,8 @@ WireCell::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
 	    infile >> tmp >> _halves.at(cryo).at(apa).x >> _halves.at(cryo).at(apa).y >> _halves.at(cryo).at(apa).z;	 
 	    _min_bound.at(cryo).at(apa) = _center.at(cryo).at(apa) - _halves.at(cryo).at(apa);
 	    _max_bound.at(cryo).at(apa) = _center.at(cryo).at(apa) + _halves.at(cryo).at(apa);
-	    //std::cout<<"bound box: ("<<_min_bound.at(cryo).at(apa).x<<", "<<_min_bound.at(cryo).at(apa).y<<", "<<_min_bound.at(cryo).at(apa).z
-	    //	     <<") --> ("<<_max_bound.at(cryo).at(apa).x<<", "<<_max_bound.at(cryo).at(apa).y<<", "<<_max_bound.at(cryo).at(apa).z<<")"<<std::endl;
+	    std::cout<<"bound box: ("<<_min_bound.at(cryo).at(apa).x<<", "<<_min_bound.at(cryo).at(apa).y<<", "<<_min_bound.at(cryo).at(apa).z
+	    	     <<") --> ("<<_max_bound.at(cryo).at(apa).x<<", "<<_max_bound.at(cryo).at(apa).y<<", "<<_max_bound.at(cryo).at(apa).z<<")"<<std::endl;
 	    _APAgds.at(cryo).at(apa) = new WrappedGDS(_min_bound.at(cryo).at(apa), _max_bound.at(cryo).at(apa), _angleU.at(cryo), _angleV.at(cryo), _pitch.at(cryo), cryo, apa);
 	}
 	

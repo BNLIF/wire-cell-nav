@@ -37,7 +37,7 @@ int main () {
     
     DetGenerativeFDS fds(dep, gds);
 
-    for (int ind=0; ind<10; ++ind) {
+    for (int ind=0; ind<1; ++ind) {
         assert (fds.jump(ind) >= 0, "error: jump fds");
 	Frame frame = fds.get();
 	assert (frame.index == ind, "error: frame index");

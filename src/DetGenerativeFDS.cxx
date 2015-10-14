@@ -62,13 +62,13 @@ int DetGenerativeFDS::jump(int frame_number)
     const std::vector<int>& timeoffsets = dep.timeoffset();
     
     size_t nhits = hits.size();
-    std::cout<<"nhits = "<<nhits<<std::endl;
+    //std::cout<<"nhits = "<<nhits<<std::endl;
     if (!nhits) {
 	frame.index = frame_number; 
 	return frame.index;
     }
 
-    std::cout<<"frame.index != frame_number"<<std::endl;
+    //std::cout<<"frame.index != frame_number"<<std::endl;
     
     typedef map<int, int> TraceIndexMap; // channel->index into traces;
     TraceIndexMap tim;		// keep tabs on what channels we've seen already
@@ -295,7 +295,7 @@ int DetGenerativeFDS::jump(int frame_number)
     }
 
     
-    std::cout << "End!" << std::endl;
+    //std::cout << "End!" << std::endl;
     
     frame.index = frame_number; 
     return frame.index;

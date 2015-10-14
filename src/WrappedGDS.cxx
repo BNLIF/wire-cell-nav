@@ -254,8 +254,10 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
     
     // calculate new bounds
     const Vector center_bb = 0.5*(m_maxbound + m_minbound);
-    const double x_delta = (m_maxbound.x - m_minbound.x)*units::cm / 8.0;
-
+    const double x_delta = ((m_maxbound.x - m_minbound.x) / 6.0) * units::cm;
+    std::cout<<"center is ("<<center_bb.x<<","<<center_bb.y<<","<<center_bb.z<<")\t"
+	     <<"x_delta is "<<x_delta<<std::endl;
+    
     const double y_min = center_bb.y*units::cm - 0.5*n_vert_steps*vert_step_mag;
     const double y_max = y_min + n_vert_steps*vert_step_mag;
     const double z_min = center_bb.z*units::cm - 0.5*n_horz_steps*horz_step_mag;
@@ -352,13 +354,13 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
 		        continue;
 		    }
 		    if (this_face) { // "B" face
-		        this_x_val *= -1;
+		        this_x_val *= -1.;
 		    }
 
 		    int ident = make_ident(this_face, top_ind, this_face_uv, segment, _apa, _cryo);
 		    int chan = make_chan(this_face, top_ind, this_face_uv, _apa, _cryo);
 		    //int index = make_index(this_face, top_ind, this_face_uv, segment);
-
+		    //int index = pair2ind[VectorPtrPair(points[ipt],points[ipt+1])]*2+(int)this_face;
 		    Point p1(*(points[ipt+0].get()));
 		    Point p2(*(points[ipt+1].get()));
 		    p1.x = p2.x = this_x_val + center_bb.x;
@@ -389,7 +391,7 @@ void WireCell::WrappedGDS::w_wire_mesh(double pitch)
 
     // calculate new bounds
     const Vector center_bb = 0.5*(m_maxbound+ m_minbound);
-    const double x_delta = (m_maxbound.x - m_minbound.x)*units::cm / 8.0;
+    const double x_delta = ((m_maxbound.x - m_minbound.x) / 6.0) * units::cm;
 
     const double z_min = center_bb.z*units::cm - 0.5*n_horz_steps*horz_step_mag;
     const double z_max = z_min + n_horz_steps*horz_step_mag;
@@ -415,7 +417,8 @@ void WireCell::WrappedGDS::w_wire_mesh(double pitch)
     
 	    int ident = make_ident(this_face, ind, 2, 0, _apa, _cryo);
 	    int chan = make_chan(this_face, ind, 2, _apa, _cryo);
-
+	    //int index = ind*2+(int)this_face;
+	    
 	    Point p1(*top_point.get());
 	    Point p2(*bot_point.get());
 	    p1.x = p2.x = this_x_val + center_bb.x;
@@ -423,6 +426,7 @@ void WireCell::WrappedGDS::w_wire_mesh(double pitch)
 	    GeomWire gw(ident,
 			kYwire,
 			ind,
+			//index,
 			chan, p1, p2, 0, this_face, _apa, _cryo);
 	    this->add_wire(gw);
 	}
