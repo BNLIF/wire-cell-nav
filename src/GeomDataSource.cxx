@@ -78,7 +78,9 @@ bool GeomDataSource::fill_cache() const
 	ident2wire[wire.ident()] = &wire;
 	channel2wire[wire.channel()].push_back(&wire);
 	WirePlaneIndex wpi = wire.plane_index();
-	pi2wire[wpi.first].resize(wpi.second+1,0);	
+	if (wpi.second+1 > pi2wire[wpi.first].size()) {
+	    pi2wire[wpi.first].resize(wpi.second+1,0);
+	}
 	pi2wire[wpi.first][wpi.second] = &wire;
     }
 

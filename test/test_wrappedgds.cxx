@@ -33,10 +33,11 @@ int main(int argc, char* argv[])
 
 
     const double offset = 0.0;
-
+    
     int colors[] = {2,4,1};
     for (int iplane=0; iplane<3; ++iplane) {
 	WirePlaneType_t plane = (WirePlaneType_t)iplane;
+	std::cout<<"plane "<<iplane<<" has angle "<<gds.angle(plane)<<std::endl;
 	GeomWireSelection wip = gds.wires_in_plane(plane);
 	std::cout<<"# of wires is "<<wip.size()<<std::endl;
 	for (auto wit = wip.begin(); wit != wip.end(); ++wit) {
@@ -46,6 +47,7 @@ int main(int argc, char* argv[])
 
 	    l.SetLineColor(colors[iplane]);
 	    l.DrawLine(p1.z, p1.y, p2.z-offset, p2.y-offset);
+	    std::cout<<wire<<"\n";
 
 	}
 	std::pair<double, double> minmax_x = gds.minmax(0);

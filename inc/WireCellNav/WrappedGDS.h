@@ -59,16 +59,21 @@ namespace WireCell {
 		   short cryo, short apa);
     	virtual ~WrappedGDS();
 
-	const Vector get_minbound() const {return m_minbound;}
-	const Vector get_maxbound() const {return m_maxbound;}
-	const short cryo() const {return _cryo;}
-	const short apa() const {return _apa;}
+	Vector get_minbound() const {return m_minbound;}
+	Vector get_maxbound() const {return m_maxbound;}
+	short cryo() const {return _cryo;}
+	short apa() const {return _apa;}
+	
+	// overwrite GeomDataSource members:
+	double angle(WirePlaneType_t plane) const;
+	double pitch(WirePlaneType_t plane, int flag = 0) const;
 	
     private:
 
     	Vector m_minbound, m_maxbound;
 	short _cryo;
 	short _apa;
+	double _angleU, _angleV, _pitchU, _pitchV, _pitchW;
 
 	void uvw_wire_mesh(double angle, double uvpitch);
 	void uv_wire_mesh(double angle, double pitch, bool is_u);
