@@ -130,9 +130,9 @@ short DetectorGDS::in_which_cryo(const Vector& point) const
   return c;
 }
 
-WrappedGDS* DetectorGDS::get_apaGDS(short cryo, short apa) const
+const WrappedGDS* DetectorGDS::get_apaGDS(short cryo, short apa) const
 {
-  WrappedGDS* gds = NULL;
+  const WrappedGDS* gds = NULL;
   if (cryo >= 0 && apa >=0) {
     gds = _APAgds.at(cryo).at(apa);
   }
@@ -151,4 +151,55 @@ double DetectorGDS::get_angle(short cryo, WirePlaneType_t plane) const
     default:
         return -999.;
     }
+}
+
+bool DetectorGDS::crossing_point(double dis1, double dis2, const GeomWire& wire1, const GeomWire& wire2, Vector& result) const
+{
+  if ((wire1.apa() != wire2.apa()) || (wire1.cryo() != wire2.cryo()) || (wire1.face() != wire2.face()) || (wire1.plane() == wire2.plane())) {
+    return false;
+  }
+  const WrappedGDS *apaGDS = get_apaGDS(wire1.cryo(), wire1.apa());
+  Vector minbound = apaGDS->get_minbound();
+  Vector maxbound = apaGDS->get_maxbound();
+  double theta1 = get_angle(wire1.cryo(),wire1.plane());
+  double theta2 = get_angle(wire2.cryo(),wire2.plane());
+
+  if (wire1.face()) {
+    theta1 *= -1;
+    theta2 *= -1;
+  }
+  
+  double a1 = std::cos(theta1);
+  double b1 = -std::sin(theta1);
+  
+  double a2 = std::cos(theta2);
+  double b2 = -std::sin(theta2);
+
+  //equation array is
+  // dis1 = z * a1 + y * b1;
+  // dis2 = z * a2 + y * b2;
+
+  result.y = (dis1 * a2 - dis2 * a1)/(b1 * a2 - b2 * a1);
+  result.z = (dis1 * b2 - dis2 * b1)/(a1 * b2 - a2 * b1);
+
+  if (result.y < minbound.y || maxbound.y < result.y) { 
+    return false;
+  }
+
+  if (result.z < minbound.z || maxbound.z < result.z) { 
+    return false;
+  }
+
+  return true;
+    
+}
+
+const GeomWire* DetectorGDS::closest(const Vector& point, WirePlaneType_t plane, int face) const
+{
+  const WrappedGDS* apaGDS = get_apaGDS(in_which_cryo(point),in_which_apa(point));
+  const GeomWire* wire;
+  if (apaGDS != NULL) {
+    wire = apaGDS->closest(point, plane, face);
+  }
+  return wire;
 }
