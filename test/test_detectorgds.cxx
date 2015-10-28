@@ -17,8 +17,24 @@ int main(int argc, char* argv[])
 {
 
     std::vector<std::string> geometry;
-    geometry.push_back("/home/xiaoyueli/BNLIF/wire-cell/geom_35t_v5.txt");
-    DetectorGDS gds(geometry);
+    //geometry.push_back("/home/xiaoyueli/BNLIF/wire-cell/geom_35t_v5.txt");
+    //DetectorGDS gds(geometry);
+    DetectorGDS gds;
+    gds.set_ncryos(1);
+    gds.set_napas(0,4);
+    Vector center0(-4.0122, 15.3431, 24.6852);
+    Vector halves0(3.26512, 99.7439, 26.7233);
+    gds.set_apa(0, 0, 45.705, 44.274, 0.4880488, 0.4880488, 0.4880488, center0, halves0);
+    Vector center1(-4.0122, -42.2348, 77.3702);
+    Vector halves1(3.26512, 42.2504, 25.9617);
+    gds.set_apa(0, 1, 45.705, 44.274, 0.4880488, 0.4880488, 0.4880488, center1, halves1);
+    Vector center2(-4.0122, 57.5435, 77.3702);
+    Vector halves2(3.26512, 57.5435, 25.9617);
+    gds.set_apa(0, 2, 45.705, 44.274, 0.4880488, 0.4880488, 0.4880488, center2, halves2);
+    Vector center3(-4.0122, 15.3431, 130.055);
+    Vector halves3(3.26512, 99.7439, 26.7235);
+    gds.set_apa(0, 3, 45.705, 44.274, 0.4880488, 0.4880488, 0.4880488, center3, halves3);
+    gds.buildGDS();
     TCanvas *c = new TCanvas();
     c->Range(-5*units::cm, -90*units::cm, 160*units::cm, 120*units::cm);    
 

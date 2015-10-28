@@ -55,7 +55,7 @@ namespace WireCell {
     	WrappedGDS(const Vector& minbound, const Vector& maxbound, 
 		   double angle, double pitch);
 	WrappedGDS(const Vector& minbound, const Vector& maxbound,
-		   double angleU, double angleV, double pitch,
+		   double angleU, double angleV, double pitchU, double pitchV, double pitchW,
 		   short cryo, short apa);
     	virtual ~WrappedGDS();
 

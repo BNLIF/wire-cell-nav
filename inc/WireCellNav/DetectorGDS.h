@@ -23,11 +23,16 @@ namespace WireCell {
   public:
 
     void set_ncryos(short ncryo);
-    void set_apas(std::vector<short> napa, std::vector<double> angleU, std::vector<double> angleV, std::vector<double> pitch);
-    void set_boundries(std::vector<std::vector<Vector> > center, std::vector<std::vector<Vector> > halves);
+    void set_napas(short cryo, short napas);
+    // configure all apas in all cryostats in one go
+    void set_apas(std::vector<short> napa, std::vector<double> angleU, std::vector<double> angleV, std::vector<double> pitchU, std::vector<double> pitchV, std::vector<double> pitchW, std::vector<std::vector<Vector> > center, std::vector<std::vector<Vector> > halves);
+    // configure each apa individually
+    void set_apa(short cryo, short apa, double angleU, double angleV, double pitchU, double pitchV, double pitchW, Vector center, Vector halves);
+    // to be called after apa configuration
     void buildGDS();
 
     const WrappedGDS* get_apaGDS(short cryo, short apa) const;
+    void set_apaGDS(short cryo, short apa, const WrappedGDS* apaGDS);
     
     short ncryos() const {return _ncryos;}
     short napa(short cryo) const {return _napas.at(cryo);}
@@ -35,8 +40,8 @@ namespace WireCell {
     short in_which_apa(const Vector& point) const;
     short in_which_cryo(const Vector& point) const;
     
-    double get_angle(short cryo, WirePlaneType_t plane) const;
-    double get_pitch(short cryo) const {return _pitch.at(cryo);}
+    double get_angle(short cryo, WirePlaneType_t plane = kUnknownWirePlaneType) const;
+    double get_pitch(short cryo, WirePlaneType_t plane = kUnknownWirePlaneType) const;
     bool crossing_point(double dist1, double dist2, const GeomWire& wire1, const GeomWire& wire2, Vector& result) const;
     const GeomWire* closest(const Vector& point,
 			    WirePlaneType_t plane = kUnknownWirePlaneType,
@@ -61,7 +66,7 @@ namespace WireCell {
     std::vector<std::vector<Vector> > _min_bound; // [cryo][apa]
     std::vector<std::vector<Vector> > _center;
     std::vector<std::vector<Vector> > _halves;
-    std::vector<double> _angleU, _angleV, _pitch;
+    std::vector<double> _angleU, _angleV, _pitchU, _pitchV, _pitchW;
     
   };
 

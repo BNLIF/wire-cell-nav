@@ -445,22 +445,22 @@ WireCell::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound,
 }
 
 WireCell::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound,
-				 double angleU, double angleV, double pitch,
+				 double angleU, double angleV, double pitchU, double pitchV, double pitchW,				 
 				 short cryo, short apa)
   : GeomDataSource()
-  , _angleU(-angleU)
-  , _angleV(angleV)
+  , _angleU(-angleU*units::deg)
+  , _angleV(angleV*units::deg)
   , m_minbound(minbound)
   , m_maxbound(maxbound)
   , _cryo(cryo)
   , _apa(apa)
-  , _pitchU(pitch)
-  , _pitchV(pitch)
-  , _pitchW(pitch)
+  , _pitchU(pitchU)
+  , _pitchV(pitchV)
+  , _pitchW(pitchW)
 {
-    uv_wire_mesh(angleU, pitch, true);
-    uv_wire_mesh(angleV, pitch, false);
-    w_wire_mesh(pitch);
+    uv_wire_mesh(angleU, pitchU, true);
+    uv_wire_mesh(angleV, pitchV, false);
+    w_wire_mesh(pitchW);
 }
 
 WireCell::WrappedGDS::~WrappedGDS()

@@ -30,7 +30,9 @@ WireCell::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
     _napas.resize(_ncryos);
     _angleU.resize(_ncryos);
     _angleV.resize(_ncryos);
-    _pitch.resize(_ncryos);
+    _pitchU.resize(_ncryos);
+    _pitchV.resize(_ncryos);
+    _pitchW.resize(_ncryos);
     _max_bound.resize(_ncryos);
     _min_bound.resize(_ncryos);
     _center.resize(_ncryos);
@@ -39,8 +41,9 @@ WireCell::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
     for ( short cryo = 0; cryo < _ncryos; cryo++ ) {
         ifstream infile(geometry.at(cryo).c_str());
 	std::string tmp;
-	infile >> tmp >> _pitch.at(cryo);
-	//std::cout<<tmp.c_str()<<" is "<<_pitch.at(cryo)<<"\n";
+	infile >> tmp >> _pitchU.at(cryo);
+	infile >> tmp >> _pitchV.at(cryo);
+	infile >> tmp >> _pitchW.at(cryo);
 	infile >> tmp >> _angleU.at(cryo);
 	//std::cout<<tmp.c_str()<<" is "<<_angleU.at(cryo)<<"\n";
 	infile >> tmp >> _angleV.at(cryo);
@@ -57,9 +60,9 @@ WireCell::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
 	    infile >> tmp >> _halves.at(cryo).at(apa).x >> _halves.at(cryo).at(apa).y >> _halves.at(cryo).at(apa).z;	 
 	    _min_bound.at(cryo).at(apa) = _center.at(cryo).at(apa) - _halves.at(cryo).at(apa);
 	    _max_bound.at(cryo).at(apa) = _center.at(cryo).at(apa) + _halves.at(cryo).at(apa);
-	    std::cout<<"bound box: ("<<_min_bound.at(cryo).at(apa).x<<", "<<_min_bound.at(cryo).at(apa).y<<", "<<_min_bound.at(cryo).at(apa).z
-	    	     <<") --> ("<<_max_bound.at(cryo).at(apa).x<<", "<<_max_bound.at(cryo).at(apa).y<<", "<<_max_bound.at(cryo).at(apa).z<<")"<<std::endl;
-	    _APAgds.at(cryo).at(apa) = new WrappedGDS(_min_bound.at(cryo).at(apa), _max_bound.at(cryo).at(apa), _angleU.at(cryo), _angleV.at(cryo), _pitch.at(cryo), cryo, apa);
+	    //std::cout<<"bound box: ("<<_min_bound.at(cryo).at(apa).x<<", "<<_min_bound.at(cryo).at(apa).y<<", "<<_min_bound.at(cryo).at(apa).z
+	    //	     <<") --> ("<<_max_bound.at(cryo).at(apa).x<<", "<<_max_bound.at(cryo).at(apa).y<<", "<<_max_bound.at(cryo).at(apa).z<<")"<<std::endl;
+	    _APAgds.at(cryo).at(apa) = new WrappedGDS(_min_bound.at(cryo).at(apa), _max_bound.at(cryo).at(apa), _angleU.at(cryo), _angleV.at(cryo), _pitchU.at(cryo), _pitchV.at(cryo), _pitchW.at(cryo), cryo, apa);
 	}
 	
     }
@@ -71,18 +74,32 @@ void DetectorGDS::set_ncryos(short ncryos)
   _ncryos = ncryos;
 }
 
-void DetectorGDS::set_apas(std::vector<short> napa, std::vector<double> angleU, std::vector<double> angleV, std::vector<double> pitch)
+void DetectorGDS::set_napas(short cryo, short napas)
+{
+  _napas.at(cryo) = napas;
+}
+
+void DetectorGDS::set_apas(std::vector<short> napa, std::vector<double> angleU, std::vector<double> angleV, std::vector<double> pitchU, std::vector<double> pitchV, std::vector<double> pitchW, std::vector<std::vector<Vector> > center, std::vector<std::vector<Vector> > halves)
 {
   _napas = napa;
   _angleU = angleU;
   _angleV = angleV;
-  _pitch = pitch;
-}
-
-void DetectorGDS::set_boundries(std::vector<std::vector<Vector> > center, std::vector<std::vector<Vector> > halves)
-{
+  _pitchU = pitchU;
+  _pitchV = pitchV;
+  _pitchW = pitchW;
   _center = center;
   _halves = halves;
+}
+
+void DetectorGDS::set_apa(short cryo, short apa, double angleU, double angleV, double pitchU, double pitchV, double pitchW, Vector center, Vector halves)
+{
+  _angleU.at(cryo) = angleU;
+  _angleV.at(cryo) = angleV;
+  _pitchU.at(cryo) = pitchU;
+  _pitchV.at(cryo) = pitchV;
+  _pitchW.at(cryo) = pitchW;
+  _center.at(cryo).at(apa) = center;
+  _halves.at(cryo).at(apa) = halves;
 }
 
 void DetectorGDS::buildGDS()
@@ -98,9 +115,8 @@ void DetectorGDS::buildGDS()
 	for (short apa = 0; apa < _napas.at(cryo); apa++) {
 	    _min_bound.at(cryo).at(apa) = _center.at(cryo).at(apa) - _halves.at(cryo).at(apa);
 	    _max_bound.at(cryo).at(apa) = _center.at(cryo).at(apa) + _halves.at(cryo).at(apa);
-	    _APAgds.at(cryo).at(apa) = new WrappedGDS(_min_bound.at(cryo).at(apa), _max_bound.at(cryo).at(apa), _angleU.at(cryo), _angleV.at(cryo), _pitch.at(cryo), cryo, apa);
-	}
-	
+	    _APAgds.at(cryo).at(apa) = new WrappedGDS(_min_bound.at(cryo).at(apa), _max_bound.at(cryo).at(apa), _angleU.at(cryo), _angleV.at(cryo), _pitchU.at(cryo), _pitchV.at(cryo), _pitchW.at(cryo), cryo, apa);
+	}	
     }
 }
 
@@ -133,10 +149,17 @@ short DetectorGDS::in_which_cryo(const Vector& point) const
 const WrappedGDS* DetectorGDS::get_apaGDS(short cryo, short apa) const
 {
   const WrappedGDS* gds = NULL;
-  if (cryo >= 0 && apa >=0) {
+  if (cryo >= 0 && apa >=0 && cryo < _ncryos && apa < _napas.at(cryo)) {
     gds = _APAgds.at(cryo).at(apa);
   }
   return gds;
+}
+
+void DetectorGDS::set_apaGDS(short cryo, short apa, const WrappedGDS *apaGDS)
+{
+  if (cryo >=0 && apa >=0 && cryo < _ncryos && apa < _napas.at(cryo)) {
+    _APAgds.at(cryo).at(apa) = apaGDS;
+  }
 }
 
 double DetectorGDS::get_angle(short cryo, WirePlaneType_t plane) const
@@ -148,6 +171,20 @@ double DetectorGDS::get_angle(short cryo, WirePlaneType_t plane) const
         return _angleV.at(cryo);
     case 2:
         return 0.;
+    default:
+        return -999.;
+    }
+}
+
+double DetectorGDS::get_pitch(short cryo, WirePlaneType_t plane) const
+{
+  switch (plane) {
+    case 0:
+        return _pitchU.at(cryo);
+    case 1:
+        return _pitchV.at(cryo);
+    case 2:
+        return _pitchW.at(cryo);
     default:
         return -999.;
     }
