@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
     std::vector<std::string> geometry;
     //geometry.push_back("/home/xiaoyueli/BNLIF/wire-cell/geom_35t_v5.txt");
     //DetectorGDS gds(geometry);
+    
     DetectorGDS gds;
     gds.set_ncryos(1);
     gds.set_napas(0,4);
@@ -35,6 +36,7 @@ int main(int argc, char* argv[])
     Vector halves3(3.26512, 99.7439, 26.7235);
     gds.set_apa(0, 3, 45.705, 44.274, 0.4880488, 0.4880488, 0.4880488, center3, halves3);
     gds.buildGDS();
+
     TCanvas *c = new TCanvas();
     c->Range(-5*units::cm, -90*units::cm, 160*units::cm, 120*units::cm);    
 

@@ -8,7 +8,7 @@ using namespace std;
 using namespace WireCell;
 
 WireCell::DetectorGDS::DetectorGDS()
-  : _ncryos(0)
+//  : _ncryos(0)
 {
 }
 
@@ -72,11 +72,21 @@ WireCell::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
 void DetectorGDS::set_ncryos(short ncryos)
 {
   _ncryos = ncryos;
+  _napas.resize(_ncryos);
+  _angleU.resize(_ncryos);
+  _angleV.resize(_ncryos);
+  _pitchU.resize(_ncryos);
+  _pitchV.resize(_ncryos);
+  _pitchW.resize(_ncryos);
+  _center.resize(_ncryos);
+  _halves.resize(_ncryos);
 }
 
 void DetectorGDS::set_napas(short cryo, short napas)
 {
   _napas.at(cryo) = napas;
+  _center.at(cryo).resize(napas);
+  _halves.at(cryo).resize(napas);
 }
 
 void DetectorGDS::set_apas(std::vector<short> napa, std::vector<double> angleU, std::vector<double> angleV, std::vector<double> pitchU, std::vector<double> pitchV, std::vector<double> pitchW, std::vector<std::vector<Vector> > center, std::vector<std::vector<Vector> > halves)
