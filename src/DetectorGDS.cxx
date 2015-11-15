@@ -199,13 +199,14 @@ void DetectorGDS::build_channel_map(){
   
 }
 
-int DetectorGDS::channel_count_conv(int channel) {
+int DetectorGDS::channel_count_conv(int channel) const{
   if (_channel_umap.find(channel)!=_channel_umap.end()){
-    return  _channel_umap[channel];
+    return _channel_umap.at(channel);
+   
   }else if (_channel_vmap.find(channel)!=_channel_vmap.end()){
-    return _channel_vmap[channel];
+    return _channel_vmap.at(channel);
   }else if (_channel_wmap.find(channel)!=_channel_wmap.end()){
-    return  _channel_wmap[channel];
+    return  _channel_wmap.at(channel);
   }else{
     return -1;
   }

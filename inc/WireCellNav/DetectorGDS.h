@@ -57,7 +57,7 @@ namespace WireCell {
     void build_channel_map();
     int channel_count(WirePlaneType_t plane) const;
     WirePlaneType_t channel_plane_conv(int channel) const;
-    int channel_count_conv(int channel);
+    int channel_count_conv(int channel) const;
     /*
     bool contained(const Vector& point) const;
     bool contained_yz(const Vector& point) const;
