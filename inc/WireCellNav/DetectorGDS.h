@@ -54,6 +54,10 @@ namespace WireCell {
     
     int get_total_nwires(WirePlaneType_t plane) const;
     
+    void build_channel_map();
+    int channel_count(WirePlaneType_t plane) const;
+    WirePlaneType_t channel_plane_conv(int channel) const;
+    int channel_count_conv(int channel);
     /*
     bool contained(const Vector& point) const;
     bool contained_yz(const Vector& point) const;
@@ -76,6 +80,9 @@ namespace WireCell {
     std::vector<std::vector<Vector> > _halves;
     std::vector<double> _angleU, _angleV, _pitchU, _pitchV, _pitchW;
     
+    std::map<int, int> _channel_umap;
+    std::map<int, int> _channel_vmap;
+    std::map<int, int> _channel_wmap;
   };
 
 }

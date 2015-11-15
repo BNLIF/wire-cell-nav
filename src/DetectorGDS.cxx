@@ -150,6 +150,87 @@ void DetectorGDS::buildGDS()
 	    _APAgds.at(cryo).at(apa) = new WrappedGDS(_min_bound.at(cryo).at(apa), _max_bound.at(cryo).at(apa), _angleU.at(cryo), _angleV.at(cryo), _pitchU.at(cryo), _pitchV.at(cryo), _pitchW.at(cryo), cryo, apa);
 	}	
     }
+
+    build_channel_map();
+}
+
+void DetectorGDS::build_channel_map(){
+   
+  int nu_wire = 0;
+  int nv_wire = 0;
+  int nw_wire = 0;
+  
+  for (short cryo = 0; cryo < _ncryos; cryo++) {
+    for (short apa = 0; apa < _napas.at(cryo); apa++) {
+      // deal with u-plane
+      const GeomWireSelection& uwires = _APAgds.at(cryo).at(apa)->wires_in_plane(WirePlaneType_t(0));
+      for (int i = 0; i!=uwires.size();i++){
+	int chid = uwires.at(i)->channel();
+	if (_channel_umap.find(chid) == _channel_umap.end()){
+	  _channel_umap[chid] = nu_wire;
+	  nu_wire++;
+	}
+      }
+
+      //deal with v-map
+      const GeomWireSelection& vwires = _APAgds.at(cryo).at(apa)->wires_in_plane(WirePlaneType_t(1));
+      for (int i = 0; i!=vwires.size();i++){
+	int chid = vwires.at(i)->channel();
+	if (_channel_vmap.find(chid) == _channel_vmap.end()){
+	  _channel_vmap[chid] = nv_wire;
+	  nv_wire++;
+	}
+      }
+      
+      //deal with w-map
+      const GeomWireSelection& wwires = _APAgds.at(cryo).at(apa)->wires_in_plane(WirePlaneType_t(2));
+      for (int i = 0; i!=wwires.size();i++){
+	int chid = wwires.at(i)->channel();
+	if (_channel_wmap.find(chid) == _channel_wmap.end()){
+	  _channel_wmap[chid] = nw_wire;
+	  nw_wire++;
+	}
+      }
+
+      
+
+    }
+  }
+  
+}
+
+int DetectorGDS::channel_count_conv(int channel) {
+  if (_channel_umap.find(channel)!=_channel_umap.end()){
+    return  _channel_umap[channel];
+  }else if (_channel_vmap.find(channel)!=_channel_vmap.end()){
+    return _channel_vmap[channel];
+  }else if (_channel_wmap.find(channel)!=_channel_wmap.end()){
+    return  _channel_wmap[channel];
+  }else{
+    return -1;
+  }
+}
+
+WirePlaneType_t DetectorGDS::channel_plane_conv(int channel) const{
+  if (_channel_umap.find(channel)!=_channel_umap.end()){
+    return WirePlaneType_t(0);
+  }else if (_channel_vmap.find(channel)!=_channel_vmap.end()){
+    return WirePlaneType_t(1);
+  }else if (_channel_wmap.find(channel)!=_channel_wmap.end()){
+    return WirePlaneType_t(2);
+  }else{
+    return kUnknownWirePlaneType;
+  }
+}
+
+int DetectorGDS::channel_count(WirePlaneType_t plane) const{
+  if (plane == WirePlaneType_t(0)){
+    return _channel_umap.size();
+  }else if (plane == WirePlaneType_t(1)){
+    return _channel_vmap.size();
+  }else if (plane == WirePlaneType_t(2)){
+    return _channel_wmap.size();
+  }
 }
 
 short DetectorGDS::in_which_apa(const Vector& point) const
