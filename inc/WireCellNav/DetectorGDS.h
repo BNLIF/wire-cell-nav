@@ -52,6 +52,7 @@ namespace WireCell {
     // find the wires corresponding to this channel
     const GeomWireSelection& by_channel(int channel) const;
     
+    int get_total_nwires(WirePlaneType_t plane) const;
     
     /*
     bool contained(const Vector& point) const;
