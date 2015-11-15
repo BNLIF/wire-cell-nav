@@ -145,15 +145,16 @@ const GeomWireSelection& GeomDataSource::wires_in_plane(WirePlaneType_t plane) c
 
 const GeomWireSelection& GeomDataSource::wires_in_plane(int face, WirePlaneType_t plane) const
 {
-    if (mm_gwsel.find(plane) == mm_gwsel.end()) {
-        GeomWireSelection ws;
-	mm_gwsel[plane] = ws;
-    }
-    GeomWireSelection& ws = mm_gwsel[plane];
-    ws.clear();
-    //if (ws.size()) {
-    //    return ws;
-    //}
+  WirePlaneType_t tmp_plane = WirePlaneType_t(plane*2+face);
+  if (mm_gwsel.find(tmp_plane) == mm_gwsel.end()) {
+    GeomWireSelection ws;
+    mm_gwsel[tmp_plane] = ws;
+  }
+  GeomWireSelection& ws = mm_gwsel[tmp_plane];
+  //ws.clear();
+  if (ws.size()) {
+    return ws;
+  }
 
     GeomWireSet::const_iterator wit, done = wires.end();
 
@@ -605,72 +606,68 @@ GeomWirePair GeomDataSource::GeomDataSource::bounds(const Vector& point, WirePla
     }
     const GeomWireSelection& wip = wires_in_plane(face, plane);
     int nwires = wip.size();
-
-
     
     double dist_p = wire_dist(point, plane);
     const GeomWire *wire0 = wip.at(0);
     double dist0 = wire_dist(*wire0);
     double find = (dist_p-dist0)/pitch(face,plane,1);
 
-    std::cout << dist_p << " " << dist0 << " " << find << " " << plane << " " << pitch(WirePlaneType_t(0)) << " " << pitch(WirePlaneType_t(1)) << " " << pitch(WirePlaneType_t(2)) << std::endl;
+    //std::cout << dist_p << " " << dist0 << " " << find << " " << plane << " " << pitch(WirePlaneType_t(0)) << " " << pitch(WirePlaneType_t(1)) << " " << pitch(WirePlaneType_t(2)) << std::endl;
     
-
-    // int central_wiren;
-    // if (find <0 ){
-    //   central_wiren = 0;
-    // }else if (find >= nwires-1){
-    //   central_wiren = nwires -1;
-    // }else{
-    //   central_wiren = round(find);
-    // }
-    // const GeomWire *central_wire = by_planeindex(plane,central_wiren);
-    // float central_dist = wire_dist(*central_wire);
+    int central_wiren;
+    if (find <0 ){
+      central_wiren = 0;
+    }else if (find >= nwires-1){
+      central_wiren = nwires -1;
+    }else{
+      central_wiren = round(find);
+    }
+    const GeomWire *central_wire = wip.at(central_wiren);//by_planeindex(plane,central_wiren);
+    float central_dist = wire_dist(*central_wire);
     
-    // find = central_wiren + (dist - central_dist)/pitch(plane,1);
+    find = central_wiren + (dist_p - central_dist)/pitch(face,plane,1);
 
-    // if (find < 0) {
-    // 	return GeomWirePair(0, wip[0]);
-    // }
-    // if (find >= nwires-1) {
-    // 	return GeomWirePair(wip[nwires-1], 0);
-    // }
+    if (find < 0) {
+      return GeomWirePair(0, wip[0]);
+    }
+    if (find >= nwires-1) {
+      return GeomWirePair(wip[nwires-1], 0);
+    }
     
-    // // It is possible due to non-regular pitch and/or round-off that
-    // // the indexed calculation becomes off-by-one.  So, do a last
-    // // ditch check to confirm we return what is actually the closest
-    // // wire.
-    // const GeomWire *central_wire1 = by_planeindex(plane,int(find));
-    // central_dist = wire_dist(*central_wire1);
-    // if (central_dist < dist){
-    //   return GeomWirePair(wip[int(find)], wip[int(find+1)]);
-    // }else{
-    //   if (int(find-1)<0){
-    // 	return GeomWirePair(0, wip[0]);
-    //   }else{
-    // 	return GeomWirePair(wip[int(find-1)], wip[int(find)]);
-    //   }
-      
-    // }
-
-    GeomWireSelection::const_iterator wit, done = wip.end();
-    double dist[]={9999.,9999.}; //dist[0]: shortest distance; dist[1]: second shortest distance
-    //GeomWirePair pr(wip.at(0),wip.at(1));
-    GeomWirePair pr;
-    for (wit = wip.begin(); wit != done; ++wit) {
-      double tmp_dist = wire_dist(point, *wit);
-      //  std::cout << wit - wip.begin() << " " << tmp_dist << std::endl;
-      if (dist[1]>tmp_dist) {
-    	if (dist[0] > tmp_dist) {
-    	  dist[0] = tmp_dist;
-    	  pr.first = *wit;
-    	} else {
-    	  dist[1] = tmp_dist;
-    	  pr.second = *wit;
-    	}
+    // It is possible due to non-regular pitch and/or round-off that
+    // the indexed calculation becomes off-by-one.  So, do a last
+    // ditch check to confirm we return what is actually the closest
+    // wire.
+    const GeomWire *central_wire1 = wip.at(int(find));//by_planeindex(plane,int(find));
+    central_dist = wire_dist(*central_wire1);
+    if (central_dist < dist_p){
+      return GeomWirePair(wip[int(find)], wip[int(find+1)]);
+    }else{
+      if (int(find-1)<0){
+    	return GeomWirePair(0, wip[0]);
+      }else{
+    	return GeomWirePair(wip[int(find-1)], wip[int(find)]);
       }
     }
-    return pr;
+
+    // GeomWireSelection::const_iterator wit, done = wip.end();
+    // double dist[]={9999.,9999.}; //dist[0]: shortest distance; dist[1]: second shortest distance
+    // // GeomWirePair pr(wip.at(0),wip.at(1));
+    // GeomWirePair pr;
+    // for (wit = wip.begin(); wit != done; ++wit) {
+    //   double tmp_dist = wire_dist(point, *wit);
+    //   //  std::cout << wit - wip.begin() << " " << tmp_dist << std::endl;
+    //   if (dist[1]>tmp_dist) {
+    // 	if (dist[0] > tmp_dist) {
+    // 	  dist[0] = tmp_dist;
+    // 	  pr.first = *wit;
+    // 	} else {
+    // 	  dist[1] = tmp_dist;
+    // 	  pr.second = *wit;
+    // 	}
+    //   }
+    // }
+    // return pr;
 }
 
 
