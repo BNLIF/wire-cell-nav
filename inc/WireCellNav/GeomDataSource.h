@@ -41,6 +41,7 @@ namespace WireCell {
 
 	/// Return wire pitch (perpendicular distance between wires, in System of Units) 
 	double pitch(WirePlaneType_t plane, int flag = 0) const;
+	double pitch(int face, WirePlaneType_t plane, int flag = 0) const;
 
 	/// Return a Vector which points along the pitch and has unit length.
 	WireCell::Vector pitch_unit_vector(WirePlaneType_t plane) const;
