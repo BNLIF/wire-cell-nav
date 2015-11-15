@@ -46,6 +46,13 @@ namespace WireCell {
     const GeomWire* closest(const Vector& point,
 			    WirePlaneType_t plane = kUnknownWirePlaneType,
 			    int face = -999) const;
+
+    // what do we need from this class?
+    // for each wire, it has a face, apa_no, and cryo_no 
+    // find the wires corresponding to this channel
+    const GeomWireSelection& by_channel(int channel) const;
+    
+    
     /*
     bool contained(const Vector& point) const;
     bool contained_yz(const Vector& point) const;

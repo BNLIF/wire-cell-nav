@@ -23,6 +23,18 @@ WireCell::DetectorGDS::~DetectorGDS()
     }
 }
 
+const WireCell::GeomWireSelection& WireCell::DetectorGDS::by_channel(int channel) const{
+  //const WireCell::GeomWireSelection& wires;
+  for (short cryo = 0; cryo < _ncryos; cryo++) {
+    for (short apa = 0; apa < _napas.at(cryo); apa++) {
+      const WireCell::GeomWireSelection& wires = _APAgds.at(cryo).at(apa)->by_channel(channel);
+      if (wires.size() >0) return wires;
+      //std::cout << cryo << " " << apa << " " << wires.size() << std::endl;
+    }
+  }
+  //return wires;
+}
+
 WireCell::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
 {
     _ncryos = geometry.size();
