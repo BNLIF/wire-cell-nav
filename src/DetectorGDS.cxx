@@ -137,6 +137,7 @@ short DetectorGDS::in_which_apa(const Vector& point) const
     for (short apa = 0; apa < _napas.at(cryo); apa++) {
       if (_APAgds.at(cryo).at(apa)->contained_yz(point)) {
 	a = apa;
+	return a;
       }
     }
   }
@@ -150,6 +151,7 @@ short DetectorGDS::in_which_cryo(const Vector& point) const
     for (short apa = 0; apa < _napas.at(cryo); apa++) {
       if (_APAgds.at(cryo).at(apa)->contained_yz(point)) {
 	c = cryo;
+	return c;
       }
     }
   }
