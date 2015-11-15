@@ -122,6 +122,10 @@ namespace WireCell {
 	const GeomWire* closest(const Vector& point, 
 				WirePlaneType_t plane = kUnknownWirePlaneType,
 				int face = -999) const;
+
+	const GeomWire* get_ad_wire(const GeomWire *wire0, int kk,
+				    WirePlaneType_t plane,
+				    int face) const;
 	//const GeomWire* closest(const Vector& point,
 	//			WirePlaneType_t plane = kUnknownWirePlaneType,
 	//			int face = 0) const;

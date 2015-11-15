@@ -188,126 +188,128 @@ int DetGenerativeFDS::jump(int frame_number)
 	  // only look up wires from the correct face
 	  const GeomWire* wire = apa_gds->closest(pt, plane, face);
 
-	//     //if (wire->face() != face) continue;
+	  //if (wire->face() != face) continue;
 
-	//     if (wire!=0){
-	//       int chid = wire->channel();
-	//       int windex = wire->index();
-	//       //std::cout << iplane << " " << chid << " " << windex << std::endl;
+	  if (wire!=0){
+	    int chid = wire->channel();
+	    int windex = wire->index();
+	    //std::cout << iplane << " " << chid << " " << windex << std::endl;
   
-	//       // start to do the transverse diffusion here ...
-	//       double pitch = apa_gds->pitch(plane);
-	//       double angle = apa_gds->angle(plane);
-	//       const Point shift(0, pitch*std::sin(angle), -pitch*std::cos(angle));
-	//       int nwbin = sigmaT*3/pitch + 1; // +- ntinb 3sigma
-	//       GeomWireSelection trans_wires;
-	//       std::vector<double> trans_integral;
-	//       double dist = apa_gds->wire_dist(pt,plane);
-	//       double wdist = apa_gds->wire_dist(*wire);
-	//       trans_wires.push_back(wire);
-	//       trans_integral.push_back(integral(sigmaT,dist,wdist-pitch/2.,wdist+pitch/2.));
-	//       //fill the rest of wires
-	//       for (int kk =0; kk!=nwbin;kk++){
-	// 	//const GeomWire* wire1 = apa_gds->by_planeindex(plane,windex-kk-1);
-	// 	const Point shift1(shift.x, shift.y*(kk+1.), shift.z*(kk+1.));
-	// 	const Point& pt1 = pt - shift1;
-	// 	const GeomWire* wire1 = apa_gds->closest(pt1, plane, face);
-	// 	if (wire1!=0){
-	// 	    wdist = apa_gds->wire_dist(*wire1);
-	// 	    trans_wires.push_back(wire1);
-	// 	    trans_integral.push_back(integral(sigmaT,dist,wdist-pitch/2.,wdist+pitch/2.));
-	// 	}
+	    // start to do the transverse diffusion here ...
+	    double pitch = apa_gds->pitch(plane);
+	    double angle = apa_gds->angle(plane);
+	    //const Point shift(0, pitch*std::sin(angle), -pitch*std::cos(angle));
+	    int nwbin = sigmaT*3/pitch + 1; // +- ntinb 3sigma
+	    GeomWireSelection trans_wires;
+	    std::vector<double> trans_integral;
+	    double dist = apa_gds->wire_dist(pt,plane);
+	    double wdist = apa_gds->wire_dist(*wire);
+	    trans_wires.push_back(wire);
+	    trans_integral.push_back(integral(sigmaT,dist,wdist-pitch/2.,wdist+pitch/2.));
+	    //fill the rest of wires
+	    for (int kk =0; kk!=nwbin;kk++){
+	      // const Point shift1(shift.x, shift.y*(kk+1.), shift.z*(kk+1.));
+	      //const Point& pt1 = pt - shift1;
+	      //const GeomWire* wire1 = apa_gds->closest(pt1, plane, face);
+	      const GeomWire* wire1 = apa_gds->get_ad_wire(wire,kk+1,plane,face);
+	      if (wire1!=0){
+	      	wdist = apa_gds->wire_dist(*wire1);
+	      	trans_wires.push_back(wire1);
+	      	trans_integral.push_back(integral(sigmaT,dist,wdist-pitch/2.,wdist+pitch/2.));
+	      }
+	      
+	//       //const GeomWire* wire2 = apa_gds->by_planeindex(plane,windex+kk+1);
+	//       const Point& pt2 = pt + shift1;
+	//       const GeomWire* wire2 = apa_gds->closest(pt2, plane, face);
+	      const GeomWire* wire2 = apa_gds->get_ad_wire(wire,-1-kk,plane,face);
+	      if (wire2!=0){
+	 	wdist = apa_gds->wire_dist(*wire2);
+	 	trans_wires.push_back(wire2);
+	 	trans_integral.push_back(integral(sigmaT,dist,wdist-pitch/2.,wdist+pitch/2.));
+	      }
+	    }
+	  
+	    //std::cout << sigmaT/units::mm << std::endl;
+	    //for (int kk = 0; kk!=trans_integral.size();kk++){
+	    //  std::cout << trans_integral.at(kk) << std::endl;
+	    //}
+	    // std::cout << std::endl;
+	    // finish the calculation of transverse diffusion
+	    
+	    
+	    // Now put everything into 1D arrays
+	    // 1D wires
+	    // 1D time
+	    // 1D number of electrons with random
+	    GeomWireSelection allwires;
+	    std::vector<int> alltime;
+	    std::vector<float> allcharge;
+	    float sum_charge = 0;
+	    for (int qt = 0; qt!= long_tbin.size(); qt++){
+	      for (int qw = 0; qw!= trans_wires.size(); qw++){
+		alltime.push_back(long_tbin.at(qt) + offset);
+		allwires.push_back(trans_wires.at(qw));
+		float tcharge = charge * long_integral.at(qt) * 
+		  trans_integral.at(qw);
+		allcharge.push_back(tcharge);
+		sum_charge += tcharge;
+	      }
+	    }
+	    
+	    // for (int qx = 0; qx!=allcharge.size();qx++){
+	    //   const GeomWire* wire3 = allwires.at(qx);
+	    //   int chid3 = wire3->channel();
+	    //   std::cout << alltime.at(qx) << " " << charge << " " << 
+	    // 	allcharge.at(qx) << " " << chid3 << std::endl;
+	    // }
+	    // std::cout << std::endl;
+	    
+	    //do normalization ... 
+	    for (int qx = 0; qx!=allcharge.size();qx++){
+	      const GeomWire* wire3 = allwires.at(qx);
+	      int chid3 = wire3->channel();
+	      int tbin3 = alltime.at(qx);
+	      
+	      if (tbin3 >=0 && tbin3 < bins_per_frame){
 		
-	// 	//const GeomWire* wire2 = apa_gds->by_planeindex(plane,windex+kk+1);
-	// 	const Point& pt2 = pt + shift1;
-	// 	const GeomWire* wire2 = apa_gds->closest(pt2, plane, face);
-	// 	if (wire2!=0){
-	// 	  wdist = apa_gds->wire_dist(*wire2);
-	// 	  trans_wires.push_back(wire2);
-	// 	  trans_integral.push_back(integral(sigmaT,dist,wdist-pitch/2.,wdist+pitch/2.));
-	// 	}
-	//       }
-	//       //std::cout << sigmaT/units::mm << std::endl;
-	//       //for (int kk = 0; kk!=trans_integral.size();kk++){
-	//       //  std::cout << trans_integral.at(kk) << std::endl;
-	//       //}
-	//       // std::cout << std::endl;
-	//       // finish the calculation of transverse diffusion
-	      
-	      
-	//       // Now put everything into 1D arrays
-	//       // 1D wires
-	//       // 1D time
-	//       // 1D number of electrons with random
-	//       GeomWireSelection allwires;
-	//       std::vector<int> alltime;
-	//       std::vector<float> allcharge;
-	//       float sum_charge = 0;
-	//       for (int qt = 0; qt!= long_tbin.size(); qt++){
-	// 	for (int qw = 0; qw!= trans_wires.size(); qw++){
-	// 	  alltime.push_back(long_tbin.at(qt) + offset);
-	// 	  allwires.push_back(trans_wires.at(qw));
-	// 	  float tcharge = charge * long_integral.at(qt) * 
-	// 	    trans_integral.at(qw);
-	// 	  allcharge.push_back(tcharge);
-	// 	  sum_charge += tcharge;
-	// 	}
-	//       }
-
-	//       // for (int qx = 0; qx!=allcharge.size();qx++){
-	//       //   const GeomWire* wire3 = allwires.at(qx);
-	//       //   int chid3 = wire3->channel();
-	//       //   std::cout << alltime.at(qx) << " " << charge << " " << 
-	//       // 	allcharge.at(qx) << " " << chid3 << std::endl;
-	//       // }
-	//       // std::cout << std::endl;
-	      
-	//       //do normalization ... 
-	//       for (int qx = 0; qx!=allcharge.size();qx++){
-	// 	const GeomWire* wire3 = allwires.at(qx);
-	// 	int chid3 = wire3->channel();
-	// 	int tbin3 = alltime.at(qx);
+		float charge3 = allcharge.at(qx)/sum_charge*charge;
 		
-	// 	if (tbin3 >=0 && tbin3 < bins_per_frame){
-
-	// 	  float charge3 = allcharge.at(qx)/sum_charge*charge;
-		  
-	// 	  TraceIndexMap::iterator it = tim.find(chid3);
-	// 	  int trace_index = frame.traces.size(); // if new
-	// 	  if (it == tim.end()) {
-	// 	    Trace t;
-	// 	    t.chid = chid3;
-	// 	    t.tbin = 0;
-	// 	    t.charge.resize(bins_per_frame, 0.0);
-	// 	    tim[chid3] = frame.traces.size();
-	// 	    frame.traces.push_back(t);
-	// 	  }else {		// already seen
-	// 	    trace_index = it->second;
-	// 	  }
-	// 	  Trace& trace = frame.traces[trace_index];
-		  
-	// 	  // finally
-	// 	  trace.charge[tbin3] += charge3;
-	// 	}
-	//       }
-	      
-	//       // TraceIndexMap::iterator it = tim.find(chid);
-	//       // int trace_index = frame.traces.size(); // if new
-	//       // if (it == tim.end()) {
-	//       // 	Trace t;
-	//       // 	t.chid = chid;
-	//       // 	t.tbin = 0;
-	//       // 	t.charge.resize(bins_per_frame, 0.0);
-	//       // 	tim[chid] = frame.traces.size();
-	//       // 	frame.traces.push_back(t);
-	//       // }
-	//       // else {		// already seen
-	//       // 	trace_index = it->second;
-	//       // }
-	//       // Trace& trace = frame.traces[trace_index];
-	//       // // finally
-	//     // trace.charge[tbin] += charge;
-	//     }
+		TraceIndexMap::iterator it = tim.find(chid3);
+		int trace_index = frame.traces.size(); // if new
+		if (it == tim.end()) {
+		  Trace t;
+		  t.chid = chid3;
+		  t.tbin = 0;
+		  t.charge.resize(bins_per_frame, 0.0);
+		  tim[chid3] = frame.traces.size();
+		  frame.traces.push_back(t);
+		}else {		// already seen
+		  trace_index = it->second;
+		}
+		Trace& trace = frame.traces[trace_index];
+		
+		// finally
+		trace.charge[tbin3] += charge3;
+	      }
+	    }
+	    
+	    // TraceIndexMap::iterator it = tim.find(chid);
+	    // int trace_index = frame.traces.size(); // if new
+	    // if (it == tim.end()) {
+	    // 	Trace t;
+	    // 	t.chid = chid;
+	    // 	t.tbin = 0;
+	    // 	t.charge.resize(bins_per_frame, 0.0);
+	    // 	tim[chid] = frame.traces.size();
+	    // 	frame.traces.push_back(t);
+	    // }
+	    // else {		// already seen
+	    // 	trace_index = it->second;
+	    // }
+	    // Trace& trace = frame.traces[trace_index];
+	    // // finally
+	    // trace.charge[tbin] += charge;
+	  }
 	}	
     }
 

@@ -597,6 +597,21 @@ GeomWirePair GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane) 
     }
 }
 
+const GeomWire* GeomDataSource::GeomDataSource::get_ad_wire(const GeomWire *wire0, int kk,
+			    WirePlaneType_t plane,
+			    int face) const{
+  if (plane != (WirePlaneType_t)(0) &&
+      plane != (WirePlaneType_t)(1) &&
+      plane != (WirePlaneType_t)(2)) {
+    plane = kUnknownWirePlaneType;
+  }
+  const GeomWireSelection& wip = wires_in_plane(face, plane);
+  int nwires = wip.size();
+  auto it = find(wip.begin(),wip.end(),wire0) + kk;
+  if (it >= wip.begin() && it < wip.end())
+    return *it;
+}
+
 GeomWirePair GeomDataSource::GeomDataSource::bounds(const Vector& point, WirePlaneType_t plane, int face) const
 {
     if (plane != (WirePlaneType_t)(0) &&
