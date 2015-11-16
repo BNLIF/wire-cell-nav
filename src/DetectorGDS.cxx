@@ -38,8 +38,9 @@ const WireCell::GeomWireSelection& WireCell::DetectorGDS::by_channel(int channel
   for (short cryo = 0; cryo < _ncryos; cryo++) {
     for (short apa = 0; apa < _napas.at(cryo); apa++) {
       const WireCell::GeomWireSelection& wires = _APAgds.at(cryo).at(apa)->by_channel(channel);
+      //
+      //std::cout << "Simulation " << cryo << " " << apa << " " << wires.size() << std::endl;
       if (wires.size() >0) return wires;
-      //std::cout << cryo << " " << apa << " " << wires.size() << std::endl;
     }
   }
   //return wires;

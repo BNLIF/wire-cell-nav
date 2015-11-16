@@ -156,18 +156,17 @@ const GeomWireSelection& GeomDataSource::wires_in_plane(int face, WirePlaneType_
     return ws;
   }
 
-    GeomWireSet::const_iterator wit, done = wires.end();
+  GeomWireSet::const_iterator wit, done = wires.end();
 
-    for (wit=wires.begin(); wit != done; ++wit) {
-	const GeomWire& wire = *wit;
-	if (wire.plane() == plane && wire.face() == face) {
-	    ws.push_back(&wire);
-	}
+  for (wit=wires.begin(); wit != done; ++wit) {
+    const GeomWire& wire = *wit;
+    if (wire.plane() == plane && wire.face() == face) {
+      ws.push_back(&wire);
     }
+  }
 
-    //cerr << "Generated " << ws.size() << " wires for plane " << plane << endl;
-
-    return ws;
+  //cerr << "Generated " << ws.size() << " wires for plane " << plane << endl;
+  return ws;
 }
 
 

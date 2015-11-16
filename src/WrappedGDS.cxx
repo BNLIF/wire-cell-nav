@@ -15,6 +15,7 @@ namespace {
     static void get_points(std::vector<VectorPtr>& ret,
 			   WirePointMesh& wm, std::set<VectorPtr>& end, VectorPtr point, int segment)
     {
+      //assuming the start is u
         VectorPtrPair& vpp = wm[point];
 	VectorPtr found;
 	if (segment%2) {		// go v
@@ -324,64 +325,116 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
 	wm[v_ul[ind]].second = v_lu[ind];
     }
 
+    int plane;
+    if (is_u){
+      plane = 0;
+    }else{
+      plane = 1;
+    }
+
     std::set<VectorPtr> bot_set(bot.begin(), bot.end());
     for (int top_ind=0; top_ind < top.size(); ++top_ind) {
+      VectorPtr starting_point = top[top_ind];
+      
+      //cerr << "START" << top_ind << " " << *(starting_point.get()) <<endl;
+      for (int starting_face = 0; starting_face < 2; starting_face ++){
+      	// channel number should just depend on the plane number, 
+      	// whether the starting point is front or back, 
+      	// and the position of the top point
+      	int chan = make_chan(starting_face, top_ind, plane, _apa, _cryo); 
+	
+      	vector<VectorPtr> points;
+      	points.push_back(starting_point);	
+      	get_points(points, wm, bot_set, starting_point, starting_face);
 
-	VectorPtr starting_point = top[top_ind];
-	//cerr << "START" << top_ind << " " << *(starting_point.get()) <<endl;
+      	//std::cout << chan << " " << points.size() << std::endl;
+	
+      	//now loop over all the points
+      	for (int ipt=0; ipt<points.size()-1; ++ipt) {
+      	  int segment = ipt;
+      	  int this_face = (starting_face + ipt)%2; //current face
+	  
+      	  double this_x_val = 0.;
+      	  if (plane ==0) {
+      	    this_x_val = x_delta*3.0; // u
+      	  } else if (plane == 1){
+      	    this_x_val = x_delta*2.0; // v
+      	  }
+      	  if (this_face) { // "B" face
+      	    this_x_val *= -1.;
+      	  }
 
-	// starting u or v
-	for (int starting_uv = 0; starting_uv < 2; ++starting_uv) {
+      	  int ident = make_ident(starting_face, top_ind, plane, segment, _apa, _cryo);
+      	  int index = pair2ind[VectorPtrPair(points[ipt],points[ipt+1])]*2+(int)this_face;
+      	  Point p1(*(points[ipt+0].get()));
+      	  Point p2(*(points[ipt+1].get()));
+      	  p1.x = p2.x = this_x_val + center_bb.x*units::cm;
+      	  GeomWire gw(ident,
+      		      WirePlaneType_t(plane),
+      		      index,
+      	   	      chan,
+      	   	      p1, p2,
+      	   	      segment, this_face, _apa, _cryo);
+	  
+      	  //cerr << gw << " " << gw.point1() << " " << gw.point2() << endl;
+      	  this->add_wire(gw);
+      	}
+      }
 
-	    vector<VectorPtr> points;
-	    points.push_back(starting_point);
-	    get_points(points, wm, bot_set, starting_point, starting_uv);
-	    //cerr << "GOT " << points.size() << " points for uv=" << starting_uv << endl;
+
+      // // starting u or v
+      // for (int starting_uv = 0; starting_uv < 2; ++starting_uv) {
+	
+      // 	vector<VectorPtr> points;
+      // 	points.push_back(starting_point);
+      // 	get_points(points, wm, bot_set, starting_point, starting_uv);
+      // 	//cerr << "GOT " << points.size() << " points for uv=" << starting_uv << endl;
+	
+      // 	for (int ipt=0; ipt<points.size()-1; ++ipt) {
+      // 	  int segment = ipt;
+	  
+      // 	  int this_uv = (starting_uv + ipt)%2;
+	  
+      // 	  for (int this_face = 0; this_face < 2; ++this_face) {
 	    
-	    for (int ipt=0; ipt<points.size()-1; ++ipt) {
-		int segment = ipt;
-
-		int this_uv = (starting_uv + ipt)%2;
-
-		for (int this_face = 0; this_face < 2; ++this_face) {
-		    
-		    int this_face_uv = (this_uv+this_face)%2; // 0 = u; 1 = v
-
-		    double this_x_val = 0.;
-		    if ((!this_face_uv) && is_u) {
-		        this_x_val = x_delta*3.0; // u
-		    } else if (this_face_uv && (!is_u)) {
-			this_x_val = x_delta*2.0; // v
-		    } else {
-		        continue;
-		    }
-		    if (this_face) { // "B" face
-		        this_x_val *= -1.;
-		    }
-
-		    int ident = make_ident(this_face, top_ind, this_face_uv, segment, _apa, _cryo);
-		    int chan = make_chan(this_face, top_ind, this_face_uv, _apa, _cryo);
-		    //int index = make_index(this_face, top_ind, this_face_uv, segment);
-		    int index = pair2ind[VectorPtrPair(points[ipt],points[ipt+1])]*2+(int)this_face;
-		    Point p1(*(points[ipt+0].get()));
-		    Point p2(*(points[ipt+1].get()));
-		    p1.x = p2.x = this_x_val + center_bb.x*units::cm;
-
-		    GeomWire gw(ident,
-				//WirePlaneType_t((((starting_uv + ipt)%2) + this_face)%2),
-				WirePlaneType_t(this_face_uv),
-				//pair2ind[VectorPtrPair(points[ipt],points[ipt+1])],
-				index,
-				chan,
-				p1, p2,
-				segment, this_face, _apa, _cryo);
-
-		    //cerr << gw << " " << gw.point1() << " " << gw.point2() << endl;
-		    this->add_wire(gw);
-		}
-	    }
-	}
-    }
+      // 	    int this_face_uv = (this_uv+this_face)%2; // 0 = u; 1 = v
+	    
+      // 	    double this_x_val = 0.;
+      // 	    if ((!this_face_uv) && is_u) {
+      // 	      this_x_val = x_delta*3.0; // u
+      // 	    } else if (this_face_uv && (!is_u)) {
+      // 	      this_x_val = x_delta*2.0; // v
+      // 	    } else {
+      // 	      continue;
+      // 	    }
+      // 	    if (this_face) { // "B" face
+      // 	      this_x_val *= -1.;
+      // 	    }
+	    
+      // 	    int ident = make_ident(this_face, top_ind, this_face_uv, segment, _apa, _cryo);
+      // 	    int chan = make_chan(this_face, top_ind, this_face_uv, _apa, _cryo);
+      // 	    //int index = make_index(this_face, top_ind, this_face_uv, segment);
+      // 	    int index = pair2ind[VectorPtrPair(points[ipt],points[ipt+1])]*2+(int)this_face;
+      // 	    Point p1(*(points[ipt+0].get()));
+      // 	    Point p2(*(points[ipt+1].get()));
+      // 	    p1.x = p2.x = this_x_val + center_bb.x*units::cm;
+	    
+      // 	    GeomWire gw(ident,
+      // 			//WirePlaneType_t((((starting_uv + ipt)%2) + this_face)%2),
+      // 			WirePlaneType_t(this_face_uv),
+      // 			//pair2ind[VectorPtrPair(points[ipt],points[ipt+1])],
+      // 			index,
+      // 			chan,
+      // 			p1, p2,
+      // 			segment, this_face, _apa, _cryo);
+	    
+      // 	    //cerr << gw << " " << gw.point1() << " " << gw.point2() << endl;
+      // 	    this->add_wire(gw);
+      // 	  }
+      // 	}
+      // }
+      
+    } // for (top points)
 }
 
 
@@ -419,6 +472,7 @@ void WireCell::WrappedGDS::w_wire_mesh(double pitch)
     
 	    int ident = make_ident(this_face, ind, 2, 0, _apa, _cryo);
 	    int chan = make_chan(this_face, ind, 2, _apa, _cryo);
+	    
 	    int index = 2*ind+this_face;
 	    Point p1(*top_point.get());
 	    Point p2(*bot_point.get());
@@ -426,7 +480,6 @@ void WireCell::WrappedGDS::w_wire_mesh(double pitch)
 
 	    GeomWire gw(ident,
 			kYwire,
-			//ind,
 			index,
 			chan, p1, p2, 0, this_face, _apa, _cryo);
 	    this->add_wire(gw);
