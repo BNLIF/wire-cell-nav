@@ -96,7 +96,7 @@ int DetGenerativeFDS::jump(int frame_number)
 	}
 	xmm = apa_gds->minmax(0); 
 
-	//std::cout << xmm.first/units::cm << " " << xmm.second/units::cm << std::endl;
+	//	std::cout << pt.x/units::cm << " " << xmm.first/units::cm << " " << xmm.second/units::cm << std::endl;
 	if (pt.x>xmm.first && pt.x<xmm.second) continue;// space in between wires in an APA are treated as dead region
 	
 	int face = 0;
@@ -123,7 +123,8 @@ int DetGenerativeFDS::jump(int frame_number)
 	// adding in the diffusion
 	// assuming the velocity is 1.6 mm/us
 	float drift_time = drift_dist/(unit_dis*units::millimeter); // us
-	
+
+
 	// can not handle negative drift time yet .... 
 	if (drift_time < 0) {
 	  //std::cout<<"exit because drift time < 0"<<std::endl; 
@@ -289,6 +290,9 @@ int DetGenerativeFDS::jump(int frame_number)
 		Trace& trace = frame.traces[trace_index];
 		
 		// finally
+		
+		
+
 		trace.charge[tbin3] += charge3;
 	      }
 	    }
