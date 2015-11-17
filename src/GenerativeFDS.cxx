@@ -151,7 +151,7 @@ int GenerativeFDS::jump(int frame_number)
 	for (int iplane=0; iplane < 3; ++iplane) {
 	    WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
 	    const GeomWire* wire = gds.closest(pt, plane);
-
+	    //std::cout << iplane << " " << wire << std::endl;
 	    
 
 	    if (wire!=0){

@@ -65,8 +65,8 @@ namespace WireCell {
 	short apa() const {return _apa;}
 	
 	// overwrite GeomDataSource members:
-	double angle(WirePlaneType_t plane) const;
-	double pitch(WirePlaneType_t plane, int flag = 0) const;
+	//double angle(WirePlaneType_t plane) const;
+	//double pitch(WirePlaneType_t plane, int flag = 0) const;
 	
     private:
 

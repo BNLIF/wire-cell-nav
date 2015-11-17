@@ -77,7 +77,7 @@ namespace WireCell {
 
 	/// Return the location of the point measured in the direction
 	/// of wire pitch.
-	double wire_dist(const Vector& point, WirePlaneType_t plane) const;
+	double wire_dist(const Vector& point, WirePlaneType_t plane, int face = -999) const;
 	
 	/// Return the location of the center point of the wire
 	/// measured in the direction of the pitch of the wire's
@@ -145,6 +145,7 @@ namespace WireCell {
 	// one for each x,y,z
 	mutable std::map<WirePlaneType_t, std::pair<double,double> > mm_cache[3];
 	mutable std::map<WirePlaneType_t, GeomWireSelection> mm_gwsel;
+	mutable std::map<WirePlaneType_t, GeomWireSelection> mm1_gwsel;
 
 	mutable double angle_cache[3];
 	

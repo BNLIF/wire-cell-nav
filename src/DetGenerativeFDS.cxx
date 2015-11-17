@@ -79,15 +79,23 @@ int DetGenerativeFDS::jump(int frame_number)
 
     const WrappedGDS *apa_gds = 0;
 
+    //hack for now
+    nhits = 1;
+
     for (size_t ind=0; ind<nhits; ++ind) {
-	const Point& pt = hits[ind].first;
-	//const Vector vpt(pt.x, pt.y, pt.z);
-	float charge = hits[ind].second;
+	// const Point& pt = hits[ind].first;
+	// //const Vector vpt(pt.x, pt.y, pt.z);
+	// float charge = hits[ind].second;
+
+      const Point pt(1000.4,801.877,335.128);
+      float charge = 100000;
+	
+	
 	// decide which apa the charge deposit belongs to
 	short which_cryo = det_gds.in_which_cryo(pt);
 	short which_apa = det_gds.in_which_apa(pt);
-	//std::cout<<"point ("<<pt.x<<", "<<pt.y<<", "<<pt.z<<") is in the "<<which_cryo<<"th "
-	//	 <<"cryo and the "<<which_apa<<"th apa"<<std::endl;
+	// std::cout<<"point ("<<pt.x<<", "<<pt.y<<", "<<pt.z<<") is in the "<<which_cryo<<"th "
+	// 	 <<"cryo and the "<<which_apa<<"th apa"<<std::endl;
 	apa_gds = det_gds.get_apaGDS(det_gds.in_which_cryo(pt), det_gds.in_which_apa(pt));
 	if (apa_gds==NULL) {
 	  // out side the detector boundary ... 
@@ -133,6 +141,8 @@ int DetGenerativeFDS::jump(int frame_number)
 	
 	float DL = 5.3; //cm^2/s
 	float DT = 12.8; //cm^2/s
+
+	
 	float sigmaL = sqrt(2.*DL*drift_time*1e-6) * units::cm;
 	float sigmaT = sqrt(2.*DT*drift_time*1e-6) * units::cm;
 	
@@ -189,15 +199,23 @@ int DetGenerativeFDS::jump(int frame_number)
 	  // only look up wires from the correct face
 	  const GeomWire* wire = apa_gds->closest(pt, plane, face);
 
+	  // std::cout << plane << " " << face << " " << 
+	  //   wire->point1().y << " " << wire->point1().z << " " 
+	  // 	    << pt.y << " " << pt.z << " " 
+	  // 	    << wire->point2().y << " " << wire->point2().z << 
+	  //   " " << wire->plane() << 
+	  //   std::endl;
+	  //std::cout << iplane << " " << face << " " << wire << std::endl;
+
 	  //if (wire->face() != face) continue;
 
 	  if (wire!=0){
 	    int chid = wire->channel();
 	    int windex = wire->index();
-	    //std::cout << iplane << " " << chid << " " << windex << std::endl;
+	    
   
 	    // start to do the transverse diffusion here ...
-	    double pitch = apa_gds->pitch(plane);
+	    double pitch = apa_gds->pitch(0,plane);
 	    double angle = apa_gds->angle(plane);
 	    //const Point shift(0, pitch*std::sin(angle), -pitch*std::cos(angle));
 	    int nwbin = sigmaT*3/pitch + 1; // +- ntinb 3sigma
@@ -207,6 +225,11 @@ int DetGenerativeFDS::jump(int frame_number)
 	    double wdist = apa_gds->wire_dist(*wire);
 	    trans_wires.push_back(wire);
 	    trans_integral.push_back(integral(sigmaT,dist,wdist-pitch/2.,wdist+pitch/2.));
+	    
+	    //if (tbin ==317)
+	    //std::cout << iplane << " " << tbin << " " << chid << " " << " " << wire->plane() << " " << windex << " " << dist << " " << wdist << " " << pitch << std::endl;
+
+
 	    //fill the rest of wires
 	    for (int kk =0; kk!=nwbin;kk++){
 	      // const Point shift1(shift.x, shift.y*(kk+1.), shift.z*(kk+1.));
@@ -252,6 +275,7 @@ int DetGenerativeFDS::jump(int frame_number)
 		allwires.push_back(trans_wires.at(qw));
 		float tcharge = charge * long_integral.at(qt) * 
 		  trans_integral.at(qw);
+		//		std::cout << qt << " " << qw << " " << tcharge << std::endl;
 		allcharge.push_back(tcharge);
 		sum_charge += tcharge;
 	      }

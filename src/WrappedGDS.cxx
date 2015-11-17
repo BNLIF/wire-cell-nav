@@ -344,8 +344,11 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
       	int chan = make_chan(starting_face, top_ind, plane, _apa, _cryo); 
 	
       	vector<VectorPtr> points;
-      	points.push_back(starting_point);	
-      	get_points(points, wm, bot_set, starting_point, starting_face);
+      	points.push_back(starting_point);
+	
+	int orientation = (starting_face + plane)%2; //for V-plane need to change the orientation
+	
+      	get_points(points, wm, bot_set, starting_point, orientation);
 
       	//std::cout << chan << " " << points.size() << std::endl;
 	
@@ -520,16 +523,16 @@ WireCell::WrappedGDS::~WrappedGDS()
 {
 }
 
-double WireCell::WrappedGDS::angle(WirePlaneType_t plane) const
-{
-  if (plane==0) return _angleU*TMath::Pi()/180.;
-  if (plane==1) return _angleV*TMath::Pi()/180.;
-  if (plane==2) return 0;
-}
+// double WireCell::WrappedGDS::angle(WirePlaneType_t plane) const
+// {
+//   if (plane==0) return _angleU*TMath::Pi()/180.;
+//   if (plane==1) return _angleV*TMath::Pi()/180.;
+//   if (plane==2) return 0;
+// }
 
-double WireCell::WrappedGDS::pitch(WirePlaneType_t plane, int flag) const
-{
-  if (plane==0) return _pitchU;
-  if (plane==1) return _pitchV;
-  if (plane==2) return _pitchW;
-}
+// double WireCell::WrappedGDS::pitch(WirePlaneType_t plane, int flag) const
+// {
+//   if (plane==0) return _pitchU;
+//   if (plane==1) return _pitchV;
+//   if (plane==2) return _pitchW;
+// }
