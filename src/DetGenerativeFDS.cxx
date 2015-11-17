@@ -80,7 +80,7 @@ int DetGenerativeFDS::jump(int frame_number)
     const WrappedGDS *apa_gds = 0;
 
     //hack for now
-    // nhits = 1;
+    //nhits = 1;
 
     for (size_t ind=0; ind<nhits; ++ind) {
       const Point& pt = hits[ind].first;

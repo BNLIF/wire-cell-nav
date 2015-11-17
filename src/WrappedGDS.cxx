@@ -346,7 +346,7 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
       vector<VectorPtr> points;
       points.push_back(starting_point);
       
-      int orientation = (starting_face + plane+1)%2; //for V-plane need to change the orientation
+      int orientation = (starting_face + plane)%2; //for V-plane need to change the orientation
       
       get_points(points, wm, bot_set, starting_point, orientation);
       

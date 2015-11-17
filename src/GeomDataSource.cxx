@@ -99,7 +99,7 @@ bool GeomDataSource::fill_cache() const
 	double dy = w.point2().y - w.point1().y;
 	double angle = std::atan2(dz, dy);
 	
-	if (w.face()==0) angle = angle*-1.;
+	if (w.face()==1) angle = angle*-1.;
 	//std::cout << "abc " << w.plane() << " " << w.face() << " " << angle << " " << std::endl;
 
 	
