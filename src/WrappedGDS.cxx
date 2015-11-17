@@ -15,7 +15,7 @@ namespace {
     static void get_points(std::vector<VectorPtr>& ret,
 			   WirePointMesh& wm, std::set<VectorPtr>& end, VectorPtr point, int segment)
     {
-      //assuming the start is u
+      //assuming the start is u"
         VectorPtrPair& vpp = wm[point];
 	VectorPtr found;
 	if (segment%2) {		// go v
@@ -170,7 +170,7 @@ void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
 		    if (this_face_uv) {
 			this_x_val = x_delta*2.0; // v
 		    }
-		    if (this_face) { // "B" face
+		    if (!this_face) { // "A" face
 			this_x_val *= -1;
 		    }
 
@@ -205,7 +205,7 @@ void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
 	for (int this_face = 0; this_face < 2; ++this_face) {
 
 	    double this_x_val = x_delta; // u
-	    if (this_face) { // "B" face
+	    if (!this_face) { // "A" face
 		this_x_val *= -1;
 	    }
     
@@ -363,7 +363,7 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
       	  } else if (plane == 1){
       	    this_x_val = x_delta*2.0; // v
       	  }
-      	  if (this_face) { // "B" face
+      	  if (!this_face) { // "A" face
       	    this_x_val *= -1.;
       	  }
 
@@ -410,7 +410,7 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
       // 	    } else {
       // 	      continue;
       // 	    }
-      // 	    if (this_face) { // "B" face
+      // 	    if (!this_face) { // "A" face
       // 	      this_x_val *= -1.;
       // 	    }
 	    
@@ -469,7 +469,7 @@ void WireCell::WrappedGDS::w_wire_mesh(double pitch)
 	for (int this_face = 0; this_face < 2; ++this_face) {
 
 	    double this_x_val = x_delta; // u
-	    if (this_face) { // "B" face
+	    if (!this_face) { // "A" face
 		this_x_val *= -1;
 	    }
     

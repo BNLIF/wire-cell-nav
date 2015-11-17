@@ -107,12 +107,12 @@ int DetGenerativeFDS::jump(int frame_number)
 	//	std::cout << pt.x/units::cm << " " << xmm.first/units::cm << " " << xmm.second/units::cm << std::endl;
 	if (pt.x>xmm.first && pt.x<xmm.second) continue;// space in between wires in an APA are treated as dead region
 	
-	int face = 0;
+	int face = 0; // "A face -x"
 	float drift_dist;
 	
 	if (TMath::Abs(pt.x-xmm.first) > TMath::Abs(pt.x-xmm.second)) {
 	  drift_dist = TMath::Abs(pt.x-xmm.second);
-	  face = 1;
+	  face = 1; "B face +x"
 	}else{
 	  drift_dist = TMath::Abs(pt.x-xmm.first);
 	}

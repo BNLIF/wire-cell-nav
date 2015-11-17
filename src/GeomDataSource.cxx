@@ -98,7 +98,9 @@ bool GeomDataSource::fill_cache() const
 	double dz = w.point2().z - w.point1().z;
 	double dy = w.point2().y - w.point1().y;
 	double angle = std::atan2(dz, dy);
+	
 	if (w.face()==0) angle = angle*-1.;
+	
 	if (angle>TMath::Pi()/2.) angle -= TMath::Pi();
 	if (angle<-TMath::Pi()/2.) angle += TMath::Pi();
 	angle_cache[iplane] = angle*units::radian;
