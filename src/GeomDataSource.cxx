@@ -534,7 +534,11 @@ bool GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2
     double dis1 = wire_dist(wire1);
     double dis2 = wire_dist(wire2);
   
-    bool okay = crossing_point(dis1,dis2,wire1.plane(),wire2.plane(), result);
+    bool okay;
+    if (wire1.face() != wire2.face())
+      return false;
+    
+    okay = crossing_point(dis1,dis2,wire1.plane(),wire2.plane(), result,wire1.face());
     if (!okay) {
 	return false;
     }
@@ -559,10 +563,25 @@ bool GeomDataSource::crossing_point(const GeomWire& wire1, const GeomWire& wire2
 
 bool GeomDataSource::crossing_point(double dis1, double dis2,
 				    WirePlaneType_t plane1, WirePlaneType_t plane2, 
-				    Vector& result) const
+				    Vector& result, int face) const
 {
-    double theta1 = angle(plane1);
-    double theta2 = angle(plane2);
+  double theta1, theta2;
+  if (face == -999){
+    theta1 = angle(plane1);
+    theta2 = angle(plane2);
+  }else{
+    const GeomWireSelection& wip1 = wires_in_plane(face, plane1);
+    const GeomWire& w1 = *wip1[int(wip1.size()/2.-1)];
+    double dz1 = w1.point2().z - w1.point1().z;
+    double dy1 = w1.point2().y - w1.point1().y;
+    theta1 = std::atan2(dz1, dy1);
+
+    const GeomWireSelection& wip2 = wires_in_plane(face, plane2);
+    const GeomWire& w2 = *wip2[int(wip2.size()/2.-1)];
+    double dz2 = w2.point2().z - w2.point1().z;
+    double dy2 = w2.point2().y - w2.point1().y;
+    theta2 = std::atan2(dz2, dy2);
+  }
   
     double a1 = std::cos(theta1/units::radian);
     double b1 = -std::sin(theta1/units::radian);

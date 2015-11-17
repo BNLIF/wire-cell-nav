@@ -101,7 +101,7 @@ namespace WireCell {
 	/// is in the extent.
 	bool crossing_point(double dis1, double dis2, 
 			    WirePlaneType_t plane1, WirePlaneType_t plane2, 
-			    Vector& result) const;
+			    Vector& result, int face = -999) const;
 
 	/// Return the two wires that bound a given point in the wire
 	/// plane.  If point is out not bounded on the lower distance
