@@ -112,7 +112,7 @@ int DetGenerativeFDS::jump(int frame_number)
 	
 	if (TMath::Abs(pt.x-xmm.first) > TMath::Abs(pt.x-xmm.second)) {
 	  drift_dist = TMath::Abs(pt.x-xmm.second);
-	  face = 1; "B face +x"
+	  face = 1; //"B face +x"
 	}else{
 	  drift_dist = TMath::Abs(pt.x-xmm.first);
 	}

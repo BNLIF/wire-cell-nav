@@ -99,7 +99,7 @@ bool GeomDataSource::fill_cache() const
 	double dy = w.point2().y - w.point1().y;
 	double angle = std::atan2(dz, dy);
 	
-	if (w.face()==0) angle = angle*-1.;
+	if (w.face()==1) angle = angle*-1.;
 	
 	if (angle>TMath::Pi()/2.) angle -= TMath::Pi();
 	if (angle<-TMath::Pi()/2.) angle += TMath::Pi();
@@ -479,9 +479,11 @@ bool GeomDataSource::contained_yz(const Vector& point) const
 double GeomDataSource::wire_dist(const Vector& point, WirePlaneType_t plane, int face ) const
 {
     double theta = angle(plane);
-    if (face == 0){
+
+    if (face == 1){
       theta = -theta;
     }
+
     double dis = std::cos(theta/units::radian) *point.z  - std::sin(theta/units::radian) * point.y;
     
     return dis;
