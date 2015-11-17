@@ -80,15 +80,15 @@ int DetGenerativeFDS::jump(int frame_number)
     const WrappedGDS *apa_gds = 0;
 
     //hack for now
-    //nhits = 1;
+    // nhits = 1;
 
     for (size_t ind=0; ind<nhits; ++ind) {
       const Point& pt = hits[ind].first;
       //const Vector vpt(pt.x, pt.y, pt.z);
       float charge = hits[ind].second;
       
-      //const Point pt(1000.4,-301.877,135.128);
-      //float charge = 100000;
+      // const Point pt(1000.4,801.877,135.128);
+      // float charge = 100000;
       
       
       // decide which apa the charge deposit belongs to
@@ -203,7 +203,8 @@ int DetGenerativeFDS::jump(int frame_number)
 	  //   wire->point1().y << " " << wire->point1().z << " " 
 	  // 	    << pt.y << " " << pt.z << " " 
 	  // 	    << wire->point2().y << " " << wire->point2().z << 
-	  //   " " << wire->plane() << 
+	  //   " " << wire->plane() << " " << apa_gds->angle(plane) << " " 
+	  // 	    <<  tbin << 
 	  //   std::endl;
 	  //std::cout << iplane << " " << face << " " << wire << std::endl;
 
@@ -221,13 +222,13 @@ int DetGenerativeFDS::jump(int frame_number)
 	    int nwbin = sigmaT*3/pitch + 1; // +- ntinb 3sigma
 	    GeomWireSelection trans_wires;
 	    std::vector<double> trans_integral;
-	    double dist = apa_gds->wire_dist(pt,plane);
+	    double dist = apa_gds->wire_dist(pt,plane,wire->face());
 	    double wdist = apa_gds->wire_dist(*wire);
 	    trans_wires.push_back(wire);
 	    trans_integral.push_back(integral(sigmaT,dist,wdist-pitch/2.,wdist+pitch/2.));
 	    
 	    //if (tbin ==317)
-	    //std::cout << iplane << " " << tbin << " " << chid << " " << " " << wire->plane() << " " << windex << " " << dist << " " << wdist << " " << pitch << std::endl;
+	    // std::cout << iplane << " " << tbin << " " << chid << " " << " " << wire->plane() << " " << windex << " " << dist << " " << wdist << " " << pitch << std::endl;
 
 
 	    //fill the rest of wires
