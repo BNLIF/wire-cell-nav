@@ -142,6 +142,9 @@ int DetGenerativeFDS::jump(int frame_number)
 	float DL = 5.3; //cm^2/s
 	float DT = 12.8; //cm^2/s
 
+	// float DL = 5.3e-3; //cm^2/s
+	// float DT = 12.8e-3; //cm^2/s
+
 	
 	float sigmaL = sqrt(2.*DL*drift_time*1e-6) * units::cm;
 	float sigmaT = sqrt(2.*DT*drift_time*1e-6) * units::cm;
