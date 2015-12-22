@@ -46,6 +46,25 @@ const WireCell::GeomWireSelection& WireCell::DetectorGDS::by_channel(int channel
   //return wires;
 }
 
+void WireCell::DetectorGDS::read_geometry(std::vector<std::string> filename)
+{
+  /*
+  iftream infile(filename.c_str());
+  std::string tmp, line;
+  infile.getline(tmp);
+  infile.getline(tmp);
+  infile.getline(tmp);
+  infile.getline(tmp);
+  infile.getline(tmp);
+  int tpc, plane, wireno, wireid, channelid;
+  Point start, end;
+  while(getline(infile, line)) {
+    line >> tpc >> plane >> wireno >> wireid >> wire >> channelid >> start.x >> start.y >> start.z >> end.x>> end.y >>  end.z ;
+    std::cout<<tpc<<" "<<plane<<" "<<wireid<<" "<<channelid<<" "<<start.x<<" "<<end.x<<std::endl;
+  }
+  */
+}
+
 WireCell::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
 {
     _ncryos = geometry.size();

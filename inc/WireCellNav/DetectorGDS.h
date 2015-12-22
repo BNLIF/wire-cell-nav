@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <fstream>
 
 namespace WireCell {
 
@@ -22,6 +23,7 @@ namespace WireCell {
 
   public:
 
+    void read_geometry(std::vector<std::string> filename);
     void set_ncryos(short ncryo);
     void set_napas(short cryo, short napas);
     // configure all apas in all cryostats in one go

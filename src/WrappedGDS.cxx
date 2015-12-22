@@ -257,7 +257,7 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
   
   // calculate new bounds
   const Vector center_bb = 0.5*(m_maxbound + m_minbound);
-  const double x_delta = ((m_maxbound.x - m_minbound.x) / 8.0) * 1;
+  const double x_delta = ((m_maxbound.x - m_minbound.x) / 16.0) * 1;// changed from 8 to 16 to match dune10k_workspace geometry
   //std::cout<<"center is ("<<center_bb.x*1<<","<<center_bb.y*1<<","<<center_bb.z*1<<")\t"
   //<<"x_delta is "<<x_delta<<std::endl;
   
@@ -359,9 +359,9 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
 	
 	double this_x_val = 0.;
 	if (plane ==0) {
-	  this_x_val = x_delta*3.0; // u
+	  this_x_val = x_delta*8.0; // u
 	} else if (plane == 1){
-	  this_x_val = x_delta*2.0; // v
+	  this_x_val = x_delta*7.0; // v
 	}
 	if (!this_face) { // "A" face
 	  this_x_val *= -1.;
@@ -468,7 +468,7 @@ void WireCell::WrappedGDS::w_wire_mesh(double pitch)
     
     for (int this_face = 0; this_face < 2; ++this_face) {
       
-      double this_x_val = x_delta; // u
+      double this_x_val = x_delta * 6.; // u
       if (!this_face) { // "A" face
 	this_x_val *= -1;
       }
