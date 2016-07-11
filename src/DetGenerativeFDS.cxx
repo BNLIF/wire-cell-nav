@@ -23,6 +23,15 @@ DetGenerativeFDS::DetGenerativeFDS(const Depositor& dep, const DetectorGDS& gds,
     , unit_dis(unit_dis)
 {
   bins_per_frame = bins_per_frame1;
+  tot_charge = 0;
+  collected_charge = 0;
+  const int napas = gds.napa(0);
+  sideband_charge[0] = new double[napas];
+  sideband_charge[1] = new double[napas];
+  for (int i = 0; i < napas; ++i) {
+    sideband_charge[0][i] = 0;
+    sideband_charge[1][i] = 0;
+  }
 }
 
 
@@ -86,7 +95,7 @@ int DetGenerativeFDS::jump(int frame_number)
       const Point& pt = hits[ind].first;
       //const Vector vpt(pt.x, pt.y, pt.z);
       float charge = hits[ind].second;
-      
+      tot_charge += charge;      
       // const Point pt(1000.4,801.877,135.128);
       // float charge = 100000;
       
@@ -201,7 +210,6 @@ int DetGenerativeFDS::jump(int frame_number)
 	  WirePlaneType_t plane = static_cast<WirePlaneType_t>(iplane); // annoying
 	  // only look up wires from the correct face
 	  const GeomWire* wire = apa_gds->closest(pt, plane, face);
-
 	  // std::cout << plane << " " << face << " " << 
 	  //   wire->point1().y << " " << wire->point1().z << " " 
 	  // 	    << pt.y << " " << pt.z << " " 
@@ -216,7 +224,6 @@ int DetGenerativeFDS::jump(int frame_number)
 	  if (wire!=0){
 	    int chid = wire->channel();
 	    int windex = wire->index();
-	    
   
 	    // start to do the transverse diffusion here ...
 	    double pitch = apa_gds->pitch(0,plane);
@@ -279,29 +286,29 @@ int DetGenerativeFDS::jump(int frame_number)
 		allwires.push_back(trans_wires.at(qw));
 		float tcharge = charge * long_integral.at(qt) * 
 		  trans_integral.at(qw);
-		//		std::cout << qt << " " << qw << " " << tcharge << std::endl;
-		allcharge.push_back(tcharge);
+		allcharge.push_back(tcharge);		
 		sum_charge += tcharge;
 	      }
 	    }
 	    
-	    // for (int qx = 0; qx!=allcharge.size();qx++){
-	    //   const GeomWire* wire3 = allwires.at(qx);
-	    //   int chid3 = wire3->channel();
-	    //   std::cout << alltime.at(qx) << " " << charge << " " << 
-	    // 	allcharge.at(qx) << " " << chid3 << std::endl;
+	    //for (int qx = 0; qx!=allcharge.size();qx++){
+	    //const GeomWire* wire3 = allwires.at(qx);
+	    // int chid3 = wire3->channel();
+	    //  std::cout << alltime.at(qx) << " " << charge << " " << 
+	    //  	allcharge.at(qx) << " " << chid3 << std::endl;
 	    // }
-	    // std::cout << std::endl;
+	    //std::cout << std::endl;
 	    
-	    //do normalization ... 
+	     //do normalization ... 
 	    for (int qx = 0; qx!=allcharge.size();qx++){
 	      const GeomWire* wire3 = allwires.at(qx);
 	      int chid3 = wire3->channel();
 	      int tbin3 = alltime.at(qx);
-	      
+
 	      if (tbin3 >=0 && tbin3 < bins_per_frame){
 		
-		float charge3 = allcharge.at(qx)/sum_charge*charge;
+		float charge3 = 0;
+		if (sum_charge>0) charge3 = allcharge.at(qx)/sum_charge*charge;
 		
 		TraceIndexMap::iterator it = tim.find(chid3);
 		int trace_index = frame.traces.size(); // if new
@@ -317,11 +324,13 @@ int DetGenerativeFDS::jump(int frame_number)
 		}
 		Trace& trace = frame.traces[trace_index];
 		
-		// finally
-		
-		
-
+		// finally			       
 		trace.charge[tbin3] += charge3;
+		if (plane==2) {
+		  collected_charge += charge3;
+		  if (drift_dist < 5.*units::cm) sideband_charge[face][which_apa]+= charge3;
+		  //std::cout<<"charge3 = "<<charge3<<", collected_charge = "<<collected_charge<<", sum_charge = "<<sum_charge<<", charge = "<<charge<<std::endl;
+		}
 	      }
 	    }
 	    

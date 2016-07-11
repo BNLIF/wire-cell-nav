@@ -56,6 +56,9 @@ namespace WireCell {
 	virtual SimTruthSelection truth() const; 
 
 	void clear(){frame.clear();simtruth.clear();};
+	double *sideband_charge[2];
+	double tot_true_charge() {return tot_charge;}
+	double tot_collected_charge() {return collected_charge;}	
 	
     private:    
 	const Depositor& dep;
@@ -64,6 +67,8 @@ namespace WireCell {
 	int  max_frames;
 	float bin_drift_distance;
 	float unit_dis;
+	double tot_charge;
+	double collected_charge;
 
 	mutable WireCell::SimTruthSet simtruth;
     };

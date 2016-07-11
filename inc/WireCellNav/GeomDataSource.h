@@ -115,6 +115,9 @@ namespace WireCell {
 	GeomWirePair bounds(const Vector& point,
 			    WirePlaneType_t plane, int face) const;
 
+	GeomWirePair bounds(const double dist,
+			    WirePlaneType_t plane, int face) const; 
+	
 	/// Return closest wire in the plane to the given point along
 	/// the direction perpendicular to the wires of the given
 	/// plane.  This implementation assumes wires are of uniform
@@ -123,13 +126,17 @@ namespace WireCell {
 				WirePlaneType_t plane = kUnknownWirePlaneType,
 				int face = -999) const;
 
+	const GeomWire* closest(const double dist,
+				WirePlaneType_t plane = kUnknownWirePlaneType,
+				int face = -999) const;     
+	
 	const GeomWire* get_ad_wire(const GeomWire *wire0, int kk,
 				    WirePlaneType_t plane,
 				    int face) const;
-	//const GeomWire* closest(const Vector& point,
-	//			WirePlaneType_t plane = kUnknownWirePlaneType,
-	//			int face = 0) const;
-	
+
+	double get_channel_length(int channel_index);	
+	double get_channel_length(const GeomWire* wire);
+
 	/// Xin, document me.
 	void avoid_gap(Vector& point) const;
 	

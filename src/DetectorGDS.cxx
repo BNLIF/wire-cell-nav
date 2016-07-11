@@ -110,7 +110,37 @@ WireCell::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
     }
     
 }
+/*
+void DetectorGDS::DetectorGDS(int cryo, std::string geometry)
+{
+  if (_ncryos <= cryo) {
+    _ncryos = cryo+1;
+    _APAgds.resize(cryo+1);
+    _napas.resize(cryo+1);
+    _angleU.resize(cryo+1);
+    _angleV.resize(cryo+1);
+    _pitchU.resize(cryo+1);
+    _pitchV.resize(cryo+1);
+    _pitchW.resize(cryo+1);
+    _max_bound.resize(cryo+1);
+    _min_bound.resize(cryo+1);
+    _center.resize(cryo+1);
+    _halves.resize(cryo+1);
+  }
+  std::vector<GeomWire> gw;
+  ifstream infile(geometry.c_str());
+  std::string tmp;
+  infile.getline(tmp);
+  infile.getline(tmp);
+  infile.getline(tmp);
+  infile.getline(tmp);
+  infile.getline(tmp);
+  while (infile.getline(tmp)) {
+    scanf("")
+  }
 
+}
+*/
 void DetectorGDS::set_ncryos(short ncryos)
 {
   _ncryos = ncryos;

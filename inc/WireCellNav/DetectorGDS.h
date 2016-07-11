@@ -19,6 +19,7 @@ namespace WireCell {
   public:
     DetectorGDS();
     DetectorGDS(std::vector<std::string> geometry);
+    //DetectorGDS(int cryo, std::string geometry);
     virtual ~DetectorGDS();
 
   public:
@@ -68,7 +69,8 @@ namespace WireCell {
     short contained_yz_cryo(const Vector& point) const;
     short contained_yz_apa(short cryo, const Vector& point) const;
     */
-    
+    Vector get_maxbound(short c, short a) {return _max_bound.at(c).at(a);}
+    Vector get_minbound(short c, short a) {return _min_bound.at(c).at(a);} 
   private:
 
     mutable std::vector<std::vector<const WrappedGDS*> > _APAgds;
