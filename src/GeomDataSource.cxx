@@ -172,8 +172,6 @@ const GeomWireSelection& GeomDataSource::wires_in_plane(int face, WirePlaneType_
     tmp_plane = WirePlaneType_t(6);
   }
 
-  
-
   if (mm1_gwsel.find(tmp_plane) == mm1_gwsel.end()) {
     GeomWireSelection ws;
     mm1_gwsel[tmp_plane] = ws;
@@ -523,7 +521,7 @@ double GeomDataSource::wire_dist(const Vector& pt, const GeomWire* wire) const
   // else return num/den;
 }
 
-double GeomDataSource::get_channel_length(int channel_index)
+double GeomDataSource::get_channel_length(int channel_index) const
 {
   const GeomWireSelection &wires = by_channel(channel_index);
   int nsegments = wires.size();
@@ -535,7 +533,7 @@ double GeomDataSource::get_channel_length(int channel_index)
   return length;
 }
 
-double GeomDataSource::get_channel_length(const GeomWire *wire)
+double GeomDataSource::get_channel_length(const GeomWire *wire) const
 {
   int channelID = wire->channel();
   return get_channel_length(channelID);

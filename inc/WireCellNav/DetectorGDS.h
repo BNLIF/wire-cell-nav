@@ -42,7 +42,7 @@ namespace WireCell {
 
     short in_which_apa(const Vector& point) const;
     short in_which_cryo(const Vector& point) const;
-    
+
     double get_angle(short cryo, WirePlaneType_t plane = kUnknownWirePlaneType) const;
     double get_pitch(short cryo, WirePlaneType_t plane = kUnknownWirePlaneType) const;
     bool crossing_point(double dist1, double dist2, const GeomWire& wire1, const GeomWire& wire2, Vector& result) const;

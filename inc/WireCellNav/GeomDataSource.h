@@ -134,8 +134,8 @@ namespace WireCell {
 				    WirePlaneType_t plane,
 				    int face) const;
 
-	double get_channel_length(int channel_index);	
-	double get_channel_length(const GeomWire* wire);
+	double get_channel_length(int channel_index) const;	
+	double get_channel_length(const GeomWire* wire) const;
 
 	/// Xin, document me.
 	void avoid_gap(Vector& point) const;
@@ -154,6 +154,7 @@ namespace WireCell {
 	mutable std::map<WirePlaneType_t, GeomWireSelection> mm_gwsel;
 	mutable std::map<WirePlaneType_t, GeomWireSelection> mm1_gwsel;
 
+	
 	mutable double angle_cache[3];
 	
 	mutable int nwires_cache[3];

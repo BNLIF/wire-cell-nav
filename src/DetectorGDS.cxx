@@ -110,6 +110,7 @@ WireCell::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
     }
     
 }
+
 /*
 void DetectorGDS::DetectorGDS(int cryo, std::string geometry)
 {
@@ -224,11 +225,10 @@ void DetectorGDS::build_channel_map(){
 
       //deal with v-map
       const GeomWireSelection& vwires = _APAgds.at(cryo).at(apa)->wires_in_plane(WirePlaneType_t(1));
-      for (int i = 0; i!=vwires.size();i++){
+      for (int i = 0; i!=vwires.size();i++){	
 	int chid = vwires.at(i)->channel();
 	if (_channel_vmap.find(chid) == _channel_vmap.end()){
 	  _channel_vmap[chid] = nv_wire;
-	  nv_wire++;
 	}
       }
       
@@ -240,9 +240,7 @@ void DetectorGDS::build_channel_map(){
 	  _channel_wmap[chid] = nw_wire;
 	  nw_wire++;
 	}
-      }
-
-      
+      }      
 
     }
   }

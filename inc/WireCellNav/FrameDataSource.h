@@ -3,6 +3,10 @@
 
 #include "WireCellData/Frame.h"
 
+#ifdef WIRECELLSIGNAL_CONVOLUTEDRESPONSE_H
+#include "WireCellSignal/ConvolutedResponse.h"
+#endif
+
 namespace WireCell {
 
 /**
@@ -31,6 +35,9 @@ namespace WireCell {
 	/// Advance to next frame, return frame number or -1 on error, -2 on end of frames
 	virtual int next();
 	
+#ifdef WIRECELLSIGNAL_CONVOLUTEDRESPONSE_H
+	virtual void SetResponseFunctions(WireCellSignal::ConvolutedResponse *f) = 0;
+#endif
 	/// Access currently loaded frame.
 	virtual WireCell::Frame& get();
 	virtual const WireCell::Frame& get() const;
