@@ -496,6 +496,13 @@ WireCell::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound,
   : GeomDataSource()
   , m_minbound(minbound)
   , m_maxbound(maxbound)
+  , _cryo(0)
+  , _apa(0)
+  , _angleU(0)
+  , _angleV(0)
+  , _pitchU(0)
+  , _pitchV(0)
+  , _pitchW(0)
 {
   uvw_wire_mesh(angle, pitch);
 }

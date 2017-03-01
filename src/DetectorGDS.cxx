@@ -8,7 +8,7 @@ using namespace std;
 using namespace WireCell;
 
 WireCell::DetectorGDS::DetectorGDS()
-//  : _ncryos(0)
+  : _ncryos(0)
 {
 }
 
@@ -398,7 +398,7 @@ bool DetectorGDS::crossing_point(double dis1, double dis2, const GeomWire& wire1
 const GeomWire* DetectorGDS::closest(const Vector& point, WirePlaneType_t plane, int face) const
 {
   const WrappedGDS* apaGDS = get_apaGDS(in_which_cryo(point),in_which_apa(point));
-  const GeomWire* wire;
+  const GeomWire* wire=0;
   if (apaGDS != NULL) {
     wire = apaGDS->closest(point, plane, face);
   }
