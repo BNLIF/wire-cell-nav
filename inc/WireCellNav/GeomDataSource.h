@@ -112,6 +112,9 @@ namespace WireCell {
 	GeomWirePair bounds(const Vector& point, 
 			    WirePlaneType_t plane = kUnknownWirePlaneType) const;
 
+	GeomWirePair bounds(const double dist, 
+			    WirePlaneType_t plane = kUnknownWirePlaneType) const;
+
 	GeomWirePair bounds(const Vector& point,
 			    WirePlaneType_t plane, int face) const;
 
