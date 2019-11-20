@@ -1,10 +1,10 @@
-#include "WireCellNav/GeomDataSource.h"
+#include "WCPNav/GeomDataSource.h"
 
 #include <cmath>		// std::abs() - careful not to use bare abs()
 #include <algorithm>
 
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
 GeomDataSource::GeomDataSource()
   : flag_nwires_cache(0)
@@ -24,8 +24,8 @@ GeomDataSource::~GeomDataSource()
     
 //     for (int plane = 0; plane!=3; plane ++){
 //       int nwire = (nwires_cache[int(plane)]-1)/2.;
-//       const GeomWire& wire0 = *this->by_planeindex(WireCell::WirePlaneType_t(plane), nwire);
-//       const GeomWire& wire1 = *this->by_planeindex(WireCell::WirePlaneType_t(plane), nwire+1);
+//       const GeomWire& wire0 = *this->by_planeindex(WCP::WirePlaneType_t(plane), nwire);
+//       const GeomWire& wire1 = *this->by_planeindex(WCP::WirePlaneType_t(plane), nwire+1);
       
 //       double d = (wire0.point2().z - wire0.point1().z);
 //       if (d == 0) {		// y wires
@@ -218,7 +218,7 @@ const GeomWire* GeomDataSource::by_ident(int ident) const
 }
 
 
-const std::vector<const WireCell::GeomWire*>& GeomDataSource::by_channel(int channel) const
+const std::vector<const WCP::GeomWire*>& GeomDataSource::by_channel(int channel) const
 {
     fill_cache();
     return channel2wire[channel];
@@ -254,7 +254,7 @@ const GeomWire* GeomDataSource::by_planeindex(WirePlaneType_t plane, int index) 
     return wires.at(index);
 }
 
-double GeomDataSource::pitch(int face, WireCell::WirePlaneType_t plane, int flag) const
+double GeomDataSource::pitch(int face, WCP::WirePlaneType_t plane, int flag) const
 {
   const GeomWireSelection& wip = wires_in_plane(face, plane);
   int nwires = wip.size();
@@ -273,7 +273,7 @@ double GeomDataSource::pitch(int face, WireCell::WirePlaneType_t plane, int flag
 
 }
 
-double GeomDataSource::pitch(WireCell::WirePlaneType_t plane, int flag) const
+double GeomDataSource::pitch(WCP::WirePlaneType_t plane, int flag) const
 {
   // fill_pitch_cache();
   // return pitch_cache[int(plane)];
@@ -313,16 +313,16 @@ double GeomDataSource::pitch(WireCell::WirePlaneType_t plane, int flag) const
 }
 
 
-WireCell::Vector GeomDataSource::pitch_unit_vector(WirePlaneType_t plane) const
+WCP::Vector GeomDataSource::pitch_unit_vector(WirePlaneType_t plane) const
 {
   const GeomWire& wire = *this->by_planeindex(plane, 0);
-  WireCell::Vector vwire(wire.point2() - wire.point1()), ecks(1,0,0);
-  WireCell::Vector vpitch = ecks.cross(vwire);
+  WCP::Vector vwire(wire.point2() - wire.point1()), ecks(1,0,0);
+  WCP::Vector vpitch = ecks.cross(vwire);
   return vpitch.norm();
 }
 
 
-double GeomDataSource::angle(WireCell::WirePlaneType_t plane) const
+double GeomDataSource::angle(WCP::WirePlaneType_t plane) const
 {
   if (0 > plane || plane >= 3) {
     return -999;
@@ -378,7 +378,7 @@ bool GeomDataSource::fill_mm_cache() const
     mm_cache[2][kUnknownWirePlaneType] = vmm(totz);
     
     // for (int iplane=kUnknownWirePlaneType; iplane<=kYwire; ++iplane) {
-    //     WireCell::WirePlaneType_t eplane = (WireCell::WirePlaneType_t)iplane;
+    //     WCP::WirePlaneType_t eplane = (WCP::WirePlaneType_t)iplane;
     //     std::cerr << "CACHE HIT: extent for plane "<< iplane << ": "
     //               << " x:" << mm_cache[0][eplane].first <<" "<<mm_cache[0][eplane].second
     //               << " y:" << mm_cache[1][eplane].first <<" "<<mm_cache[1][eplane].second
@@ -404,7 +404,7 @@ Vector GeomDataSource::center() const
     return p;
 }
 
-std::vector<double> GeomDataSource::extent(WireCell::WirePlaneType_t plane) const
+std::vector<double> GeomDataSource::extent(WCP::WirePlaneType_t plane) const
 {
     if (plane < kUnknownWirePlaneType || plane > kYwire) {
         return std::vector<double>();
@@ -421,7 +421,7 @@ std::vector<double> GeomDataSource::extent(WireCell::WirePlaneType_t plane) cons
     return ret;
 }
 
-std::pair<double, double> GeomDataSource::minmax(int axis, WireCell::WirePlaneType_t plane) const
+std::pair<double, double> GeomDataSource::minmax(int axis, WCP::WirePlaneType_t plane) const
 {
     if (plane < kUnknownWirePlaneType || plane > kYwire) {
         return std::pair<double,double>(-999,-999);

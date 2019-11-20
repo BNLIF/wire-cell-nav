@@ -1,4 +1,4 @@
-#include "WireCellNav/DetectorGDS.h"
+#include "WCPNav/DetectorGDS.h"
 
 #include "TCanvas.h"
 #include "TBenchmark.h"
@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main(int argc, char* argv[])

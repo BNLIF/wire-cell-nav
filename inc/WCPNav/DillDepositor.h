@@ -1,12 +1,12 @@
 #ifndef WIRECELLNAV_DILLDEPOSITOR
 #define WIRECELLNAV_DILLDEPOSITOR
 
-#include "WireCellNav/Depositor.h"
-#include "WireCellData/Units.h"
+#include "WCPNav/Depositor.h"
+#include "WCPData/Units.h"
 
 #include <map>
 
-namespace WireCell {
+namespace WCP {
 
     /** A Depositor which sprays little dill seeds through the volume.
      */

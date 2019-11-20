@@ -1,13 +1,15 @@
-#ifndef WIRECELLNAV_GENERATIVEFDS
-#define  WIRECELLNAV_GENERATIVEFDS
+#ifndef WIRECELLNAV_DETGENERATIVEFDS
+#define  WIRECELLNAV_DETGENERATIVEFDS
 
-#include "WireCellNav/FrameDataSource.h"
-#include "WireCellNav/GeomDataSource.h"
-#include "WireCellNav/SimDataSource.h"
-#include "WireCellNav/Depositor.h"
-#include "WireCellData/Units.h"
+#include "WCPNav/FrameDataSource.h"
+#include "WCPNav/DetectorGDS.h"
+#include "WCPNav/WrappedGDS.h"
+#include "WCPNav/SimDataSource.h"
+#include "WCPNav/Depositor.h"
+#include "WCPData/Units.h"
+#include "WCPData/Vector.h"
 
-namespace WireCell {
+namespace WCP {
 
     /** A FrameDataSource which generates frames of traces based on
      * hits from a Depositor object.
@@ -20,7 +22,7 @@ namespace WireCell {
      * given bins_per_frame is digitized and hits are collected onto
      * wires.  Any hits outside the frame are ignored.
      */
-    class GenerativeFDS : public FrameDataSource , public SimDataSource
+    class DetGenerativeFDS : public FrameDataSource , public SimDataSource
     {
     public:
 	/** Create a GenerativeFDS.
@@ -40,11 +42,11 @@ namespace WireCell {
 	 * the time collected in one time bin.  Ie, digitization
 	 * period * drift speed.
 	 */	
-	GenerativeFDS(const Depositor& dep, const GeomDataSource& gds,
-		      int bins_per_frame1 = 1000, int nframes_total = -1,
-		      float bin_drift_distance = 0.5*1.6*units::millimeter, float unit_dis=1.6);
+        DetGenerativeFDS(const Depositor& dep, const DetectorGDS& gds,
+			 int bins_per_frame1 = 1000, int nframes_total = -1,
+			 float bin_drift_distance = 0.5*1.6*units::millimeter, float unit_dis=1.6);
 
-	virtual ~GenerativeFDS();
+	virtual ~DetGenerativeFDS();
 
 	virtual int size() const;
 
@@ -54,16 +56,21 @@ namespace WireCell {
 	virtual SimTruthSelection truth() const; 
 
 	void clear(){frame.clear();simtruth.clear();};
+	double *sideband_charge[2];
+	double tot_true_charge() {return tot_charge;}
+	double tot_collected_charge() {return collected_charge;}	
 	
     private:    
 	const Depositor& dep;
-	const GeomDataSource& gds;
+	const DetectorGDS& det_gds;
 	
 	int  max_frames;
 	float bin_drift_distance;
 	float unit_dis;
+	double tot_charge;
+	double collected_charge;
 
-	mutable WireCell::SimTruthSet simtruth;
+	mutable WCP::SimTruthSet simtruth;
     };
 
 }

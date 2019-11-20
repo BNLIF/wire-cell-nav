@@ -1,10 +1,10 @@
-#include "WireCellNav/Depositor.h"
+#include "WCPNav/Depositor.h"
 
-WireCell::Depositor::~Depositor()
+WCP::Depositor::~Depositor()
 {
 }
  
-const std::vector<int>& WireCell::Depositor::timeoffset() const
+const std::vector<int>& WCP::Depositor::timeoffset() const
 {
   return timeo;
 }

@@ -1,4 +1,4 @@
-#include "WireCellNav/WrappedGDS.h"
+#include "WCPNav/WrappedGDS.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -7,7 +7,7 @@
 
 #include <cmath>
 #include <iostream>
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main(int argc, char* argv[])

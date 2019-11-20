@@ -1,9 +1,9 @@
 #ifndef WIRECELLNAV_SIMDATASOURCE
 #define WIRECELLNAV_SIMDATASOURCE
 
-#include "WireCellData/SimTruth.h"
+#include "WCPData/SimTruth.h"
 
-namespace WireCell {
+namespace WCP {
 
     /** SimDataSource - a Mixin providing access to simulated truth information.
      *

@@ -1,20 +1,20 @@
 #ifndef WIRECELLNAV_PARAMGEOMDATASOURCE_H
 #define WIRECELLNAV_PARAMGEOMDATASOURCE_H
 
-#include "WireCellNav/GeomDataSource.h"
-#include "WireCellData/Vector.h"
-#include "WireCellData/GeomWire.h"
+#include "WCPNav/GeomDataSource.h"
+#include "WCPData/Vector.h"
+#include "WCPData/GeomWire.h"
 
 #include <map>
 #include <vector>
 
-namespace WireCell {
+namespace WCP {
 
     /**
        A source of wire geometry generated from parameters.
 
      */
-    class ParamGDS : public WireCell::GeomDataSource {
+    class ParamGDS : public WCP::GeomDataSource {
     public:
 
 	/** Create a parameterized geometry data source.
@@ -50,7 +50,7 @@ namespace WireCell {
 	int make_wire_plane(const Vector& offset, const Vector& pitch,
 			    WirePlaneType_t plane);
 
-	bool make_wire(std::vector<WireCell::GeomWire>& all_wires,
+	bool make_wire(std::vector<WCP::GeomWire>& all_wires,
 		       int index, const Vector& point,
 		       const Vector& proto);
 

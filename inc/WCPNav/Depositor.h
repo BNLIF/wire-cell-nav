@@ -1,10 +1,10 @@
 #ifndef WIRECELLNAV_DEPOSITOR
 #define WIRECELLNAV_DEPOSITOR
 
-#include "WireCellData/Point.h"
+#include "WCPData/Point.h"
 #include <vector>
 
-namespace WireCell {
+namespace WCP {
 
     /**
      * A Depositor produces "hit" depositions in time.

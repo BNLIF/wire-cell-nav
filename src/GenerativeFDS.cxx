@@ -1,7 +1,7 @@
-#include "WireCellNav/GenerativeFDS.h"
+#include "WCPNav/GenerativeFDS.h"
 #include "TMath.h"
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 double integral(double sigma, double z0, double z1, double z2){
@@ -30,9 +30,9 @@ GenerativeFDS::~GenerativeFDS()
 
 int GenerativeFDS::size() const { return max_frames; }
 
-WireCell::SimTruthSelection GenerativeFDS::truth() const
+WCP::SimTruthSelection GenerativeFDS::truth() const
 {
-    WireCell::SimTruthSelection ret;
+    WCP::SimTruthSelection ret;
 
     for (auto it = simtruth.begin(); it != simtruth.end(); ++it) {
 	ret.push_back(& (*it));
@@ -143,7 +143,7 @@ int GenerativeFDS::jump(int frame_number)
 	  // std::cout << "GenerativeFDS: drop: point contained: " << pt.x/units::cm << " " << pt.y/units::cm  << " " << pt.z/units::cm << std::endl;
 	}
 	  
-	WireCell::SimTruth st(pt.x, pt.y, pt.z, charge, tbin, simtruth.size());
+	WCP::SimTruth st(pt.x, pt.y, pt.z, charge, tbin, simtruth.size());
 	simtruth.insert(st);
 	//cerr << "SimTruth: " << st.trackid() << " q=" << st.charge()
 	//     << " tbin=" << tbin << " pos=" << st.pos() << endl;

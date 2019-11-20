@@ -1,13 +1,13 @@
 #ifndef WIRECELLNAV_GEOMDATASOURCE_H
 #define WIRECELLNAV_GEOMDATASOURCE_H
 
-#include "WireCellData/GeomWire.h"
-#include "WireCellData/Vector.h"
+#include "WCPData/GeomWire.h"
+#include "WCPData/Vector.h"
 
 #include <map>
 #include "TMath.h"
 
-namespace WireCell {
+namespace WCP {
 
     /**
      * A source of wire geometry information.
@@ -44,7 +44,7 @@ namespace WireCell {
 	double pitch(int face, WirePlaneType_t plane, int flag = 0) const;
 
 	/// Return a Vector which points along the pitch and has unit length.
-	WireCell::Vector pitch_unit_vector(WirePlaneType_t plane) const;
+	WCP::Vector pitch_unit_vector(WirePlaneType_t plane) const;
 
 	/// Return the wire angle of given plane w.r.t. the Y axis (in System of Units)
 	double angle(WirePlaneType_t plane) const;

@@ -1,12 +1,12 @@
 #ifndef WIRECELLNAV_SLICEDATASOURCE_H
 #define WIRECELLNAV_SLICEDATASOURCE_H
 
-#include "WireCellNav/FrameDataSource.h"
-#include "WireCellNav/GeomDataSource.h"
-#include "WireCellData/Slice.h"
-#include "WireCellData/Frame.h"
+#include "WCPNav/FrameDataSource.h"
+#include "WCPNav/GeomDataSource.h"
+#include "WCPData/Slice.h"
+#include "WCPData/Frame.h"
 
-namespace WireCell {
+namespace WCP {
 
     /**
        SliceDataSource - deliver slices of frames from a FrameDataSource
@@ -15,7 +15,7 @@ namespace WireCell {
     public:
 
 	/// Create a slice data source from the given FrameDataSource.
-	SliceDataSource(WireCell::FrameDataSource& fds);
+	SliceDataSource(WCP::FrameDataSource& fds);
 
 	// not virtual.  If you think you want to inherit from this class, let's discuss.
 	~SliceDataSource();
@@ -30,13 +30,13 @@ namespace WireCell {
 	int next();
 
 	/// Get the current slice
-	const WireCell::Slice&  get() const;
+	const WCP::Slice&  get() const;
 
     private:
 
-	WireCell::FrameDataSource& _fds;
+	WCP::FrameDataSource& _fds;
 
-	WireCell::Slice _slice;	// cache the current slice
+	WCP::Slice _slice;	// cache the current slice
 	int _frame_index;	// last frame we loaded
 	int _slice_index;	// current slice, for caching
 	mutable int _slices_begin; // tbin index of earliest bin of all traces

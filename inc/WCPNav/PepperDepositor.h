@@ -1,11 +1,11 @@
 #ifndef WIRECELLNAV_PEPPERDEPOSITOR
 #define WIRECELLNAV_PEPPERDEPOSITOR
 
-#include "WireCellNav/Depositor.h"
+#include "WCPNav/Depositor.h"
 
 #include <map>
 
-namespace WireCell {
+namespace WCP {
 
     /** A Depositor which simply peppers a volume covered by the wires
      * with random hits

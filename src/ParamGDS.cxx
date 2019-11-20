@@ -1,10 +1,10 @@
-#include "WireCellNav/ParamGDS.h"
-#include "WireCellData/Intersection.h"
-#include "WireCellData/Point.h"
+#include "WCPNav/ParamGDS.h"
+#include "WCPData/Intersection.h"
+#include "WCPData/Point.h"
 
 #include <iostream>		// debug
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
 
 // in the new branch, this is part of IWire

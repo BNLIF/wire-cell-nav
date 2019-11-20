@@ -1,9 +1,9 @@
 #ifndef WIRECELLNAV_REBINNINGFDS
 #define  WIRECELLNAV_REBINNINGFDS
 
-#include "WireCellNav/FrameDataSource.h"
+#include "WCPNav/FrameDataSource.h"
 
-namespace WireCell {
+namespace WCP {
 
     class RebinningFDS : public FrameDataSource
     {

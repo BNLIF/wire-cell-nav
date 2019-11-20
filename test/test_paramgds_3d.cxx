@@ -1,5 +1,5 @@
-#include "WireCellNav/ParamGDS.h"
-#include "WireCellData/Units.h"
+#include "WCPNav/ParamGDS.h"
+#include "WCPData/Units.h"
 
 
 #include "TApplication.h"
@@ -11,7 +11,7 @@
 #include <cmath>
 #include <cassert>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main(int argc, char* argv[])

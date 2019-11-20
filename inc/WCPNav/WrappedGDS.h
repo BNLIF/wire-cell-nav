@@ -1,20 +1,20 @@
 #ifndef WIRECELLNAV_WRAPPEDGEOMDATASOURCE_H
 #define WIRECELLNAV_WRAPPEDGEOMDATASOURCE_H
 
-#include "WireCellNav/GeomDataSource.h"
-#include "WireCellData/Vector.h"
-#include "WireCellData/GeomWire.h"
+#include "WCPNav/GeomDataSource.h"
+#include "WCPData/Vector.h"
+#include "WCPData/GeomWire.h"
 
 #include <map>
 #include <vector>
 #include <memory>
 
-namespace WireCell {
+namespace WCP {
 
     /**
        A parameterized source of wire geometry in a wrapped configuration.
      */
-    class WrappedGDS : public WireCell::GeomDataSource {
+    class WrappedGDS : public WCP::GeomDataSource {
     public:
 
 	/** Create a wrapped wire geometry data source from parameters.

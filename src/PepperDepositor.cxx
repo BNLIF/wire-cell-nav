@@ -1,9 +1,9 @@
-#include "WireCellNav/PepperDepositor.h"
+#include "WCPNav/PepperDepositor.h"
 
 #include <random>
 
 #include <iostream>
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 PepperDepositor::PepperDepositor(MinMax xmm, MinMax ymm, MinMax zmm, MinMax qmm,

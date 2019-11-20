@@ -1,10 +1,10 @@
 #ifndef WIRECELLNAV_SIMTRUTHDEPOSITOR
 #define WIRECELLNAV_SIMTRUTHDEPOSITOR
 
-#include "WireCellNav/Depositor.h"
-#include "WireCellNav/SimDataSource.h"
+#include "WCPNav/Depositor.h"
+#include "WCPNav/SimDataSource.h"
 
-namespace WireCell {
+namespace WCP {
 
     /** SimTruthDepositor - deposit hits using SimTruth. 
      */

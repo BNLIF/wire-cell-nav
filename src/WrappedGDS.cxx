@@ -1,9 +1,9 @@
-#include "WireCellNav/WrappedGDS.h"
+#include "WCPNav/WrappedGDS.h"
 #include "TMath.h"
 #include <cassert>
 #include <iostream>		// debug
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
 // In the refactoring, using shared pointers is the norm, but here in
 // the prototype code we keep it to ourselves.
@@ -48,7 +48,7 @@ namespace {
   //}
 }
 
-void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
+void WCP::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
 {
     const Vector drift(-1,0,0);
 
@@ -227,7 +227,7 @@ void WireCell::WrappedGDS::uvw_wire_mesh(double angle, double pitch)
     }
 }
 
-void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
+void WCP::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
 {
     //const Vector drift(-1,0,0);
     //std::cout<<"wire angle is "<<angle<<"; wire pitch is "<<pitch<<std::endl;
@@ -441,7 +441,7 @@ void WireCell::WrappedGDS::uv_wire_mesh(double angle, double pitch, bool is_u)
 }
 
 
-void WireCell::WrappedGDS::w_wire_mesh(double pitch)
+void WCP::WrappedGDS::w_wire_mesh(double pitch)
 {
   
   const double horz_step_mag = pitch*1;
@@ -491,7 +491,7 @@ void WireCell::WrappedGDS::w_wire_mesh(double pitch)
 }
 
 
-WireCell::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound, 
+WCP::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound, 
 				 double angle, double pitch)
   : GeomDataSource()
   , m_minbound(minbound)
@@ -507,7 +507,7 @@ WireCell::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound,
   uvw_wire_mesh(angle, pitch);
 }
 
-WireCell::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound,
+WCP::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound,
 				 double angleU, double angleV, double pitchU, double pitchV, double pitchW,				 
 				 short cryo, short apa)
   : GeomDataSource()
@@ -526,18 +526,18 @@ WireCell::WrappedGDS::WrappedGDS(const Vector& minbound, const Vector& maxbound,
     w_wire_mesh(pitchW);
 }
 
-WireCell::WrappedGDS::~WrappedGDS()
+WCP::WrappedGDS::~WrappedGDS()
 {
 }
 
-// double WireCell::WrappedGDS::angle(WirePlaneType_t plane) const
+// double WCP::WrappedGDS::angle(WirePlaneType_t plane) const
 // {
 //   if (plane==0) return _angleU*TMath::Pi()/180.;
 //   if (plane==1) return _angleV*TMath::Pi()/180.;
 //   if (plane==2) return 0;
 // }
 
-// double WireCell::WrappedGDS::pitch(WirePlaneType_t plane, int flag) const
+// double WCP::WrappedGDS::pitch(WirePlaneType_t plane, int flag) const
 // {
 //   if (plane==0) return _pitchU;
 //   if (plane==1) return _pitchV;

@@ -1,9 +1,9 @@
-#include "WireCellNav/ExampleGDS.h"
+#include "WCPNav/ExampleGDS.h"
 
 #include <iostream>
 #include <cassert>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main()

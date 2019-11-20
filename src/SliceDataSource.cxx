@@ -1,8 +1,8 @@
-#include "WireCellNav/SliceDataSource.h"
+#include "WCPNav/SliceDataSource.h"
 
 #include <iostream>
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
 SliceDataSource::SliceDataSource(FrameDataSource& fds)
     : _fds(fds)

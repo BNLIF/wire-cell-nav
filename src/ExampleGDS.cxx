@@ -1,11 +1,11 @@
-#include "WireCellNav/ExampleGDS.h"
-#include "WireCellNav/ParamGDS.h"
+#include "WCPNav/ExampleGDS.h"
+#include "WCPNav/ParamGDS.h"
 
 #include <iostream>
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
-WireCell::GeomDataSource* WireCell::make_example_gds(float pitch, float angle,
+WCP::GeomDataSource* WCP::make_example_gds(float pitch, float angle,
 						     float yextent, float zextent)
 {
     float dx=10*units::mm;
@@ -31,7 +31,7 @@ WireCell::GeomDataSource* WireCell::make_example_gds(float pitch, float angle,
     const Vector oV( 0.0    , 0.0, 0.0);
     const Vector oW(-0.25*dx, 0.0, 0.0);
 
-    return new WireCell::ParamGDS(bmin,bmax, oU,pU, oV,pV, oW,pW);
+    return new WCP::ParamGDS(bmin,bmax, oU,pU, oV,pV, oW,pW);
 }    
 
 

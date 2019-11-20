@@ -1,23 +1,23 @@
 #ifndef WIRECELLNAV_FRAMEDATASOURCE_H
 #define WIRECELLNAV_FRAMEDATASOURCE_H
 
-#include "WireCellData/Frame.h"
+#include "WCPData/Frame.h"
 
 #ifdef WIRECELLSIGNAL_CONVOLUTEDRESPONSE_H
-#include "WireCellSignal/ConvolutedResponse.h"
+#include "WCPSignal/ConvolutedResponse.h"
 #endif
 
-namespace WireCell {
+namespace WCP {
 
 /**
-   FrameDataSource - provide base class access to WireCell:Frame data.
+   FrameDataSource - provide base class access to WCP:Frame data.
 
    This class is mostly abstract.  Subclass implementations should 
  */
     class FrameDataSource {
     protected:
 
-	WireCell::Frame frame;
+	WCP::Frame frame;
 	int bins_per_frame;
 	
     public:
@@ -36,11 +36,11 @@ namespace WireCell {
 	virtual int next();
 	
 #ifdef WIRECELLSIGNAL_CONVOLUTEDRESPONSE_H
-	virtual void SetResponseFunctions(WireCellSignal::ConvolutedResponse *f) = 0;
+	virtual void SetResponseFunctions(WCPSignal::ConvolutedResponse *f) = 0;
 #endif
 	/// Access currently loaded frame.
-	virtual WireCell::Frame& get();
-	virtual const WireCell::Frame& get() const;
+	virtual WCP::Frame& get();
+	virtual const WCP::Frame& get() const;
 
 	int Get_Bins_Per_Frame(){return bins_per_frame;};
     };

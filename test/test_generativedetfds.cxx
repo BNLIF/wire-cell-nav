@@ -1,17 +1,17 @@
-#include "WireCellNav/DetectorGDS.h"
-#include "WireCellNav/DetGenerativeFDS.h"
-#include "WireCellNav/PepperDepositor.h"
-#include "WireCellNav/SliceDataSource.h"
+#include "WCPNav/DetectorGDS.h"
+#include "WCPNav/DetGenerativeFDS.h"
+#include "WCPNav/PepperDepositor.h"
+#include "WCPNav/SliceDataSource.h"
 
-#include "WireCellData/Units.h"
-#include "WireCellData/Slice.h"
+#include "WCPData/Units.h"
+#include "WCPData/Slice.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
 
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
 namespace {
   template<typename OK>

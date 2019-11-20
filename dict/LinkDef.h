@@ -5,15 +5,15 @@
 #pragma link C++ nestedclasses;
 #pragma link C++ nestedfunctions;
 
-#pragma link C++ class WireCell::GeomDataSource-!;
-#pragma link C++ class WireCell::ParamGDS-!;
-#pragma link C++ class WireCell::GenerativeFDS-!;
-#pragma link C++ class WireCell::PepperDepositor-!;
-#pragma link C++ class WireCell::DillDepositor-!;
-#pragma link C++ class WireCell::FrameDataSource-!;
-#pragma link C++ class WireCell::ThresholdFDS-!;
-#pragma link C++ class WireCell::SliceDataSource-!;
+#pragma link C++ class WCP::GeomDataSource-!;
+#pragma link C++ class WCP::ParamGDS-!;
+#pragma link C++ class WCP::GenerativeFDS-!;
+#pragma link C++ class WCP::PepperDepositor-!;
+#pragma link C++ class WCP::DillDepositor-!;
+#pragma link C++ class WCP::FrameDataSource-!;
+#pragma link C++ class WCP::ThresholdFDS-!;
+#pragma link C++ class WCP::SliceDataSource-!;
 
-#pragma link C++ function WireCell::make_example_gds;
+#pragma link C++ function WCP::make_example_gds;
 
 #endif

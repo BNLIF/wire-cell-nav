@@ -1,18 +1,18 @@
-#include "WireCellNav/DetectorGDS.h"
+#include "WCPNav/DetectorGDS.h"
 
 #include <cassert>
 #include <iostream>
 #include <fstream>
 
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
-WireCell::DetectorGDS::DetectorGDS()
+WCP::DetectorGDS::DetectorGDS()
   : _ncryos(0)
 {
 }
 
-WireCell::DetectorGDS::~DetectorGDS()
+WCP::DetectorGDS::~DetectorGDS()
 {
     for (short cryo = 0; cryo < _ncryos; cryo++) {
         for (short apa = 0; apa < _napas.at(cryo); apa++) {
@@ -23,7 +23,7 @@ WireCell::DetectorGDS::~DetectorGDS()
     }
 }
 
-int WireCell::DetectorGDS::get_total_nwires(WirePlaneType_t plane) const{
+int WCP::DetectorGDS::get_total_nwires(WirePlaneType_t plane) const{
   int nwire = 0;
   for (short cryo = 0; cryo < _ncryos; cryo++) {
         for (short apa = 0; apa < _napas.at(cryo); apa++) {
@@ -33,11 +33,11 @@ int WireCell::DetectorGDS::get_total_nwires(WirePlaneType_t plane) const{
   return nwire;
 }
 
-const WireCell::GeomWireSelection& WireCell::DetectorGDS::by_channel(int channel) const{
-  //const WireCell::GeomWireSelection& wires;
+const WCP::GeomWireSelection& WCP::DetectorGDS::by_channel(int channel) const{
+  //const WCP::GeomWireSelection& wires;
   for (short cryo = 0; cryo < _ncryos; cryo++) {
     for (short apa = 0; apa < _napas.at(cryo); apa++) {
-      const WireCell::GeomWireSelection& wires = _APAgds.at(cryo).at(apa)->by_channel(channel);
+      const WCP::GeomWireSelection& wires = _APAgds.at(cryo).at(apa)->by_channel(channel);
       //
       //std::cout << "Simulation " << cryo << " " << apa << " " << wires.size() << std::endl;
       if (wires.size() >0) return wires;
@@ -46,7 +46,7 @@ const WireCell::GeomWireSelection& WireCell::DetectorGDS::by_channel(int channel
   //return wires;
 }
 
-void WireCell::DetectorGDS::read_geometry(std::vector<std::string> filename)
+void WCP::DetectorGDS::read_geometry(std::vector<std::string> filename)
 {
   /*
   iftream infile(filename.c_str());
@@ -65,7 +65,7 @@ void WireCell::DetectorGDS::read_geometry(std::vector<std::string> filename)
   */
 }
 
-WireCell::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
+WCP::DetectorGDS::DetectorGDS(std::vector<std::string> geometry)
 {
     _ncryos = geometry.size();
     _APAgds.resize(_ncryos);

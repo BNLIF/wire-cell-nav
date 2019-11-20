@@ -1,9 +1,9 @@
-#include "WireCellNav/DillDepositor.h"
+#include "WCPNav/DillDepositor.h"
 
 #include <random>
 
 #include <iostream>
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 DillDepositor::DillDepositor(MinMax xmm, MinMax ymm, MinMax zmm, MinMax lmm,

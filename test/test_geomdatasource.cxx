@@ -1,9 +1,9 @@
-#include "WireCellNav/GeomDataSource.h"
-#include "WireCellData/Units.h"
+#include "WCPNav/GeomDataSource.h"
+#include "WCPData/Units.h"
 
 #include <iostream>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main()

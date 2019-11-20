@@ -1,5 +1,5 @@
-#include "WireCellNav/WrappedGDS.h"
-#include "WireCellData/Point.h"
+#include "WCPNav/WrappedGDS.h"
+#include "WCPData/Point.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -9,7 +9,7 @@
 
 #include <cmath>
 #include <iostream>
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main(int argc, char* argv[])

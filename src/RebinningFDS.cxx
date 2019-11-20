@@ -1,7 +1,7 @@
 
-#include "WireCellNav/RebinningFDS.h"
+#include "WCPNav/RebinningFDS.h"
 
-using namespace WireCell;
+using namespace WCP;
 
 RebinningFDS::RebinningFDS(FrameDataSource& fds, int nbins_to_group)
     : fds(fds)
@@ -24,11 +24,11 @@ int RebinningFDS::jump(int frame_number)
 
     frame.clear();		// win or lose, we start anew
 
-    const WireCell::Frame& other_frame = fds.get();
+    const WCP::Frame& other_frame = fds.get();
 
     for (std::size_t itrace = 0; itrace < other_frame.traces.size(); ++itrace) {
-	const WireCell::Trace& other_trace = other_frame.traces[itrace];
-	WireCell::Trace trace;
+	const WCP::Trace& other_trace = other_frame.traces[itrace];
+	WCP::Trace trace;
 	trace.chid = other_trace.chid;
 
 	// rebin

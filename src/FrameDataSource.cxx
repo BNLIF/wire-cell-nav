@@ -1,6 +1,6 @@
-#include "WireCellNav/FrameDataSource.h"
+#include "WCPNav/FrameDataSource.h"
 
-using namespace WireCell;
+using namespace WCP;
 
 FrameDataSource::FrameDataSource()
     : frame()
@@ -17,11 +17,11 @@ int FrameDataSource::next()
     return this->jump(frame.index+1);
 }
 
-WireCell::Frame& FrameDataSource::get()
+WCP::Frame& FrameDataSource::get()
 {
     return frame;
 }
-const WireCell::Frame& FrameDataSource::get() const
+const WCP::Frame& FrameDataSource::get() const
 {
     return frame;
 }

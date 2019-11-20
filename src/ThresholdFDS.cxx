@@ -1,15 +1,15 @@
-#include "WireCellNav/ThresholdFDS.h"
+#include "WCPNav/ThresholdFDS.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-ThresholdFDS::ThresholdFDS(WireCell::FrameDataSource &FDS, double threshold)
+ThresholdFDS::ThresholdFDS(WCP::FrameDataSource &FDS, double threshold)
   : _FDS(&FDS)
   , _threshold(threshold)
   , frame()
 {
 }
 
-ThresholdFDS::ThresholdFDS(WireCell::FrameDataSource &FDS)
+ThresholdFDS::ThresholdFDS(WCP::FrameDataSource &FDS)
   : _FDS(&FDS)
   , frame()
 {
@@ -25,16 +25,16 @@ int ThresholdFDS::next()
     return this->jump(frame.index+1);
 }
 
-WireCell::Frame& ThresholdFDS::get()
+WCP::Frame& ThresholdFDS::get()
 {
     return frame;
 }
-const WireCell::Frame& ThresholdFDS::get() const
+const WCP::Frame& ThresholdFDS::get() const
 {
     return frame;
 }
 
-int WireCell::ThresholdFDS::jump(int frame_number)
+int WCP::ThresholdFDS::jump(int frame_number)
 {
     // jump to frame of interest
     frame.index = _FDS->jump(frame_number);
@@ -47,8 +47,8 @@ int WireCell::ThresholdFDS::jump(int frame_number)
     int tbin;
     double charge;
     bool traceflag;
-    WireCell::Trace trace;
-    WireCell::Trace newtrace;
+    WCP::Trace trace;
+    WCP::Trace newtrace;
     for (int ind = 0; ind < ntraces; ++ind) {
         trace = frame.traces.at(ind);
         ntbins = trace.charge.size();

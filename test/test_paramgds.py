@@ -5,7 +5,7 @@ import ROOT
 mm=1.0                          # something is broken
 meter=1000.0*mm                 # with the dictionaries
 
-from ROOT.WireCell import Point
+from ROOT.WCP import Point
 import math
 
 def centered():

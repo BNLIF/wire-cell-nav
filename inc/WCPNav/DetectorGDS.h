@@ -1,8 +1,8 @@
 #ifndef WIRECELLNAV_DETECTORDATASOURCE_H
 #define WIRECELLNAV_DETECTORDATASOURCE_H
 
-#include "WireCellNav/WrappedGDS.h"
-#include "WireCellNav/GeomDataSource.h"
+#include "WCPNav/WrappedGDS.h"
+#include "WCPNav/GeomDataSource.h"
 
 #include "TMath.h"
 
@@ -12,9 +12,9 @@
 #include <memory>
 #include <fstream>
 
-namespace WireCell {
+namespace WCP {
 
-  class DetectorGDS {// : public WireCell::GeomDataSource {
+  class DetectorGDS {// : public WCP::GeomDataSource {
     
   public:
     DetectorGDS();

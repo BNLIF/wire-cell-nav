@@ -1,6 +1,6 @@
-#include "WireCellNav/SimDataSource.h"
+#include "WCPNav/SimDataSource.h"
 
-WireCell::SimDataSource::~SimDataSource()
+WCP::SimDataSource::~SimDataSource()
 {
 }
 

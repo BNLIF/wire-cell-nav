@@ -1,7 +1,7 @@
-#include "WireCellNav/DetGenerativeFDS.h"
+#include "WCPNav/DetGenerativeFDS.h"
 #include "TMath.h"
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 namespace {
@@ -41,9 +41,9 @@ DetGenerativeFDS::~DetGenerativeFDS()
 
 int DetGenerativeFDS::size() const { return max_frames; }
 
-WireCell::SimTruthSelection DetGenerativeFDS::truth() const
+WCP::SimTruthSelection DetGenerativeFDS::truth() const
 {
-    WireCell::SimTruthSelection ret;
+    WCP::SimTruthSelection ret;
 
     for (auto it = simtruth.begin(); it != simtruth.end(); ++it) {
 	ret.push_back(& (*it));
@@ -201,7 +201,7 @@ int DetGenerativeFDS::jump(int frame_number)
 	//   // std::cout << "GenerativeFDS: drop: point contained: " << pt.x/units::cm << " " << pt.y/units::cm  << " " << pt.z/units::cm << std::endl;
 	// }
 	  
-	WireCell::SimTruth st(pt.x, pt.y, pt.z, charge, tbin, simtruth.size());
+	WCP::SimTruth st(pt.x, pt.y, pt.z, charge, tbin, simtruth.size());
 	simtruth.insert(st);
 	//cerr << "SimTruth: " << st.trackid() << " q=" << st.charge()
 	//     << " tbin=" << tbin << " pos=" << st.pos() << endl;
