@@ -116,6 +116,7 @@ int SliceDataSource::jump(int index)
 int SliceDataSource::SliceDataSource::next()
 {
     this->jump(_slice_index+1);
+    return _slice_index+1;
 }
 
 const Slice& SliceDataSource::SliceDataSource::get() const

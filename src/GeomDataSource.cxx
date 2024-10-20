@@ -52,6 +52,7 @@ bool GeomDataSource::fill_nwires_cache() const{
     nwires_cache[2] = wires_in_plane(WirePlaneType_t(2)).size();
     return true;
   }
+  return false;
 }
 
 

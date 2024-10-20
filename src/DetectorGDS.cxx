@@ -43,6 +43,7 @@ const WCP::GeomWireSelection& WCP::DetectorGDS::by_channel(int channel) const{
       if (wires.size() >0) return wires;
     }
   }
+  
   //return wires;
 }
 
@@ -280,6 +281,7 @@ int DetectorGDS::channel_count(WirePlaneType_t plane) const{
   }else if (plane == WirePlaneType_t(2)){
     return _channel_wmap.size();
   }
+  return _channel_umap.size();
 }
 
 short DetectorGDS::in_which_apa(const Vector& point) const
